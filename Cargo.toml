@@ -1,0 +1,27 @@
+[package]
+name = "traj-dist-rs"
+version = "0.1.0"
+edition = "2024"
+authors = ["TrajDist-rs Contributors"]
+license = "MIT"
+description = "High-performance trajectory distance calculations in Rust with Python bindings"
+documentation = "https://github.com/bguillouet/traj-dist-rs/blob/main/README.md"
+homepage = "https://github.com/bguillouet/traj-dist-rs"
+repository = "https://github.com/bguillouet/traj-dist-rs"
+readme = "README.md"
+keywords = ["trajectory", "distance", "algorithm", "python", "bindings"]
+categories = ["algorithms", "science", "api-bindings"]
+
+[lib]
+name = "traj_dist_rs"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+python-binding = ["pyo3", "pyo3-stub-gen", "pyo3-stub-gen-derive"]
+
+[dependencies]
+pyo3 = { version = "0.26.0", features = ["extension-module"], optional = true }
+pyo3-stub-gen = { version = "0.17.2", optional = true }
+pyo3-stub-gen-derive = { version = "0.17.2", optional = true }

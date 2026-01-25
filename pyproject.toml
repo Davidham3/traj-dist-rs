@@ -1,0 +1,60 @@
+[project]
+name = "traj-dist-rs"
+version = "0.1.0"
+description = "High-performance trajectory distance calculations in Rust with Python bindings"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+  {name = "TrajDist-rs Contributors"},
+]
+keywords = ["trajectory", "distance", "algorithm", "performance", "rust"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+dependencies = [
+    "numpy>=1.22",
+]
+
+[[tool.uv.index]]
+url = "https://mirrors.aliyun.com/pypi/simple"
+default = true
+
+[dependency-groups]
+dev = [
+    "autoflake>=2.3.1",
+    "black>=24.8.0",
+    "cython==0.29.24",
+    "isort>=5.13.2",
+    "jupyter>=1.1.1",
+    "linkify-it-py>=2.0.3",
+    "maturin>=1.11.5",
+    "myst-nb>=1.3.0",
+    "pandas>=1.5.1",
+    "pip>=25.3",
+    "polars>=1.8.2",
+    "pyarrow>=17.0.0",
+    "pytest>=8.3.5",
+    "setuptools>=75.3.3",
+    "sphinx>=8.1.3",
+    "traj-dist>=1.15",
+]
+
+[build-system]
+requires = ["maturin>=1.11.5"]
+build-backend = "maturin"
+
+[tool.maturin]
+python-source = "python"
+module-name = "traj_dist_rs._lib"
+features = ["python-binding"]
