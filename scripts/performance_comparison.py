@@ -99,8 +99,8 @@ def benchmark_implementation(
     Returns:
         benchmark 结果字典
     """
-    algorithm_name = metainfo["algorithm"]
-    distance_type = metainfo["type_d"]
+    algorithm_name = metainfo.algorithm
+    distance_type = metainfo.type_d
     hyperparameter_value = get_hyperparameter_value_from_metainfo(metainfo)
 
     # 加载测试数据
