@@ -1,18 +1,18 @@
 //! # DTW (Dynamic Time Warping) Algorithm
-//! 
+//!
 //! This module implements the Dynamic Time Warping algorithm for comparing trajectories.
 //! DTW finds the optimal alignment between two sequences by dynamically warping the time axis,
 //! allowing for similar patterns that are out of phase to be matched.
-//! 
+//!
 //! ## Algorithm Description
-//! 
+//!
 //! The DTW algorithm works as follows:
 //! 1. Construct a cost matrix where each cell (i,j) represents the distance between points i and j
 //! 2. Find the optimal warping path that minimizes the cumulative distance
 //! 3. The final DTW distance is the total cost along the optimal path
-//! 
+//!
 //! ## Complexity
-//! 
+//!
 //! The time complexity is O(n*m) and space complexity is O(n*m) where n and m are the lengths of the two trajectories.
 
 use crate::distance::distance_type::DistanceType;
@@ -21,33 +21,34 @@ use crate::distance::spherical::great_circle_distance;
 use crate::traits::{AsCoord, CoordSequence};
 
 /// DTW (Dynamic Time Warping) distance between two trajectories using specified distance type
-/// 
+///
 /// Computes the Dynamic Time Warping distance between two trajectories using the specified
-/// distance type (Euclidean or Spherical). DTW finds the optimal alignment between two 
+/// distance type (Euclidean or Spherical). DTW finds the optimal alignment between two
 /// sequences by dynamically warping the time axis, allowing for similar patterns that are out of phase.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `t0` - The first trajectory to compare
 /// * `t1` - The second trajectory to compare
 /// * `dist_type` - The type of distance to use (Euclidean or Spherical)
-/// 
+///
 /// # Type Parameters
-/// 
+///
 /// * `T` - A type that implements the `CoordSequence` trait
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns the DTW distance between the two trajectories, or `f64::MAX` if either trajectory is empty
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust
-/// use traj_dist_rs::{dtw, DistanceType};
-/// 
+/// use traj_dist_rs::distance::dtw::dtw;
+/// use traj_dist_rs::distance::distance_type::DistanceType;
+///
 /// let traj1 = vec![[0.0, 0.0], [1.0, 1.0]];
 /// let traj2 = vec![[0.0, 1.0], [1.0, 0.0]];
-/// 
+///
 /// let distance = dtw(&traj1, &traj2, DistanceType::Euclidean);
 /// println!("DTW distance: {}", distance);
 /// ```
@@ -84,33 +85,6 @@ where
     }
 
     c[n0 * (n1 + 1) + n1]
-}
-
-// Keep the old functions for backward compatibility
-/// Computes DTW distance using Euclidean distance calculation
-/// 
-/// # Deprecated
-/// 
-/// This function is deprecated. Use `dtw()` with `DistanceType::Euclidean` instead.
-#[deprecated(note = "Use dtw() with DistanceType instead")]
-pub fn dtw_euclidean<T: CoordSequence>(t0: &T, t1: &T) -> f64
-where
-    T::Coord: AsCoord,
-{
-    dtw(t0, t1, DistanceType::Euclidean)
-}
-
-/// Computes DTW distance using Spherical distance calculation
-/// 
-/// # Deprecated
-/// 
-/// This function is deprecated. Use `dtw()` with `DistanceType::Spherical` instead.
-#[deprecated(note = "Use dtw() with DistanceType instead")]
-pub fn dtw_spherical<T: CoordSequence>(t0: &T, t1: &T) -> f64
-where
-    T::Coord: AsCoord,
-{
-    dtw(t0, t1, DistanceType::Spherical)
 }
 
 #[cfg(test)]

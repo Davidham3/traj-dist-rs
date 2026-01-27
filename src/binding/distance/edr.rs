@@ -1,10 +1,8 @@
-use crate::binding::trajectory::PyTrajectory;
+use crate::binding::sequence::types::PyTrajectoryType;
 use crate::distance::distance_type::DistanceType;
-use crate::distance::edr::edr as internal_edr;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
-use std::convert::TryFrom;
 
 /// Compute the EDR (Edit Distance on Real sequence) distance between two trajectories
 ///
@@ -39,11 +37,11 @@ pub fn edr(
     dist_type: String,
     eps: f64,
 ) -> PyResult<f64> {
-    // Convert Python objects to PyTrajectory
-    let traj1 = PyTrajectory::try_from(t1)?;
-    let traj2 = PyTrajectory::try_from(t2)?;
+    // Convert Python objects to PyTrajectoryType
+    let traj1 = PyTrajectoryType::try_from(t1)?;
+    let traj2 = PyTrajectoryType::try_from(t2)?;
 
-    // Compute distance based on type (PyTrajectory implements CoordSequence)
+    // Compute distance based on type (PyTrajectoryType implements CoordSequence)
     let distance_type = match dist_type.to_lowercase().as_str() {
         "euclidean" => DistanceType::Euclidean,
         "spherical" => DistanceType::Spherical,
@@ -55,7 +53,7 @@ pub fn edr(
         }
     };
 
-    let distance = internal_edr(&traj1, &traj2, eps, distance_type);
+    let distance = crate::distance::edr::edr(&traj1, &traj2, eps, distance_type);
 
     Ok(distance)
 }

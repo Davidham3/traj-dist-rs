@@ -1,10 +1,8 @@
-use crate::binding::trajectory::PyTrajectory;
+use crate::binding::sequence::types::PyTrajectoryType;
 use crate::distance::distance_type::DistanceType;
-use crate::distance::lcss::lcss as internal_lcss;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
-use std::convert::TryFrom;
 
 /// Compute the LCSS (Longest Common Subsequence) distance between two trajectories
 ///
@@ -38,11 +36,11 @@ pub fn lcss(
     dist_type: String,
     eps: f64,
 ) -> PyResult<f64> {
-    // Convert Python objects to PyTrajectory
-    let traj1 = PyTrajectory::try_from(t1)?;
-    let traj2 = PyTrajectory::try_from(t2)?;
+    // Convert Python objects to PyTrajectoryType
+    let traj1 = PyTrajectoryType::try_from(t1)?;
+    let traj2 = PyTrajectoryType::try_from(t2)?;
 
-    // Compute distance based on type (PyTrajectory implements CoordSequence)
+    // Compute distance based on type (PyTrajectoryType implements CoordSequence)
     let distance_type = match dist_type.to_lowercase().as_str() {
         "euclidean" => DistanceType::Euclidean,
         "spherical" => DistanceType::Spherical,
@@ -54,7 +52,7 @@ pub fn lcss(
         }
     };
 
-    let distance = internal_lcss(&traj1, &traj2, eps, distance_type);
+    let distance = crate::distance::lcss::lcss(&traj1, &traj2, eps, distance_type);
 
     Ok(distance)
 }

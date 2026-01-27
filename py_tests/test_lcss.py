@@ -22,7 +22,7 @@ class TestLCSSEuclidean(DistanceTestWithHyperparameters):
         验证 Rust 实现的结果与原始 traj-dist 实现的误差在 1e-8 以内
         """
         lcss_metainfo = all_metainfo.get("lcss", [])
-        euclidean_metainfo = [m for m in lcss_metainfo if m["type_d"] == "euclidean"]
+        euclidean_metainfo = [m for m in lcss_metainfo if m.type_d == "euclidean"]
 
         if not euclidean_metainfo:
             pytest.skip("LCSS 欧几里得距离测试数据不存在")
@@ -68,7 +68,7 @@ class TestLCSSSpherical(DistanceTestWithHyperparameters):
         验证 Rust 实现的结果与原始 traj-dist 实现的误差在 1e-8 以内
         """
         lcss_metainfo = all_metainfo.get("lcss", [])
-        spherical_metainfo = [m for m in lcss_metainfo if m["type_d"] == "spherical"]
+        spherical_metainfo = [m for m in lcss_metainfo if m.type_d == "spherical"]
 
         if not spherical_metainfo:
             pytest.skip("LCSS 球面距离测试数据不存在")

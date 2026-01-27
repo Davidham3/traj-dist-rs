@@ -1,20 +1,20 @@
 //! # Discret Frechet Distance Algorithm
-//! 
+//!
 //! This module implements the Discrete Fréchet distance algorithm for comparing trajectories.
 //! The Discrete Fréchet distance is a measure of similarity between two curves that takes
 //! into account the location and ordering of the points along the curves.
-//! 
+//!
 //! ## Algorithm Description
-//! 
+//!
 //! The Discrete Fréchet distance is computed using dynamic programming where:
 //! - C[i][j] = max(dist(t0[i-1], t1[j-1]), min(C[i][j-1], C[i-1][j-1], C[i-1][j]))
 //! - First row and column (except C[0][0]) are initialized to infinity
-//! 
+//!
 //! Intuitively, it represents the minimum length of a leash required for a person
 //! and their dog to walk along the two trajectories without backtracking.
-//! 
+//!
 //! ## Complexity
-//! 
+//!
 //! The time complexity is O(n*m) and space complexity is O(n*m) where n and m are the lengths of the two trajectories.
 
 use crate::distance::euclidean::euclidean_distance;
@@ -28,29 +28,29 @@ use crate::traits::{AsCoord, CoordSequence};
 /// It is computed using dynamic programming where:
 /// - C[i][j] = max(dist(t0[i-1], t1[j-1]), min(C[i][j-1], C[i-1][j-1], C[i-1][j]))
 /// - First row and column (except C[0][0]) are initialized to infinity
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `t0` - The first trajectory to compare
 /// * `t1` - The second trajectory to compare
-/// 
+///
 /// # Type Parameters
-/// 
+///
 /// * `T` - A type that implements the `CoordSequence` trait
-/// 
+///
 /// # Returns
-/// 
-/// Returns the Discrete Fréchet distance between the two trajectories, 
+///
+/// Returns the Discrete Fréchet distance between the two trajectories,
 /// or `f64::MAX` if either trajectory is empty
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust
-/// use traj_dist_rs::discret_frechet_euclidean;
-/// 
+/// use traj_dist_rs::distance::discret_frechet::discret_frechet_euclidean;
+///
 /// let traj1 = vec![[0.0, 0.0], [1.0, 1.0]];
 /// let traj2 = vec![[0.0, 0.1], [1.0, 1.1]];
-/// 
+///
 /// let distance = discret_frechet_euclidean(&traj1, &traj2);
 /// println!("Discrete Fréchet distance: {}", distance);
 /// ```

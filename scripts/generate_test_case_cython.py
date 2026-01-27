@@ -7,41 +7,56 @@ Parquet 文件名包含算法名、距离类型、超参数值。
 文件包含 4 列：2 列轨迹数据、1 列距离值、1 列计算时间。
 """
 
+import sys
 import argparse
 import pickle
 import timeit
-import sys
 import json
 from pathlib import Path
 
-# 添加 traj-dist 到 Python 路径
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "traj-dist"))
-
 import numpy as np
-import pandas as pd
-# 使用 Cython 实现（traj_dist.cydist）而不是 Python 实现（traj_dist.pydist）
-import traj_dist.cydist.sspd as sspd
-import traj_dist.cydist.dtw as dtw
-import traj_dist.cydist.hausdorff as hausdorff
-import traj_dist.cydist.frechet as frechet
-import traj_dist.cydist.discret_frechet as discret_frechet
-import traj_dist.cydist.lcss as lcss
-import traj_dist.cydist.edr as edr
-import traj_dist.cydist.erp as erp
-import traj_dist.cydist.sowd as sowd
+import pyarrow as pa
+import pyarrow.parquet as pq
+import traj_dist.distance as tdist
+
+sys.path.append(str(Path(__file__).parent.parent))
+from py_tests.schemas import TestCaseMeta, ImplementationType
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="生成单个算法的测试用例（使用Cython实现）")
+    parser = argparse.ArgumentParser(
+        description="生成单个算法的测试用例（使用Cython实现）"
+    )
     parser.add_argument("--algorithm", type=str, required=True, help="算法名称")
-    parser.add_argument("--type_d", type=str, default="euclidean", choices=["euclidean", "spherical"], help="距离类型")
-    parser.add_argument("--eps", type=float, default=None, help="LCSS 和 EDR 算法的 eps 参数")
-    parser.add_argument("--g", type=float, nargs=2, default=None, help="ERP 算法的 g 参数（两个值）")
-    parser.add_argument("--precision", type=int, default=None, help="SOWD 算法的 precision 参数")
-    parser.add_argument("--converted", type=bool, default=None, help="SOWD 算法的 converted 参数")
-    parser.add_argument("--output-dir", type=str, default="py_tests/data", help="输出目录")
-    parser.add_argument("--traj-data", type=str, default="../traj-dist/data/benchmark_trajectories.pkl", help="轨迹数据文件")
-    parser.add_argument("--num-traj", type=int, default=10, help="使用的轨迹数量")
+    parser.add_argument(
+        "--type_d",
+        type=str,
+        default="euclidean",
+        choices=["euclidean", "spherical"],
+        help="距离类型",
+    )
+    parser.add_argument(
+        "--eps", type=float, default=None, help="LCSS 和 EDR 算法的 eps 参数"
+    )
+    parser.add_argument(
+        "--g", type=float, nargs=2, default=None, help="ERP 算法的 g 参数（两个值）"
+    )
+    parser.add_argument(
+        "--precision", type=int, default=None, help="SOWD 算法的 precision 参数"
+    )
+    parser.add_argument(
+        "--converted", type=bool, default=None, help="SOWD 算法的 converted 参数"
+    )
+    parser.add_argument(
+        "--output-dir", type=str, default="py_tests/data", help="输出目录"
+    )
+    parser.add_argument(
+        "--traj-data",
+        type=str,
+        default="../traj-dist/data/benchmark_trajectories.pkl",
+        help="轨迹数据文件",
+    )
+    parser.add_argument("--num-traj", type=int, default=50, help="使用的轨迹数量")
     return parser.parse_args()
 
 
@@ -80,14 +95,19 @@ def main():
     traj_data_path = Path(args.traj_data)
     if not traj_data_path.exists():
         # 尝试相对路径
-        traj_data_path = Path(__file__).parent.parent.parent / "traj-dist" / "data" / "benchmark_trajectories.pkl"
+        traj_data_path = (
+            Path(__file__).parent.parent.parent
+            / "traj-dist"
+            / "data"
+            / "benchmark_trajectories.pkl"
+        )
 
     print(f"Loading trajectory data from: {traj_data_path}")
     with open(traj_data_path, "rb") as f:
-        traj_list = pickle.load(f, encoding='latin1')
+        traj_list = pickle.load(f, encoding="latin1")
 
     # 使用指定数量的轨迹
-    traj_list = traj_list[:args.num_traj]
+    traj_list = traj_list[: args.num_traj]
     print(f"Using {len(traj_list)} trajectories")
 
     # 构建参数字典
@@ -109,7 +129,9 @@ def main():
     metainfo_dir.mkdir(parents=True, exist_ok=True)
 
     # 构建样本文件名和路径
-    sample_filename = build_sample_filename(args.algorithm, args.type_d, args.eps, args.g, args.precision)
+    sample_filename = build_sample_filename(
+        args.algorithm, args.type_d, args.eps, args.g, args.precision
+    )
     sample_path = samples_dir / sample_filename
 
     print(f"Generating test cases for: {args.algorithm} (using Cython implementation)")
@@ -118,23 +140,25 @@ def main():
 
     # 获取对应的距离函数（使用 Cython 实现）
     if args.algorithm == "sspd":
-        dist_func = sspd.c_e_sspd if args.type_d == "euclidean" else sspd.c_g_sspd
+        dist_func = tdist.c_e_sspd if args.type_d == "euclidean" else tdist.c_g_sspd
     elif args.algorithm == "dtw":
-        dist_func = dtw.c_e_dtw if args.type_d == "euclidean" else dtw.c_g_dtw
+        dist_func = tdist.c_e_dtw if args.type_d == "euclidean" else tdist.c_g_dtw
     elif args.algorithm == "hausdorff":
-        dist_func = hausdorff.c_e_hausdorff if args.type_d == "euclidean" else hausdorff.c_g_hausdorff
+        dist_func = (
+            tdist.c_e_hausdorff if args.type_d == "euclidean" else tdist.c_g_hausdorff
+        )
     elif args.algorithm == "frechet":
-        dist_func = frechet.c_frechet  # frechet只支持欧几里得距离
+        dist_func = tdist.c_frechet  # frechet只支持欧几里得距离
     elif args.algorithm == "discret_frechet":
-        dist_func = discret_frechet.c_discret_frechet  # discret_frechet只支持欧几里得距离
+        dist_func = tdist.c_discret_frechet  # discret_frechet只支持欧几里得距离
     elif args.algorithm == "lcss":
-        dist_func = lcss.c_e_lcss if args.type_d == "euclidean" else lcss.c_g_lcss
+        dist_func = tdist.c_e_lcss if args.type_d == "euclidean" else tdist.c_g_lcss
     elif args.algorithm == "edr":
-        dist_func = edr.c_e_edr if args.type_d == "euclidean" else edr.c_g_edr
+        dist_func = tdist.c_e_edr if args.type_d == "euclidean" else tdist.c_g_edr
     elif args.algorithm == "erp":
-        dist_func = erp.c_e_erp if args.type_d == "euclidean" else erp.c_g_erp
+        dist_func = tdist.c_e_erp if args.type_d == "euclidean" else tdist.c_g_erp
     elif args.algorithm == "sowd_grid":
-        dist_func = sowd.c_sowd_grid  # SOWD only supports spherical/geographical
+        dist_func = tdist.c_sowd_grid  # SOWD only supports spherical/geographical
     else:
         raise ValueError(f"Unknown algorithm: {args.algorithm}")
 
@@ -152,6 +176,7 @@ def main():
             call_params = {}
             if args.algorithm == "sowd_grid":
                 from traj_dist.pydist.linecell import trajectory_set_grid
+
                 precision = params.get("precision", 7)
                 cells_list, _, _, _, _ = trajectory_set_grid([traj1, traj2], precision)
                 traj1 = np.array([[c[0], c[1]] for c in cells_list[0]], dtype=np.int64)
@@ -173,43 +198,58 @@ def main():
             # 计算距离
             distance = dist_func(traj1, traj2, **call_params)
 
-            results.append({
-                "traj_1": traj1.tolist(),
-                "traj_2": traj2.tolist(),
-                "distance": distance,
-                "time": time_elapsed,
-            })
+            results.append(
+                (
+                    traj1.tolist(),
+                    traj2.tolist(),
+                    distance,
+                    time_elapsed,
+                )
+            )
+    traj1, traj2, distance, running_time = zip(*results)
 
-    # 保存为 Parquet 文件
-    df = pd.DataFrame(results)
-    df.to_parquet(sample_path, index=False)
+    traj_type = pa.large_list(pa.list_(pa.float64(), 2))
 
+    table = pa.table(
+        {"traj1": traj1, "traj2": traj2, "distance": distance, "time": running_time},
+        schema=pa.schema(
+            [
+                ("traj1", traj_type),
+                ("traj2", traj_type),
+                ("distance", pa.float64()),
+                ("time", pa.float64()),
+            ]
+        ),
+    )
+
+    pq.write_table(table, sample_path)
     print(f"Generated {len(results)} test cases")
     print(f"Saved to: {sample_path}")
 
-    # 构建元数据
-    metainfo = {
-        "algorithm": args.algorithm,
-        "type_d": args.type_d,
-        "implemented_by": "cydist",  # 标识使用 Cython 实现
-    }
-    if args.eps is not None:
-        metainfo["eps"] = args.eps
-    if args.g is not None:
-        metainfo["g"] = list(args.g)
-    if args.precision is not None:
-        metainfo["precision"] = args.precision
-
-    # 添加样本文件路径（相对于 metainfo_dir）
-    metainfo["sample_file"] = f"../cython_samples/{sample_filename}"  # Cython 实现的样本路径
+    try:
+        metainfo = TestCaseMeta(
+            algorithm=args.algorithm,
+            type_d=args.type_d,
+            implemented_by=ImplementationType.CYTHON,
+            eps=args.eps,
+            g=args.g,  # Pydantic 会自动处理 list
+            precision=args.precision,
+            converted=args.converted,
+            # 路径相对于 metainfo_dir 的父目录
+            sample_file=f"cython_samples/{sample_filename}",
+        )
+    except Exception as e:
+        print(f"Error creating Pydantic model: {e}")
+        return
 
     # 构建元数据文件名和路径
     metainfo_filename = build_metainfo_filename(args.algorithm)
     metainfo_path = metainfo_dir / metainfo_filename
 
-    # 追加到元数据文件（JSONL 格式）
+    # 使用模型的 .json() 方法序列化并追加到元数据文件
     with open(metainfo_path, "a") as f:
-        f.write(json.dumps(metainfo) + "\n")
+        # metainfo.json() 会生成一个紧凑的 JSON 字符串
+        f.write(metainfo.json() + "\n")
 
     print(f"Metadata appended to: {metainfo_path}")
 

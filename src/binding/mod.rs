@@ -1,4 +1,8 @@
 #[cfg(feature = "python-binding")]
 pub mod distance;
+
 #[cfg(feature = "python-binding")]
-pub mod trajectory;
+pub mod sequence;
+
+#[cfg(feature = "python-binding")]
+pub mod err;

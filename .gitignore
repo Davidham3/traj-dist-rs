@@ -53,6 +53,9 @@ python/traj_dist_rs/_lib/
 # Documentation
 docs/_build/
 
+# pytest
+py_tests/data/
+
 # Traj-dist submodule
 traj-dist/.venv/
 traj-dist/build/

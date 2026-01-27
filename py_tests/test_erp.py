@@ -35,7 +35,7 @@ class TestERPCompatTrajDistEuclidean(DistanceTestWithHyperparameters):
         注意：使用 erp_compat_traj_dist 函数，复现 traj-dist 的错误实现
         """
         erp_metainfo = all_metainfo.get("erp", [])
-        euclidean_metainfo = [m for m in erp_metainfo if m["type_d"] == "euclidean"]
+        euclidean_metainfo = [m for m in erp_metainfo if m.type_d == "euclidean"]
 
         if not euclidean_metainfo:
             pytest.skip("ERP 欧几里得距离测试数据不存在")
@@ -114,7 +114,7 @@ class TestERPCompatTrajDistSpherical(DistanceTestWithHyperparameters):
         注意：球面距离由于 traj-dist 的 bug 和浮点精度问题，误差可能较大
         """
         erp_metainfo = all_metainfo.get("erp", [])
-        spherical_metainfo = [m for m in erp_metainfo if m["type_d"] == "spherical"]
+        spherical_metainfo = [m for m in erp_metainfo if m.type_d == "spherical"]
 
         if not spherical_metainfo:
             pytest.skip("ERP 球面距离测试数据不存在")

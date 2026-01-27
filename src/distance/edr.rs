@@ -1,20 +1,20 @@
 //! # EDR (Edit Distance on Real sequence) Algorithm
-//! 
+//!
 //! This module implements the Edit Distance on Real sequence algorithm for comparing trajectories.
 //! EDR is a distance measure that allows for gaps in the matching and uses a threshold to determine
 //! if two points match. It's particularly useful for comparing trajectories with different lengths
 //! or with temporal shifts.
-//! 
+//!
 //! ## Algorithm Description
-//! 
+//!
 //! EDR computes the minimum number of edit operations (insertions, deletions, substitutions)
 //! needed to transform one trajectory into another, where two points are considered matching
 //! if their distance is less than a given threshold (epsilon).
-//! 
+//!
 //! The distance is normalized by the maximum length of the two trajectories.
-//! 
+//!
 //! ## Complexity
-//! 
+//!
 //! The time complexity is O(n*m) and space complexity is O(n*m) where n and m are the lengths of the two trajectories.
 
 use crate::distance::distance_type::DistanceType;
@@ -29,31 +29,32 @@ use crate::traits::{AsCoord, CoordSequence};
 ///
 /// Note: This implementation follows the original traj-dist Python implementation,
 /// which initializes the first row and column to 0 (not to the index values).
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `t0` - The first trajectory to compare
 /// * `t1` - The second trajectory to compare
 /// * `eps` - The distance threshold for considering two points as matching
 /// * `dist_type` - The type of distance to use (Euclidean or Spherical)
-/// 
+///
 /// # Type Parameters
-/// 
+///
 /// * `T` - A type that implements the `CoordSequence` trait
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns the EDR distance between the two trajectories (value between 0 and 1),
 /// or 1.0 if either trajectory is empty
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust
-/// use traj_dist_rs::{edr, DistanceType};
-/// 
+/// use traj_dist_rs::distance::edr::edr;
+/// use traj_dist_rs::distance::distance_type::DistanceType;
+///
 /// let traj1 = vec![[0.0, 0.0], [1.0, 1.0]];
 /// let traj2 = vec![[0.0, 0.1], [1.0, 1.1]];
-/// 
+///
 /// let distance = edr(&traj1, &traj2, 0.5, DistanceType::Euclidean);
 /// println!("EDR distance: {}", distance);
 /// ```
@@ -103,33 +104,6 @@ where
 
     // Normalize by the maximum length
     c[n0 * width + n1] / (n0.max(n1) as f64)
-}
-
-// Keep the old functions for backward compatibility
-/// Computes EDR distance using Euclidean distance calculation
-/// 
-/// # Deprecated
-/// 
-/// This function is deprecated. Use `edr()` with `DistanceType::Euclidean` instead.
-#[deprecated(note = "Use edr() with DistanceType instead")]
-pub fn edr_euclidean<T: CoordSequence>(t0: &T, t1: &T, eps: f64) -> f64
-where
-    T::Coord: AsCoord,
-{
-    edr(t0, t1, eps, DistanceType::Euclidean)
-}
-
-/// Computes EDR distance using Spherical distance calculation
-/// 
-/// # Deprecated
-/// 
-/// This function is deprecated. Use `edr()` with `DistanceType::Spherical` instead.
-#[deprecated(note = "Use edr() with DistanceType instead")]
-pub fn edr_spherical<T: CoordSequence>(t0: &T, t1: &T, eps: f64) -> f64
-where
-    T::Coord: AsCoord,
-{
-    edr(t0, t1, eps, DistanceType::Spherical)
 }
 
 #[cfg(test)]

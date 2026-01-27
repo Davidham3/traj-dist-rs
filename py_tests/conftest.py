@@ -10,61 +10,12 @@ from pathlib import Path
 from typing import Optional, Dict, List, Any
 import polars as pl
 import pyarrow.parquet as pq
-
-
-def load_all_metainfo(data_dir: Optional[Path] = None) -> Dict[str, List[Dict[str, Any]]]:
-    """
-    加载所有算法的元数据
-
-    Args:
-        data_dir: 数据目录（默认为 py_tests/data）
-
-    Returns:
-        字典，键为算法名称，值为元数据列表
-    """
-    if data_dir is None:
-        data_dir = Path(__file__).parent / "data"
-
-    metainfo_dir = data_dir / "metainfo"
-    all_metainfo = {}
-
-    for metainfo_file in metainfo_dir.glob("*.jsonl"):
-        algorithm = metainfo_file.stem
-        metainfo_list = []
-        with open(metainfo_file, "r") as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    metainfo_list.append(json.loads(line))
-        all_metainfo[algorithm] = metainfo_list
-
-    return all_metainfo
-
-
-def get_sample_path(metainfo: Dict[str, Any], data_dir: Optional[Path] = None) -> Path:
-    """
-    从元数据获取样本文件路径
-
-    Args:
-        metainfo: 元数据字典
-        data_dir: 数据目录（默认为 py_tests/data）
-
-    Returns:
-        样本文件路径
-    """
-    if data_dir is None:
-        data_dir = Path(__file__).parent / "data"
-
-    sample_file = metainfo["sample_file"]
-    # sample_file 是相对于 metainfo_dir 的路径
-    # 例如: ../samples/edr_euclidean_eps_0.01.parquet
-    samples_dir = data_dir / "samples"
-    return samples_dir / Path(sample_file).name
+from test_framework import load_all_metainfo_from_data_dir, get_sample_path
 
 
 # 测试数据目录
 DATA_DIR = Path(__file__).parent / "data"
-SAMPLES_DIR = DATA_DIR / "samples"
+SAMPLES_DIR = DATA_DIR / "cython_samples"
 METAINFO_DIR = DATA_DIR / "metainfo"
 
 
@@ -106,7 +57,7 @@ def all_metainfo(data_dir):
 
     返回一个字典，键为算法名称，值为元数据列表
     """
-    return load_all_metainfo(data_dir)
+    return load_all_metainfo_from_data_dir(data_dir)
 
 
 @pytest.fixture(scope="session")
@@ -125,7 +76,7 @@ def sspd_euclidean(all_metainfo, data_dir):
     """SSPD 欧几里得距离测试数据"""
 
     sspd_metainfo = all_metainfo.get("sspd", [])
-    euclidean_metainfo = [m for m in sspd_metainfo if m["type_d"] == "euclidean"]
+    euclidean_metainfo = [m for m in sspd_metainfo if m.type_d == "spherical"]
 
     if not euclidean_metainfo:
         pytest.skip("SSPD 欧几里得距离测试数据不存在")
@@ -265,7 +216,9 @@ def discret_frechet_euclidean(all_metainfo, data_dir):
     """Discret Frechet 欧几里得距离测试数据"""
 
     discret_frechet_metainfo = all_metainfo.get("discret_frechet", [])
-    euclidean_metainfo = [m for m in discret_frechet_metainfo if m["type_d"] == "euclidean"]
+    euclidean_metainfo = [
+        m for m in discret_frechet_metainfo if m["type_d"] == "euclidean"
+    ]
 
     if not euclidean_metainfo:
         pytest.skip("Discret Frechet 欧几里得距离测试数据不存在")

@@ -1,11 +1,9 @@
-use crate::binding::trajectory::PyTrajectory;
+use crate::binding::sequence::types::{PointRef, PyTrajectoryType};
 use crate::distance::distance_type::DistanceType;
-use crate::distance::erp::{erp_compat_with_dist_type, erp_standard_with_dist_type};
 use crate::traits::{AsCoord, CoordSequence};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
-use std::convert::TryFrom;
 
 /// Compute the ERP (Edit distance with Real Penalty) distance between two trajectories
 ///
@@ -52,9 +50,11 @@ pub fn erp_compat_traj_dist(
     )]
     g: Option<Vec<f64>>,
 ) -> PyResult<f64> {
-    // Convert Python objects to PyTrajectory
-    let traj1 = PyTrajectory::try_from(t1)?;
-    let traj2 = PyTrajectory::try_from(t2)?;
+    // Convert Python objects to PyTrajectoryType
+    let traj1 = PyTrajectoryType::try_from(t1)?;
+    let traj2 = PyTrajectoryType::try_from(t2)?;
+
+    // TODO: 这里不需要这么复杂的处理方式
 
     // Compute centroid if g is None
     let gap_point = if let Some(g_vec) = g {
@@ -93,7 +93,9 @@ pub fn erp_compat_traj_dist(
         [sum_x / total, sum_y / total]
     };
 
-    // Compute distance based on type (PyTrajectory implements CoordSequence)
+    let gap_point = PointRef::new(&gap_point, 0);
+
+    // Compute distance based on type (PyTrajectoryType implements CoordSequence)
     let distance_type = match dist_type.to_lowercase().as_str() {
         "euclidean" => DistanceType::Euclidean,
         "spherical" => DistanceType::Spherical,
@@ -105,7 +107,8 @@ pub fn erp_compat_traj_dist(
         }
     };
 
-    let distance = erp_compat_with_dist_type(&traj1, &traj2, gap_point, distance_type);
+    let distance =
+        crate::distance::erp::erp_compat_traj_dist(&traj1, &traj2, &gap_point, distance_type);
 
     Ok(distance)
 }
@@ -155,10 +158,11 @@ pub fn erp_standard(
     )]
     g: Option<Vec<f64>>,
 ) -> PyResult<f64> {
-    // Convert Python objects to PyTrajectory
-    let traj1 = PyTrajectory::try_from(t1)?;
-    let traj2 = PyTrajectory::try_from(t2)?;
+    // Convert Python objects to PyTrajectoryType
+    let traj1 = PyTrajectoryType::try_from(t1)?;
+    let traj2 = PyTrajectoryType::try_from(t2)?;
 
+    // TODO: 处理g点不需要这么复杂
     // Compute centroid if g is None
     let gap_point = if let Some(g_vec) = g {
         if g_vec.len() != 2 {
@@ -208,7 +212,9 @@ pub fn erp_standard(
         }
     };
 
-    let distance = erp_standard_with_dist_type(&traj1, &traj2, gap_point, distance_type);
+    let gap_point = PointRef::new(&gap_point, 0);
+
+    let distance = crate::distance::erp::erp_standard(&traj1, &traj2, &gap_point, distance_type);
 
     Ok(distance)
 }

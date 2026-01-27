@@ -29,7 +29,8 @@
 //! ## Usage
 //!
 //! ```rust
-//! use traj_dist_rs::{sspd, DistanceType};
+//! use traj_dist_rs::distance::sspd::sspd;
+//! use traj_dist_rs::distance::distance_type::DistanceType;
 //!
 //! let traj1 = vec![[0.0, 0.0], [1.0, 1.0]];
 //! let traj2 = vec![[0.0, 1.0], [1.0, 0.0]];
@@ -39,14 +40,8 @@
 //! ```
 
 pub mod distance;
+pub mod err;
 pub mod traits;
-pub use traits::*;
-
-// Re-export distance functions for debugging
-#[allow(deprecated)]
-pub use distance::hausdorff::hausdorff_euclidean;
-#[allow(deprecated)]
-pub use distance::hausdorff::hausdorff_spherical;
 
 #[cfg(feature = "python-binding")]
 pub mod binding;
@@ -58,20 +53,25 @@ use pyo3::prelude::*;
 #[cfg(feature = "python-binding")]
 #[pymodule]
 fn _lib(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
-    use crate::binding::distance::discret_frechet::discret_frechet;
-    use crate::binding::distance::dtw::dtw;
-    use crate::binding::distance::edr::edr;
-    use crate::binding::distance::erp::{erp_compat_traj_dist, erp_standard};
-    use crate::binding::distance::hausdorff::hausdorff;
-    use crate::binding::distance::lcss::lcss;
-    use crate::binding::distance::sspd::sspd;
-    m.add_function(wrap_pyfunction!(sspd, m)?)?;
-    m.add_function(wrap_pyfunction!(dtw, m)?)?;
-    m.add_function(wrap_pyfunction!(hausdorff, m)?)?;
-    m.add_function(wrap_pyfunction!(lcss, m)?)?;
-    m.add_function(wrap_pyfunction!(edr, m)?)?;
-    m.add_function(wrap_pyfunction!(discret_frechet, m)?)?;
-    m.add_function(wrap_pyfunction!(erp_compat_traj_dist, m)?)?;
-    m.add_function(wrap_pyfunction!(erp_standard, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::binding::distance::sspd::sspd, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::binding::distance::dtw::dtw, m)?)?;
+    m.add_function(wrap_pyfunction!(
+        crate::binding::distance::hausdorff::hausdorff,
+        m
+    )?)?;
+    m.add_function(wrap_pyfunction!(crate::binding::distance::lcss::lcss, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::binding::distance::edr::edr, m)?)?;
+    m.add_function(wrap_pyfunction!(
+        crate::binding::distance::discret_frechet::discret_frechet,
+        m
+    )?)?;
+    m.add_function(wrap_pyfunction!(
+        crate::binding::distance::erp::erp_compat_traj_dist,
+        m
+    )?)?;
+    m.add_function(wrap_pyfunction!(
+        crate::binding::distance::erp::erp_standard,
+        m
+    )?)?;
     Ok(())
 }

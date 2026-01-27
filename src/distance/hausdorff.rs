@@ -1,17 +1,17 @@
 //! # Hausdorff Distance Algorithm
-//! 
+//!
 //! This module implements the Hausdorff distance algorithm for comparing trajectories.
 //! The Hausdorff distance measures how far two subsets of a metric space are from each other.
 //! It is defined as the maximum of all distances from a point in one set to the closest point in the other set.
-//! 
+//!
 //! ## Algorithm Description
-//! 
+//!
 //! The Hausdorff distance between two sets A and B is calculated as:
 //! H(A, B) = max(h(A, B), h(B, A))
 //! where h(A, B) = max(min(d(a, b))) for all a in A, b in B
-//! 
+//!
 //! ## Complexity
-//! 
+//!
 //! The time complexity is O(n*m) where n and m are the lengths of the two trajectories.
 
 use crate::distance::distance_type::DistanceType;
@@ -20,24 +20,24 @@ use crate::distance::spherical::{great_circle_distance, point_to_path};
 use crate::traits::{AsCoord, CoordSequence};
 
 /// Directed Hausdorff distance from trajectory t1 to trajectory t2 using specified distance type
-/// 
+///
 /// This is a helper function that computes the one-way Hausdorff distance from trajectory t1 to t2.
 /// It is used internally by the main `hausdorff` function to compute the symmetric distance.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `t1` - The source trajectory
 /// * `t2` - The target trajectory  
 /// * `mdist` - Precomputed pairwise distances between points in t1 and t2
 /// * `t2_dist` - Precomputed distances between consecutive points in t2
 /// * `dist_type` - The type of distance to use (Euclidean or Spherical)
-/// 
+///
 /// # Type Parameters
-/// 
+///
 /// * `T` - A type that implements the `CoordSequence` trait
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns the directed Hausdorff distance from t1 to t2
 fn directed_hausdorff<T: CoordSequence>(
     t1: &T,
@@ -81,23 +81,23 @@ where
 }
 
 /// Directed Hausdorff distance for spherical geometry from t1 to t2
-/// 
+///
 /// This is a specialized helper function for computing the directed Hausdorff distance
 /// when using spherical distance calculations.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `t1` - The source trajectory
 /// * `t2` - The target trajectory  
 /// * `mdist` - Precomputed pairwise distances between points in t1 and t2
 /// * `t1_dist` - Precomputed distances between consecutive points in t1
-/// 
+///
 /// # Type Parameters
-/// 
+///
 /// * `T` - A type that implements the `CoordSequence` trait
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns the directed Hausdorff distance from t1 to t2 for spherical geometry
 fn directed_hausdorff_spherical<T: CoordSequence>(
     t1: &T,
@@ -133,33 +133,34 @@ where
 }
 
 /// Hausdorff distance between two trajectories using specified distance type
-/// 
+///
 /// Computes the Hausdorff distance between two trajectories using the specified
 /// distance type (Euclidean or Spherical). The Hausdorff distance is defined as
 /// the maximum of all distances from a point in one trajectory to the closest point in the other trajectory.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `t1` - The first trajectory to compare
 /// * `t2` - The second trajectory to compare
 /// * `dist_type` - The type of distance to use (Euclidean or Spherical)
-/// 
+///
 /// # Type Parameters
-/// 
+///
 /// * `T` - A type that implements the `CoordSequence` trait
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns the Hausdorff distance between the two trajectories, or `f64::MAX` if either trajectory is empty
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust
-/// use traj_dist_rs::{hausdorff, DistanceType};
-/// 
+/// use traj_dist_rs::distance::hausdorff::hausdorff;
+/// use traj_dist_rs::distance::distance_type::DistanceType;
+///
 /// let traj1 = vec![[0.0, 0.0], [1.0, 1.0]];
 /// let traj2 = vec![[0.0, 1.0], [1.0, 0.0]];
-/// 
+///
 /// let distance = hausdorff(&traj1, &traj2, DistanceType::Euclidean);
 /// println!("Hausdorff distance: {}", distance);
 /// ```
@@ -242,33 +243,6 @@ where
     };
 
     dh1.max(dh2)
-}
-
-// Keep the old functions for backward compatibility
-/// Computes Hausdorff distance using Euclidean distance calculation
-/// 
-/// # Deprecated
-/// 
-/// This function is deprecated. Use `hausdorff()` with `DistanceType::Euclidean` instead.
-#[deprecated(note = "Use hausdorff() with DistanceType instead")]
-pub fn hausdorff_euclidean<T: CoordSequence>(t1: &T, t2: &T) -> f64
-where
-    T::Coord: AsCoord,
-{
-    hausdorff(t1, t2, DistanceType::Euclidean)
-}
-
-/// Computes Hausdorff distance using Spherical distance calculation
-/// 
-/// # Deprecated
-/// 
-/// This function is deprecated. Use `hausdorff()` with `DistanceType::Spherical` instead.
-#[deprecated(note = "Use hausdorff() with DistanceType instead")]
-pub fn hausdorff_spherical<T: CoordSequence>(t1: &T, t2: &T) -> f64
-where
-    T::Coord: AsCoord,
-{
-    hausdorff(t1, t2, DistanceType::Spherical)
 }
 
 #[cfg(test)]
