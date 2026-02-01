@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-  {name = "TrajDist-rs Contributors"},
+  {name = "Chao Song"},
 ]
 keywords = ["trajectory", "distance", "algorithm", "performance", "rust"]
 classifiers = [
@@ -18,6 +18,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: GIS",
     "Topic :: Software Development :: Libraries :: Python Modules"
@@ -60,3 +62,35 @@ build-backend = "maturin"
 python-source = "python"
 module-name = "traj_dist_rs._lib"
 features = ["python-binding", "pyo3/extension-module"]
+
+[tool.cibuildwheel]
+build-frontend = "build[uv]"
+build = "cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64"
+manylinux-x86_64-image = "manylinux2014"
+
+[tool.cibuildwheel.linux]
+# Build for x86_64 only (can add aarch64 if needed)
+archs = ["x86_64"]
+# Environment variables
+environment = { CARGO_TERM_COLOR = "always" }
+# Before build: install build dependencies
+before-build = "pip install --upgrade pip && pip install 'maturin>=1.11.5'"
+# Test command - simple import test to avoid test data dependency
+test-requires = "pytest numpy"
+test-command = "python -c 'import traj_dist_rs; print(\"Import successful\")'"
+
+[tool.cibuildwheel.macos]
+# Build for both Intel and Apple Silicon
+archs = ["x86_64", "arm64"]
+environment = { CARGO_TERM_COLOR = "always" }
+before-build = "pip install --upgrade pip && pip install 'maturin>=1.11.5'"
+test-requires = "pytest numpy"
+test-command = "python -c 'import traj_dist_rs; print(\"Import successful\")'"
+
+[tool.cibuildwheel.windows]
+# Build for AMD64
+archs = ["AMD64"]
+environment = { CARGO_TERM_COLOR = "always" }
+before-build = "pip install --upgrade pip && pip install 'maturin>=1.11.5'"
+test-requires = "pytest numpy"
+test-command = "python -c 'import traj_dist_rs; print(\"Import successful\")'"

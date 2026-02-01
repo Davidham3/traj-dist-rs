@@ -64,3 +64,6 @@ traj-dist/build/
 *.tmp
 *.temp
 .local
+
+# Wheel packages built by cibuildwheel
+wheelhouse/
