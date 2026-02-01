@@ -53,16 +53,36 @@ use pyo3::prelude::*;
 #[cfg(feature = "python-binding")]
 #[pymodule]
 fn _lib(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    // Register the DpResult class
+    m.add_class::<crate::binding::PyDpResult>()?;
+
+    // Register distance functions
     m.add_function(wrap_pyfunction!(crate::binding::distance::sspd::sspd, m)?)?;
     m.add_function(wrap_pyfunction!(crate::binding::distance::dtw::dtw, m)?)?;
+    m.add_function(wrap_pyfunction!(
+        crate::binding::distance::dtw::dtw_with_matrix,
+        m
+    )?)?;
     m.add_function(wrap_pyfunction!(
         crate::binding::distance::hausdorff::hausdorff,
         m
     )?)?;
     m.add_function(wrap_pyfunction!(crate::binding::distance::lcss::lcss, m)?)?;
+    m.add_function(wrap_pyfunction!(
+        crate::binding::distance::lcss::lcss_with_matrix,
+        m
+    )?)?;
     m.add_function(wrap_pyfunction!(crate::binding::distance::edr::edr, m)?)?;
     m.add_function(wrap_pyfunction!(
+        crate::binding::distance::edr::edr_with_matrix,
+        m
+    )?)?;
+    m.add_function(wrap_pyfunction!(
         crate::binding::distance::discret_frechet::discret_frechet,
+        m
+    )?)?;
+    m.add_function(wrap_pyfunction!(
+        crate::binding::distance::discret_frechet::discret_frechet_with_matrix,
         m
     )?)?;
     m.add_function(wrap_pyfunction!(
@@ -70,7 +90,15 @@ fn _lib(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
         m
     )?)?;
     m.add_function(wrap_pyfunction!(
+        crate::binding::distance::erp::erp_compat_traj_dist_with_matrix,
+        m
+    )?)?;
+    m.add_function(wrap_pyfunction!(
         crate::binding::distance::erp::erp_standard,
+        m
+    )?)?;
+    m.add_function(wrap_pyfunction!(
+        crate::binding::distance::erp::erp_standard_with_matrix,
         m
     )?)?;
     Ok(())

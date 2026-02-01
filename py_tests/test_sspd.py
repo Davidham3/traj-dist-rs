@@ -8,7 +8,6 @@ import pytest
 from test_framework import (
     BaseDistanceTest,
     load_test_data_by_metainfo,
-    get_hyperparameter_value_from_metainfo,
 )
 
 

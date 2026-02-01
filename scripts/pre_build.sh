@@ -39,49 +39,57 @@ cargo test
 # 步骤 4: 生成 Python 存根文件
 # ==========================================
 echo ""
-echo "[4/10] 生成 Python 存根文件 (stub_gen)..."
+echo "[4/11] 生成 Python 存根文件 (stub_gen)..."
+# 如果 stub_gen 构建失败，继续执行（存根文件可能已经存在）
 cargo run --features python-binding --bin stub_gen
 
 # ==========================================
 # 步骤 5: 删除干扰的 _lib 目录
 # ==========================================
 echo ""
-echo "[5/10] 删除干扰的 _lib 目录..."
+echo "[5/11] 删除干扰的 _lib 目录..."
 rm -rf python/traj_dist_rs/_lib
 
 # ==========================================
 # 步骤 6: Python 绑定构建
 # ==========================================
 echo ""
-echo "[6/10] Python 绑定构建 (maturin develop)..."
+echo "[6/11] Python 绑定构建 (maturin develop)..."
 maturin develop
 
 # ==========================================
 # 步骤 7: Python 代码清理
 # ==========================================
 echo ""
-echo "[7/10] Python 代码清理 (autoflake)..."
+echo "[7/11] Python 代码清理 (autoflake)..."
 autoflake --in-place --remove-all-unused-imports --remove-unused-variables python/**/*.py
 
 # ==========================================
 # 步骤 8: Python 代码格式化
 # ==========================================
 echo ""
-echo "[8/10] Python 代码格式化 (black)..."
+echo "[8/11] Python 代码格式化 (black)..."
 black python/
 
 # ==========================================
 # 步骤 9: Python import 排序
 # ==========================================
 echo ""
-echo "[9/10] Python import 排序 (isort)..."
+echo "[9/11] Python import 排序 (isort)..."
 isort python/
 
 # ==========================================
-# 步骤 10: Python 集成测试
+# 步骤 10: Python 代码检查和修复
 # ==========================================
 echo ""
-echo "[10/10] Python 集成测试 (pytest)..."
+echo "[10/11] Python 代码检查和修复 (ruff check --fix)..."
+ruff check --fix python/ py_tests/
+
+# ==========================================
+# 步骤 11: Python 集成测试
+# ==========================================
+echo ""
+echo "[11/11] Python 集成测试 (pytest)..."
 pytest py_tests/
 
 # ==========================================

@@ -5,9 +5,7 @@ pytest 配置文件
 """
 
 import pytest
-import json
 from pathlib import Path
-from typing import Optional, Dict, List, Any
 import polars as pl
 import pyarrow.parquet as pq
 from test_framework import load_all_metainfo_from_data_dir, get_sample_path

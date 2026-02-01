@@ -27,7 +27,7 @@ use crate::traits::{AsCoord, CoordSequence};
 /// # Arguments
 ///
 /// * `t1` - The source trajectory
-/// * `t2` - The target trajectory  
+/// * `t2` - The target trajectory
 /// * `mdist` - Precomputed pairwise distances between points in t1 and t2
 /// * `t2_dist` - Precomputed distances between consecutive points in t2
 /// * `dist_type` - The type of distance to use (Euclidean or Spherical)
@@ -88,7 +88,7 @@ where
 /// # Arguments
 ///
 /// * `t1` - The source trajectory
-/// * `t2` - The target trajectory  
+/// * `t2` - The target trajectory
 /// * `mdist` - Precomputed pairwise distances between points in t1 and t2
 /// * `t1_dist` - Precomputed distances between consecutive points in t1
 ///

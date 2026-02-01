@@ -11,9 +11,8 @@ import numpy as np
 import polars as pl
 import pandas as pd
 from pathlib import Path
-from typing import Dict, List, Tuple, Any
+from typing import Dict, Any
 import sys
-import json
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent.parent / "py_tests"))

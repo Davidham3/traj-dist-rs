@@ -16,9 +16,8 @@ import numpy as np
 import polars as pl
 import pandas as pd
 from pathlib import Path
-from typing import Dict, List, Tuple, Any
+from typing import Dict, Any
 import sys
-import json
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent.parent / "py_tests"))
@@ -415,7 +414,7 @@ def benchmark_algorithm_by_metainfo(
     }
 
     # 打印结果
-    print(f"\n误差统计:")
+    print("\n误差统计:")
     print(f"  Python vs Cython 平均误差: {avg_py_cython_error:.10e}")
     print(f"  Python vs Cython 最大误差: {max_py_cython_error:.10e}")
     print(f"  Python vs Rust 平均误差: {avg_py_rust_error:.10e}")
@@ -423,12 +422,12 @@ def benchmark_algorithm_by_metainfo(
     print(f"  Cython vs Rust 平均误差: {avg_cython_rust_error:.10e}")
     print(f"  Cython vs Rust 最大误差: {max_cython_rust_error:.10e}")
 
-    print(f"\n耗时统计 (ms):")
+    print("\n耗时统计 (ms):")
     print(f"  Python 平均耗时: {avg_py_time * 1000:.6f} ms")
     print(f"  Cython 平均耗时: {avg_cython_time * 1000:.6f} ms")
     print(f"  Rust 平均耗时: {avg_rust_time * 1000:.6f} ms")
 
-    print(f"\n性能提升 (Rust vs Others):")
+    print("\n性能提升 (Rust vs Others):")
     print(f"  Rust vs Python 平均提升倍数: {py_speedup_avg:.2f}x")
     print(f"  Rust vs Cython 平均提升倍数: {cython_speedup_avg:.2f}x")
 

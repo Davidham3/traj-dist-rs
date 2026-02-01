@@ -1,7 +1,7 @@
 use crate::traits::{AsCoord, CoordSequence};
 
 /// Euclidean distance between two points
-pub fn euclidean_distance<T: AsCoord>(p1: &T, p2: &T) -> f64 {
+pub fn euclidean_distance<C: AsCoord, D: AsCoord>(p1: &C, p2: &D) -> f64 {
     let dx = p1.x() - p2.x();
     let dy = p1.y() - p2.y();
     (dx * dx + dy * dy).sqrt()

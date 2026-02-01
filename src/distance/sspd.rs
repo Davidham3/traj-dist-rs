@@ -31,7 +31,7 @@ use crate::traits::{AsCoord, CoordSequence};
 /// # Arguments
 ///
 /// * `t1` - The source trajectory
-/// * `t2` - The target trajectory  
+/// * `t2` - The target trajectory
 /// * `dist_type` - The type of distance to use (Euclidean or Spherical)
 ///
 /// # Type Parameters

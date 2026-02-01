@@ -10,7 +10,8 @@ from pathlib import Path
 from typing import Optional, Union, List, Dict, TypedDict
 from abc import ABC, abstractmethod
 from pydantic import ValidationError
-from schemas import TestCaseMeta
+from schemas import Metainfo
+import traj_dist_rs._lib as traj_dist_rs
 
 
 class AlgorithmConfig(TypedDict):
@@ -27,7 +28,7 @@ class AlgorithmConfig(TypedDict):
 
 
 def get_algorithm_config_from_metainfo(
-    algorithm: str, all_metainfo: Optional[Dict[str, List[TestCaseMeta]]] = None
+    algorithm: str, all_metainfo: Optional[Dict[str, List[Metainfo]]] = None
 ) -> AlgorithmConfig:
     """
     从元数据动态获取算法配置信息
@@ -92,7 +93,7 @@ def get_algorithm_config(algorithm: str) -> AlgorithmConfig:
 
 def load_all_metainfo_from_data_dir(
     data_dir: Optional[Path] = None,
-) -> Dict[str, List[TestCaseMeta]]:
+) -> Dict[str, List[Metainfo]]:
     """
     从 data 目录动态加载所有元数据，并使用 Pydantic 模型进行解析
 
@@ -100,7 +101,7 @@ def load_all_metainfo_from_data_dir(
         data_dir: 数据目录（默认为 py_tests/data）
 
     Returns:
-        字典，键为算法名称，值为 TestCaseMeta 对象列表
+        字典，键为算法名称，值为 Metainfo 对象列表
     """
     if data_dir is None:
         data_dir = Path(__file__).parent / "data"
@@ -117,7 +118,7 @@ def load_all_metainfo_from_data_dir(
                 if line:
                     try:
                         # 使用 Pydantic 模型解析和验证 JSON 行
-                        meta_obj = TestCaseMeta.model_validate_json(line)
+                        meta_obj = Metainfo.model_validate_json(line)
                         metainfo_list.append(meta_obj)
                     except ValidationError as e:
                         print(
@@ -130,7 +131,7 @@ def load_all_metainfo_from_data_dir(
 
 def load_metainfo(
     algorithm: str, data_dir: Optional[Path] = None
-) -> List[TestCaseMeta]:
+) -> List[Metainfo]:
     """
     加载指定算法的元数据
 
@@ -139,7 +140,7 @@ def load_metainfo(
         data_dir: 数据目录（默认为 py_tests/data）
 
     Returns:
-        TestCaseMeta 对象列表
+        Metainfo 对象列表
     """
     all_metainfo = load_all_metainfo_from_data_dir(data_dir)
     if algorithm not in all_metainfo:
@@ -150,12 +151,12 @@ def load_metainfo(
     return all_metainfo[algorithm]
 
 
-def get_sample_path(metainfo: TestCaseMeta, data_dir: Optional[Path] = None) -> Path:
+def get_sample_path(metainfo: Metainfo, data_dir: Optional[Path] = None) -> Path:
     """
     从元数据对象获取样本文件路径
 
     Args:
-        metainfo: TestCaseMeta 对象
+        metainfo: Metainfo 对象
         data_dir: 数据目录（默认为 py_tests/data）
 
     Returns:
@@ -192,7 +193,7 @@ class BaseDistanceTest(ABC):
         return self.config["function_name"]
 
     def _get_hyperparameter_value_from_metainfo(
-        self, all_metainfo: Dict[str, List[TestCaseMeta]], distance_type: str
+        self, all_metainfo: Dict[str, List[Metainfo]], distance_type: str
     ) -> Optional[Union[float, List[float], int]]:
         """
         从元数据中获取超参数值 (已更新以使用 Pydantic 模型)
@@ -235,8 +236,57 @@ class BaseDistanceTest(ABC):
         func = self._get_distance_function()
         config = self.config
 
+        # 特殊处理 DTW 算法，它有 use_full_matrix 参数但没有超参数
+        if self.algorithm_name == "dtw":
+            result = func(traj1, traj2, distance_type, use_full_matrix=False)
+            # DTW 现在返回 DpResult 对象
+            if hasattr(result, 'distance'):
+                return result.distance
+            return result
+
+        # 特殊处理 LCSS、EDR 算法，它们有 use_full_matrix 参数和 eps 超参数
+        if self.algorithm_name in ["lcss", "edr"]:
+            param_name = config["hyperparameter_name"]
+            if hyperparameter_value is None:
+                hyperparameter_value = 1e-6
+            result = func(traj1, traj2, distance_type, eps=hyperparameter_value, use_full_matrix=False)
+            # 这些算法现在返回 DpResult 对象
+            if hasattr(result, 'distance'):
+                return result.distance
+            return result
+
+        # 特殊处理 ERP 算法，它有 use_full_matrix 参数和 g 超参数
+        if self.algorithm_name == "erp":
+            param_name = config["hyperparameter_name"]
+            if hyperparameter_value is None:
+                hyperparameter_value = [0.0, 0.0]
+            # 获取实际的函数名（可能是 erp_compat_traj_dist 或 erp_standard）
+            func_name = self.function_name
+            if func_name == "erp_compat_traj_dist":
+                result = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, distance_type, g=hyperparameter_value, use_full_matrix=False)
+            elif func_name == "erp_standard":
+                result = traj_dist_rs.erp_standard(traj1, traj2, distance_type, g=hyperparameter_value, use_full_matrix=False)
+            else:
+                result = func(traj1, traj2, distance_type, g=hyperparameter_value, use_full_matrix=False)
+            # ERP 现在返回 DpResult 对象
+            if hasattr(result, 'distance'):
+                return result.distance
+            return result
+
+        # 特殊处理 Discret Frechet 算法，它有 use_full_matrix 参数但没有超参数
+        if self.algorithm_name == "discret_frechet":
+            result = func(traj1, traj2, distance_type, use_full_matrix=False)
+            # Discret Frechet 现在返回 DpResult 对象
+            if hasattr(result, 'distance'):
+                return result.distance
+            return result
+
         if not config["has_hyperparameters"]:
-            return func(traj1, traj2, distance_type)
+            result = func(traj1, traj2, distance_type)
+            # 检查是否返回 DpResult 对象
+            if hasattr(result, 'distance'):
+                return result.distance
+            return result
         else:
             # 如果没有提供超参数值，使用默认值
             if hyperparameter_value is None:
@@ -255,13 +305,18 @@ class BaseDistanceTest(ABC):
             param_name = config["hyperparameter_name"]
             if param_name == "g" and isinstance(hyperparameter_value, list):
                 # ERP 的 g 参数是列表
-                return func(traj1, traj2, distance_type, g=hyperparameter_value)
+                result = func(traj1, traj2, distance_type, g=hyperparameter_value)
             elif param_name == "precision":
                 # SOWD 的 precision 参数
-                return func(traj1, traj2, distance_type, precision=hyperparameter_value)
+                result = func(traj1, traj2, distance_type, precision=hyperparameter_value)
             else:
                 # LCSS 和 EDR 的 eps 参数
-                return func(traj1, traj2, distance_type, eps=hyperparameter_value)
+                result = func(traj1, traj2, distance_type, eps=hyperparameter_value)
+
+            # 检查是否返回 DpResult 对象
+            if hasattr(result, 'distance'):
+                return result.distance
+            return result
 
     def _get_expected_distance(self, test_data, hyperparameter_value=None):
         """
@@ -305,6 +360,10 @@ class BaseDistanceTest(ABC):
                 traj1, traj2, distance_type, hyperparameter_value
             )
 
+            # 处理 DpResult 返回类型
+            if hasattr(actual_distance, 'distance'):
+                actual_distance = actual_distance.distance
+
             error = abs(actual_distance - expected_distance)
             assert error < tolerance, (
                 f"{self.algorithm_name.upper()} 距离计算误差过大: {error}\n"
@@ -347,6 +406,10 @@ class BaseDistanceTest(ABC):
             traj, traj, distance_type, hyperparameter_value
         )
 
+        # 处理 DpResult 返回类型
+        if hasattr(distance, 'distance'):
+            distance = distance.distance
+
         # 对于 LCSS 和 EDR，距离在 [0, 1] 范围内，相同轨迹应该接近 0
         if self.algorithm_name in ["lcss", "edr"]:
             assert (
@@ -388,6 +451,10 @@ class BaseDistanceTest(ABC):
             traj1, traj2, distance_type, hyperparameter_value
         )
 
+        # 处理 DpResult 返回类型
+        if hasattr(distance, 'distance'):
+            distance = distance.distance
+
         # 距离应该大于 0
         assert (
             distance > 0
@@ -423,6 +490,10 @@ class BaseDistanceTest(ABC):
         distance = self._call_distance_function(
             traj1, traj2, distance_type, hyperparameter_value
         )
+
+        # 处理 DpResult 返回类型
+        if hasattr(distance, 'distance'):
+            distance = distance.distance
 
         # 对于 LCSS 和 EDR，空轨迹应该返回 1.0
         if self.algorithm_name in ["lcss", "edr"]:
@@ -467,6 +538,10 @@ class BaseDistanceTest(ABC):
         distance = self._call_distance_function(
             traj1, traj2, distance_type, hyperparameter_value
         )
+
+        # 处理 DpResult 返回类型
+        if hasattr(distance, 'distance'):
+            distance = distance.distance
 
         # SSPD 单点轨迹没有段，返回 inf
         if self.algorithm_name == "sspd":
@@ -521,6 +596,9 @@ class BaseDistanceTest(ABC):
 
         for distance_type in self.config["distance_types"]:
             distance = self._call_distance_function(traj1, traj2, distance_type)
+            # 处理 DpResult 返回类型
+            if hasattr(distance, 'distance'):
+                distance = distance.distance
             assert (
                 distance > 0
             ), f"{self.algorithm_name.upper()} {distance_type} 距离应该大于 0，实际: {distance}"
@@ -575,6 +653,12 @@ class DistanceTestWithHyperparameters(BaseDistanceTest):
                 traj1, traj2, distance_type, large_value
             )
 
+            # 处理 DpResult 返回类型
+            if hasattr(distance_small, 'distance'):
+                distance_small = distance_small.distance
+            if hasattr(distance_large, 'distance'):
+                distance_large = distance_large.distance
+
             assert distance_large <= distance_small, (
                 f"{self.algorithm_name.upper()} 大 eps 应该产生更小的距离\n"
                 f"小 eps 距离: {distance_small}\n"
@@ -588,6 +672,12 @@ class DistanceTestWithHyperparameters(BaseDistanceTest):
             distance_large = self._call_distance_function(
                 traj1, traj2, distance_type, large_value
             )
+
+            # 处理 DpResult 返回类型
+            if hasattr(distance_small, 'distance'):
+                distance_small = distance_small.distance
+            if hasattr(distance_large, 'distance'):
+                distance_large = distance_large.distance
 
             # ERP 的距离受 g 参数影响，但不一定是单调的
             # 这里只验证距离是合理的
@@ -637,18 +727,18 @@ class DistanceTestWithHyperparameters(BaseDistanceTest):
             ), f"{self.algorithm_name.upper()} 负 eps 应该不匹配任何点，距离应该是 1.0，实际: {distance}"
 
 
-def load_test_data_by_metainfo(metainfo: TestCaseMeta, data_dir):
+def load_test_data_by_metainfo(metainfo: Metainfo, data_dir):
     """
     根据元数据对象加载测试数据
 
     Args:
-        metainfo: TestCaseMeta 对象
+        metainfo: Metainfo 对象
         data_dir: 数据目录
 
     Returns:
         测试数据 DataFrame
     """
-    # 此函数现在接收一个 TestCaseMeta 对象
+    # 此函数现在接收一个 Metainfo 对象
     sample_path = get_sample_path(metainfo, data_dir)
 
     try:
@@ -662,12 +752,12 @@ def load_test_data_by_metainfo(metainfo: TestCaseMeta, data_dir):
         pytest.skip(f"无法读取测试数据 {sample_path}: {e}")
 
 
-def get_hyperparameter_value_from_metainfo(metainfo: TestCaseMeta):
+def get_hyperparameter_value_from_metainfo(metainfo: Metainfo):
     """
     从元数据对象中提取超参数值
 
     Args:
-        metainfo: TestCaseMeta 对象
+        metainfo: Metainfo 对象
 
     Returns:
         超参数值
@@ -689,7 +779,7 @@ class HyperparameterUtil:
 
     @staticmethod
     def get_hyperparameter_value(
-        algorithm_name: str, distance_type: str, metainfo_list: List[TestCaseMeta]
+        algorithm_name: str, distance_type: str, metainfo_list: List[Metainfo]
     ) -> Optional[Union[float, List[float], int]]:
         """
         从元数据列表中获取算法在特定距离类型下的超参数值
@@ -697,7 +787,7 @@ class HyperparameterUtil:
         Args:
             algorithm_name: 算法名称
             distance_type: 距离类型
-            metainfo_list: TestCaseMeta 对象列表
+            metainfo_list: Metainfo 对象列表
 
         Returns:
             超参数值，如果算法没有超参数则返回 None

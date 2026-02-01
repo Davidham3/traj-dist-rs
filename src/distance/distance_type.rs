@@ -1,3 +1,8 @@
+use crate::{
+    distance::{euclidean::euclidean_distance, spherical::great_circle_distance},
+    traits::AsCoord,
+};
+
 /// Enum representing the type of distance to use for trajectory calculations
 ///
 /// This enum specifies whether to use Euclidean (Cartesian) or Spherical
@@ -61,6 +66,13 @@ impl DistanceType {
                 "Invalid distance type '{}'. Expected 'euclidean' or 'spherical'",
                 s
             )),
+        }
+    }
+
+    pub fn distance<C: AsCoord, D: AsCoord>(&self, p1: &C, p2: &D) -> f64 {
+        match self {
+            DistanceType::Euclidean => euclidean_distance(p1, p2),
+            DistanceType::Spherical => great_circle_distance(p1, p2),
         }
     }
 }

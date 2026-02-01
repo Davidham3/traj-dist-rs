@@ -47,6 +47,8 @@ pub fn hausdorff(
         }
     };
 
+    // Hausdorff distance requires direct access to trajectory coordinates
+    // to compute point-to-segment distances, so we use the CoordSequence version
     let distance = crate::distance::hausdorff::hausdorff(&traj1, &traj2, distance_type);
 
     Ok(distance)

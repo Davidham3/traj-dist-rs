@@ -64,9 +64,9 @@ class TestERPCompatTrajDistEuclidean(DistanceTestWithHyperparameters):
         traj1 = [[0.0, 0.0], [1.0, 1.0]]
         traj2 = [[0.0, 1.0], [1.0, 0.0]]
 
-        dist_g_small = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[0.0, 0.0])
-        dist_g_medium = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[10.0, 10.0])
-        dist_g_large = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[100.0, 100.0])
+        dist_g_small = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[0.0, 0.0]).distance
+        dist_g_medium = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[10.0, 10.0]).distance
+        dist_g_large = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[100.0, 100.0]).distance
 
         # g 点离轨迹越远，距离应该越大（因为插入/删除惩罚更大）
         # 注意：由于 traj-dist 的 bug，这个关系可能不总是成立
@@ -85,9 +85,9 @@ class TestERPCompatTrajDistEuclidean(DistanceTestWithHyperparameters):
         traj2 = [[0.0, 2.0], [2.0, 0.0]]
 
         # 使用 centroid（g=None）
-        dist_centroid = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=None)
+        dist_centroid = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=None).distance
         # 使用手动计算的 centroid
-        dist_manual = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[1.0, 1.0])
+        dist_manual = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[1.0, 1.0]).distance
 
         # 两者应该相同
         assert abs(dist_centroid - dist_manual) < 1e-8
@@ -140,8 +140,8 @@ class TestERPCompatTrajDistSpherical(DistanceTestWithHyperparameters):
         traj1 = [[0.0, 0.0], [0.01, 0.01]]
         traj2 = [[0.0, 0.01], [0.01, 0.0]]
 
-        dist_g_small = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "spherical", g=[0.0, 0.0])
-        dist_g_medium = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "spherical", g=[0.005, 0.005])
+        dist_g_small = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "spherical", g=[0.0, 0.0]).distance
+        dist_g_medium = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "spherical", g=[0.005, 0.005]).distance
 
         # g 点离轨迹越远，距离应该越大
         # 注意：由于 traj-dist 的 bug，这个关系可能不总是成立
@@ -155,9 +155,9 @@ class TestERPCompatTrajDistSpherical(DistanceTestWithHyperparameters):
         traj2 = [[0.0, 0.01], [0.01, 0.0]]
 
         # 使用 centroid（g=None）
-        dist_centroid = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "spherical", g=None)
+        dist_centroid = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "spherical", g=None).distance
         # 使用手动计算的 centroid
-        dist_manual = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "spherical", g=[0.005, 0.005])
+        dist_manual = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "spherical", g=[0.005, 0.005]).distance
 
         # 两者应该相同
         assert abs(dist_centroid - dist_manual) < 1e-8
@@ -193,13 +193,13 @@ class TestERPCompatTrajDistParameterValidation(DistanceTestWithHyperparameters):
         traj2 = [[0.0, 0.0], [1.0, 1.0]]
 
         # g 点在轨迹上，距离应该接近 0
-        distance_on_traj = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[0.0, 0.0])
+        distance_on_traj = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[0.0, 0.0]).distance
         assert distance_on_traj < 1e-6
 
         # g 点远离轨迹，距离应该更大
         # 注意：由于 traj-dist 的 bug，对于完全相同的轨迹，无论 g 点在哪里，距离都是 0
         # 这里只测试 g 参数可以被正确传递
-        distance_far = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[1000.0, 1000.0])
+        distance_far = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[1000.0, 1000.0]).distance
         # 对于相同的轨迹，距离应该是 0
         assert distance_far < 1e-6
 
@@ -225,9 +225,9 @@ class TestERPCompatVsStandardComparison:
         traj2 = [[0.0, 1.0], [1.0, 0.0], [2.0, 1.0]]
 
         # 使用 compat 版本（匹配 traj-dist 的 bug）
-        dist_compat = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[0.0, 0.0])
+        dist_compat = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "euclidean", g=[0.0, 0.0]).distance
         # 使用 standard 版本（正确的实现）
-        dist_standard = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[0.0, 0.0])
+        dist_standard = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[0.0, 0.0]).distance
 
         # 两者应该不同，因为 traj-dist 有 bug
         # 注意：在某些情况下，由于轨迹的特殊性，两个版本可能产生相同的结果
@@ -242,9 +242,9 @@ class TestERPCompatVsStandardComparison:
         traj2 = [[0.0, 0.005], [0.005, 0.0], [0.01, 0.005]]
 
         # 使用 compat 版本（匹配 traj-dist 的 bug）
-        dist_compat = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "spherical", g=[0.0, 0.0])
+        dist_compat = traj_dist_rs.erp_compat_traj_dist(traj1, traj2, "spherical", g=[0.0, 0.0]).distance
         # 使用 standard 版本（正确的实现）
-        dist_standard = traj_dist_rs.erp_standard(traj1, traj2, "spherical", g=[0.0, 0.0])
+        dist_standard = traj_dist_rs.erp_standard(traj1, traj2, "spherical", g=[0.0, 0.0]).distance
 
         # 两者应该不同，因为 traj-dist 有 bug
         assert dist_compat != dist_standard
@@ -259,11 +259,11 @@ class TestERPStandardImplementation:
         traj2 = [[0.0, 1.0], [1.0, 0.0]]
 
         # 标准实现应该返回一个合理的距离值
-        dist_standard = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[0.0, 0.0])
+        dist_standard = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[0.0, 0.0]).distance
         assert dist_standard > 0.0
 
         # 球面距离也应该工作
-        dist_standard_spherical = traj_dist_rs.erp_standard(traj1, traj2, "spherical", g=[0.0, 0.0])
+        dist_standard_spherical = traj_dist_rs.erp_standard(traj1, traj2, "spherical", g=[0.0, 0.0]).distance
         assert dist_standard_spherical > 0.0
 
     def test_erp_standard_identical_trajectories(self):
@@ -271,7 +271,7 @@ class TestERPStandardImplementation:
         traj1 = [[0.0, 0.0], [1.0, 1.0]]
         traj2 = [[0.0, 0.0], [1.0, 1.0]]
 
-        dist = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[0.0, 0.0])
+        dist = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[0.0, 0.0]).distance
         assert dist < 1e-6
 
     def test_erp_standard_centroid(self):
@@ -280,9 +280,9 @@ class TestERPStandardImplementation:
         traj2 = [[0.0, 2.0], [2.0, 0.0]]
 
         # 使用 centroid（g=None）
-        dist_centroid = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=None)
+        dist_centroid = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=None).distance
         # 使用手动计算的 centroid
-        dist_manual = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[1.0, 1.0])
+        dist_manual = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[1.0, 1.0]).distance
 
         # 两者应该相同
         assert abs(dist_centroid - dist_manual) < 1e-8
@@ -292,9 +292,9 @@ class TestERPStandardImplementation:
         traj1 = [[0.0, 0.0], [1.0, 1.0]]
         traj2 = [[0.0, 1.0], [1.0, 0.0]]
 
-        dist_g_small = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[0.0, 0.0])
-        dist_g_medium = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[10.0, 10.0])
-        dist_g_large = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[100.0, 100.0])
+        dist_g_small = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[0.0, 0.0]).distance
+        dist_g_medium = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[10.0, 10.0]).distance
+        dist_g_large = traj_dist_rs.erp_standard(traj1, traj2, "euclidean", g=[100.0, 100.0]).distance
 
         # g 点离轨迹越远，距离应该越大
         # 注意：由于 traj-dist 的 bug，这个关系可能不总是成立

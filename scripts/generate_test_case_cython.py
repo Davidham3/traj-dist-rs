@@ -11,7 +11,6 @@ import sys
 import argparse
 import pickle
 import timeit
-import json
 from pathlib import Path
 
 import numpy as np
@@ -20,7 +19,7 @@ import pyarrow.parquet as pq
 import traj_dist.distance as tdist
 
 sys.path.append(str(Path(__file__).parent.parent))
-from py_tests.schemas import TestCaseMeta, ImplementationType
+from py_tests.schemas import Metainfo, ImplementationType
 
 
 def parse_args():
@@ -227,7 +226,7 @@ def main():
     print(f"Saved to: {sample_path}")
 
     try:
-        metainfo = TestCaseMeta(
+        metainfo = Metainfo(
             algorithm=args.algorithm,
             type_d=args.type_d,
             implemented_by=ImplementationType.CYTHON,

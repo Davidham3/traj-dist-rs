@@ -5,7 +5,6 @@
 比较 Rust、Python 和 Cython 实现的性能
 """
 
-import time
 import timeit
 from tqdm import trange
 import traceback
@@ -24,6 +23,7 @@ from test_framework import (
     get_hyperparameter_value_from_metainfo,
     get_sample_path,
 )
+from schemas import Metainfo
 import traj_dist_rs._lib as traj_dist_rs
 
 DATA_DIR = Path(__file__).parent.parent / "py_tests" / "data"
@@ -87,20 +87,20 @@ def get_rust_function(
 
 
 def benchmark_implementation(
-    metainfo: Dict[str, Any], num_runs: int = 10
+    metainfo: Metainfo, num_runs: int = 10
 ) -> Dict[str, Any]:
     """
     对单个算法的特定配置进行三种实现的性能 benchmark
 
     Args:
-        metainfo: 元数据字典
+        metainfo: 元数据对象（Metainfo）
         num_runs: 每个测试用例运行次数（用于计算平均耗时）
 
     Returns:
         benchmark 结果字典
     """
     algorithm_name = metainfo.algorithm
-    distance_type = metainfo.type_d
+    distance_type = metainfo.type_d  # 由于 use_enum_values=True，这已经是字符串
     hyperparameter_value = get_hyperparameter_value_from_metainfo(metainfo)
 
     # 加载测试数据
@@ -132,7 +132,7 @@ def benchmark_implementation(
         def tmp_test():
             return rust_func(traj1, traj2)
 
-        rust_time = timeit.timeit(tmp_test, number=10)
+        rust_time = timeit.timeit(tmp_test, number=num_runs)
         rust_times.append(rust_time)
 
     # 计算统计结果
@@ -161,11 +161,11 @@ def benchmark_implementation(
     }
 
     # 打印结果
-    print(f"\n耗时统计 (ms):")
+    print("\n耗时统计 (ms):")
     print(f"  Cython 平均耗时: {avg_cython_time * 1000:.6f} ms")
     print(f"  Rust 平均耗时: {avg_rust_time * 1000:.6f} ms")
 
-    print(f"\n性能提升:")
+    print("\n性能提升:")
     print(f"  Rust vs Cython: {cython_vs_rust:.2f}x")
 
     return result
@@ -225,7 +225,8 @@ def run_performance_comparison(num_runs: int = 10):
         if algorithm == "erp":
             function_name = "erp_compat_traj_dist"
 
-        hyperparameter_value = get_hyperparameter_value_from_metainfo(config)
+        # 从 result 中获取超参数值
+        hyperparameter_value = result["hyperparameter"]
 
         # 格式化超参数
         if hyperparameter_value is not None:
@@ -286,13 +287,13 @@ if __name__ == "__main__":
     if args.algorithm:
         metainfo_list = ALL_METAINFO.get(args.algorithm)
         if not metainfo_list:
-            print(f"算法 {args.algorithm} 不存在或未实现")
+            raise ValueError(f"算法 {args.algorithm} 不存在或未实现")
 
-        distance_types = list({m["type_d"] for m in metainfo_list})
+        distance_types = list({m.type_d for m in metainfo_list})
 
         if args.distance_type:
             metainfo_list = [
-                m for m in metainfo_list if m["type_d"] == args.distance_type
+                m for m in metainfo_list if m.type_d == args.distance_type
             ]
 
         for metainfo in metainfo_list:

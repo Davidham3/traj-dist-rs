@@ -2,7 +2,6 @@
 调试元数据加载的测试文件
 """
 
-import pytest
 
 
 def test_all_metainfo_fixture(all_metainfo):
@@ -27,7 +26,7 @@ def test_sspd_euclidean_metainfo_filtering(all_metainfo):
     sspd_metainfo = all_metainfo.get('sspd', [])
 
     # 检查 type_d 字段
-    print(f"\nChecking type_d values:")
+    print("\nChecking type_d values:")
     for i, m in enumerate(sspd_metainfo):
         type_d = m.type_d
         print(f"  Entry {i}: type_d={repr(type_d)} (type={type(type_d)})")

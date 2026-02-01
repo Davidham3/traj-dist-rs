@@ -1,11 +1,11 @@
-use crate::traits::{AsCoord, CoordSequence};
+use crate::traits::AsCoord;
 
 const RAD: f64 = std::f64::consts::PI / 180.0;
 const R: f64 = 6378137.0; // Earth radius in meters
 
 /// Compute the great circle distance between two points
-pub fn great_circle_distance<C: AsCoord>(p1: &C, p2: &C) -> f64 {
-    let lat1 = p1.y();
+pub fn great_circle_distance<C: AsCoord, D: AsCoord>(p1: &C, p2: &D) -> f64 {
+    let lat1: f64 = p1.y();
     let lon1 = p1.x();
     let lat2 = p2.y();
     let lon2 = p2.x();
@@ -16,26 +16,6 @@ pub fn great_circle_distance<C: AsCoord>(p1: &C, p2: &C) -> f64 {
         + (RAD * lat1).cos() * (RAD * lat2).cos() * (dlon / 2.0).sin().powi(2);
     let c = 2.0 * a.sqrt().atan2((1.0 - a).sqrt());
     R * c
-}
-
-/// Compute pairwise great circle distances between two trajectories
-pub fn great_circle_distance_traj<T: CoordSequence>(t1: &T, t2: &T) -> Vec<f64>
-where
-    T::Coord: AsCoord,
-{
-    let l_t1 = t1.len();
-    let l_t2 = t2.len();
-    let mut mdist = vec![0.0; l_t1 * l_t2];
-
-    for i in 0..l_t1 {
-        let coord1 = t1.get(i);
-        for j in 0..l_t2 {
-            let coord2 = t2.get(j);
-            mdist[i * l_t2 + j] = great_circle_distance(&coord1, &coord2);
-        }
-    }
-
-    mdist
 }
 
 /// Compute the initial bearing from point 1 to point 2

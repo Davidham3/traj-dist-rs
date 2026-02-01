@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DistanceType(str, Enum):
@@ -18,7 +18,7 @@ class ImplementationType(str, Enum):
     PYTHON = "pydist"
 
 
-class TestCaseMeta(BaseModel):
+class Metainfo(BaseModel):
     """
     单个测试用例元数据的数据模型。
     对应 metainfo/*.jsonl 文件中的每一行。
@@ -39,7 +39,6 @@ class TestCaseMeta(BaseModel):
     precision: Optional[int] = Field(None, description="SOWD 的 precision 参数")
     converted: Optional[bool] = Field(None, description="SOWD 的 converted 参数")
 
-    class Config:
-        """Pydantic 模型配置"""
-
-        use_enum_values = True  # 在序列化时使用枚举的值 (例如 "euclidean" 而不是 DistanceType.EUCLIDEAN)
+    model_config = ConfigDict(
+        use_enum_values=True  # 在序列化时使用枚举的值 (例如 "euclidean" 而不是 DistanceType.EUCLIDEAN)
+    )
