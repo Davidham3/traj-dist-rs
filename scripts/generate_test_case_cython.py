@@ -248,7 +248,7 @@ def main():
     # 使用模型的 .json() 方法序列化并追加到元数据文件
     with open(metainfo_path, "a") as f:
         # metainfo.json() 会生成一个紧凑的 JSON 字符串
-        f.write(metainfo.json() + "\n")
+        f.write(metainfo.model_dump_json() + "\n")
 
     print(f"Metadata appended to: {metainfo_path}")
 
