@@ -5,7 +5,7 @@
 比较 Rust、Python 和 Cython 实现的性能
 """
 
-import timeit
+import time
 from tqdm import trange
 import traceback
 import numpy as np
@@ -102,6 +102,7 @@ def benchmark_implementation(
     algorithm_name = metainfo.algorithm
     distance_type = metainfo.type_d  # 由于 use_enum_values=True，这已经是字符串
     hyperparameter_value = get_hyperparameter_value_from_metainfo(metainfo)
+    implemented_by = metainfo.implemented_by
 
     # 加载测试数据
     sample_path = get_sample_path(metainfo, DATA_DIR)
@@ -110,12 +111,13 @@ def benchmark_implementation(
     rust_func = get_rust_function(algorithm_name, distance_type, hyperparameter_value)
 
     # 初始化统计变量
-    cython_times = []
-    rust_times = []
+    baseline_stats_list = []  # Python 或 Cython 的统计信息
+    rust_times_list = []  # Rust 所有测试用例的所有测量时间
+    rust_stats_list = []  # Rust 所有测试用例的统计信息
     num_test_cases = len(df)
 
     print(f"\n{'='*80}")
-    print(f"算法: {algorithm_name.upper()} ({distance_type})")
+    print(f"算法: {algorithm_name.upper()} ({distance_type}) - {implemented_by}")
     if hyperparameter_value is not None:
         print(f"超参数: {hyperparameter_value}")
     print(f"测试用例数: {num_test_cases}")
@@ -126,47 +128,82 @@ def benchmark_implementation(
         row = df[idx]
         traj1 = row["traj1"].item().to_numpy()
         traj2 = row["traj2"].item().to_numpy()
-        cython_time = row["time"].item()
-        cython_times.append(cython_time)
 
-        def tmp_test():
-            return rust_func(traj1, traj2)
+        # 从样本文件中读取基线实现（Python 或 Cython）的统计信息
+        baseline_stats = row["time_stats"].item()
+        baseline_stats_list.append(baseline_stats)
 
-        rust_time = timeit.timeit(tmp_test, number=num_runs)
-        rust_times.append(rust_time)
+        # Warmup - 运行几次以预热缓存
+        for _ in range(5):
+            rust_func(traj1, traj2)
 
-    # 计算统计结果
-    avg_cython_time = np.mean(cython_times)
-    max_cython_time = np.max(cython_times)
-    avg_rust_time = np.mean(rust_times)
-    max_rust_time = np.max(rust_times)
+        # 测量 Rust 实现 - 多次测量以获得统计信息
+        rust_times = []
+        for _ in range(num_runs):
+            start = time.perf_counter()
+            result = rust_func(traj1, traj2)
+            end = time.perf_counter()
+            rust_times.append(end - start)
+
+        rust_times_array = np.array(rust_times)
+        rust_stats = {
+            "mean": float(np.mean(rust_times_array)),
+            "std": float(np.std(rust_times_array)),
+            "median": float(np.median(rust_times_array)),
+            "min": float(np.min(rust_times_array)),
+            "max": float(np.max(rust_times_array)),
+        }
+
+        rust_times_list.append(rust_times)
+        rust_stats_list.append(rust_stats)
+
+    # 计算基线统计结果的平均值
+    baseline_mean_times = [stats["mean"] for stats in baseline_stats_list]
+    baseline_std_times = [stats["std"] for stats in baseline_stats_list]
+    avg_baseline_mean = np.mean(baseline_mean_times)
+    avg_baseline_std = np.mean(baseline_std_times)
+    avg_baseline_cv = avg_baseline_std / avg_baseline_mean if avg_baseline_mean > 0 else 0
+
+    # 计算 Rust 统计结果的平均值
+    rust_mean_times = [stats["mean"] for stats in rust_stats_list]
+    rust_std_times = [stats["std"] for stats in rust_stats_list]
+    avg_rust_mean = np.mean(rust_mean_times)
+    avg_rust_std = np.mean(rust_std_times)
+    avg_rust_cv = avg_rust_std / avg_rust_mean if avg_rust_mean > 0 else 0
 
     # 计算性能提升倍数
-    cython_vs_rust = avg_cython_time / avg_rust_time if avg_rust_time > 0 else 0
+    baseline_vs_rust = avg_baseline_mean / avg_rust_mean if avg_rust_mean > 0 else 0
 
     result = {
         "algorithm": algorithm_name,
         "distance_type": distance_type,
         "hyperparameter": hyperparameter_value,
         "num_test_cases": num_test_cases,
-        "cython_time": {
-            "avg": avg_cython_time,
-            "max": max_cython_time,
-            "all": cython_times,
+        "baseline_time": {
+            "mean": avg_baseline_mean,
+            "std": avg_baseline_std,
+            "cv": avg_baseline_cv,
+            "all_stats": baseline_stats_list,
         },
-        "rust_time": {"avg": avg_rust_time, "max": max_rust_time, "all": rust_times},
+        "rust_time": {
+            "mean": avg_rust_mean,
+            "std": avg_rust_std,
+            "cv": avg_rust_cv,
+            "all_stats": rust_stats_list,
+        },
         "speedup": {
-            "cython_vs_rust": cython_vs_rust,
+            "baseline_vs_rust": baseline_vs_rust,
         },
+        "implemented_by": implemented_by,
     }
 
     # 打印结果
     print("\n耗时统计 (ms):")
-    print(f"  Cython 平均耗时: {avg_cython_time * 1000:.6f} ms")
-    print(f"  Rust 平均耗时: {avg_rust_time * 1000:.6f} ms")
+    print(f"  {implemented_by} 平均耗时: {avg_baseline_mean * 1000:.6f} ± {avg_baseline_std * 1000:.6f} ms (CV: {avg_baseline_cv*100:.2f}%)")
+    print(f"  Rust 平均耗时: {avg_rust_mean * 1000:.6f} ± {avg_rust_std * 1000:.6f} ms (CV: {avg_rust_cv*100:.2f}%)")
 
     print("\n性能提升:")
-    print(f"  Rust vs Cython: {cython_vs_rust:.2f}x")
+    print(f"  Rust vs {implemented_by}: {baseline_vs_rust:.2f}x")
 
     return result
 
@@ -188,15 +225,21 @@ def run_performance_comparison(num_runs: int = 10):
         "erp",
     ]
 
-    # 运行 benchmark
-    results = []
+    # 运行 benchmark 并按 (algorithm, distance_type, hyperparameter) 分组
+    results_dict = {}
     for algorithm_name, metainfo_list in ALL_METAINFO.items():
         if algorithm_name not in implemented_algorithms:
             continue
 
         for metainfo in metainfo_list:
             try:
-                results.append(benchmark_implementation(metainfo, num_runs))
+                result = benchmark_implementation(metainfo, num_runs)
+                key = (algorithm_name, result["distance_type"], str(result["hyperparameter"]))
+                if key not in results_dict:
+                    results_dict[key] = {"cydist": None, "pydist": None, "rust": None}
+                results_dict[key][metainfo.implemented_by] = result
+                # Rust 的结果对所有实现都是一样的，保存一份即可
+                results_dict[key]["rust"] = result
             except Exception as e:
                 print(f"\n错误: {algorithm_name} benchmark 失败: {e}")
                 traceback.print_exc()
@@ -207,16 +250,40 @@ def run_performance_comparison(num_runs: int = 10):
     print("=" * 80)
 
     print(
-        f"\n{'函数名':<20} {'距离类型':<12} {'超参数':<20} {'Cython平均':<12} {'Rust平均':<12} {'Rust/C':<10}"
+        f"\n{'函数名':<20} {'距离类型':<12} {'超参数':<20} {'Python平均(ms)':<20} {'Cython平均(ms)':<20} {'Rust平均(ms)':<20} {'Rust/C':<10} {'Rust/P':<10}"
     )
-    print("-" * 100)
+    print("-" * 150)
 
-    for result in results:
-        algorithm = result["algorithm"]
-        distance_type = result["distance_type"]
-        avg_cython_time = result["cython_time"]["avg"]
-        avg_rust_time = result["rust_time"]["avg"]
-        c_vs_r = result["speedup"]["cython_vs_rust"]
+    # 按算法名称、距离类型和超参数排序
+    sorted_keys = sorted(results_dict.keys())
+
+    # 用于存储表格数据，用于生成 markdown
+    table_rows = []
+
+    for key in sorted_keys:
+        algorithm, distance_type, hyperparameter_str = key
+        data = results_dict[key]
+
+        # 获取各实现的平均时间
+        python_result = data.get("pydist")
+        cython_result = data.get("cydist")
+        rust_result = data.get("rust")
+
+        # 使用 baseline_time 作为 Python 或 Cython 的时间
+        avg_python_time = python_result["baseline_time"]["mean"] if python_result else 0
+        avg_python_std = python_result["baseline_time"]["std"] if python_result else 0
+        avg_python_cv = python_result["baseline_time"]["cv"] if python_result else 0
+        avg_cython_time = cython_result["baseline_time"]["mean"] if cython_result else 0
+        avg_cython_std = cython_result["baseline_time"]["std"] if cython_result else 0
+        avg_cython_cv = cython_result["baseline_time"]["cv"] if cython_result else 0
+        # Rust 时间从 rust_result 中获取
+        avg_rust_time = rust_result["rust_time"]["mean"] if rust_result else 0
+        avg_rust_std = rust_result["rust_time"]["std"] if rust_result else 0
+        avg_rust_cv = rust_result["rust_time"]["cv"] if rust_result else 0
+
+        # 计算性能提升
+        c_vs_r = avg_cython_time / avg_rust_time if avg_rust_time > 0 and avg_cython_time > 0 else 0
+        p_vs_r = avg_python_time / avg_rust_time if avg_rust_time > 0 and avg_python_time > 0 else 0
 
         config = get_algorithm_config_from_metainfo(algorithm)
         function_name = config["function_name"]
@@ -225,10 +292,8 @@ def run_performance_comparison(num_runs: int = 10):
         if algorithm == "erp":
             function_name = "erp_compat_traj_dist"
 
-        # 从 result 中获取超参数值
-        hyperparameter_value = result["hyperparameter"]
-
         # 格式化超参数
+        hyperparameter_value = rust_result["hyperparameter"] if rust_result else None
         if hyperparameter_value is not None:
             if isinstance(hyperparameter_value, list):
                 hyperparam_str = (
@@ -239,22 +304,114 @@ def run_performance_comparison(num_runs: int = 10):
         else:
             hyperparam_str = "N/A"
 
+        # 格式化时间字符串，包含标准差和变异系数
+        if avg_python_time > 0:
+            python_time_str = f"{avg_python_time*1000:>10.4f}±{avg_python_std*1000:>7.4f} (CV:{avg_python_cv*100:>5.2f}%)"
+            python_time_md = f"{avg_python_time*1000:.4f}±{avg_python_std*1000:.4f} (CV:{avg_python_cv*100:.2f}%)"
+        else:
+            python_time_str = "N/A                    "
+            python_time_md = "N/A"
+
+        if avg_cython_time > 0:
+            cython_time_str = f"{avg_cython_time*1000:>10.4f}±{avg_cython_std*1000:>7.4f} (CV:{avg_cython_cv*100:>5.2f}%)"
+            cython_time_md = f"{avg_cython_time*1000:.4f}±{avg_cython_std*1000:.4f} (CV:{avg_cython_cv*100:.2f}%)"
+        else:
+            cython_time_str = "N/A                    "
+            cython_time_md = "N/A"
+
+        rust_time_str = f"{avg_rust_time*1000:>10.4f}±{avg_rust_std*1000:>7.4f} (CV:{avg_rust_cv*100:>5.2f}%)"
+        rust_time_md = f"{avg_rust_time*1000:.4f}±{avg_rust_std*1000:.4f} (CV:{avg_rust_cv*100:.2f}%)"
+
+        c_vs_r_str = f"{c_vs_r:>8.2f}x" if c_vs_r > 0 else "N/A     "
+        c_vs_r_md = f"{c_vs_r:.2f}x" if c_vs_r > 0 else "N/A"
+        p_vs_r_str = f"{p_vs_r:>8.2f}x" if p_vs_r > 0 else "N/A     "
+        p_vs_r_md = f"{p_vs_r:.2f}x" if p_vs_r > 0 else "N/A"
+
         print(
-            f"{function_name:<20} {distance_type:<12} {hyperparam_str:<20} {avg_cython_time*1000:>10.4f}ms {avg_rust_time*1000:>10.4f}ms {c_vs_r:>8.2f}x"
+            f"{function_name:<20} {distance_type:<12} {hyperparam_str:<20} {python_time_str:<20} {cython_time_str:<20} {rust_time_str:<20} {c_vs_r_str:<10} {p_vs_r_str:<10}"
         )
 
-    # 计算总体统计
-    all_cython_times = [r["cython_time"]["avg"] for r in results]
-    all_rust_times = [r["rust_time"]["avg"] for r in results]
-    all_c_vs_r = [r["speedup"]["cython_vs_rust"] for r in results]
+        # 保存到表格数据
+        table_rows.append({
+            "function_name": function_name,
+            "distance_type": distance_type,
+            "hyperparameter": hyperparam_str,
+            "python_time": python_time_md,
+            "cython_time": cython_time_md,
+            "rust_time": rust_time_md,
+            "rust_c": c_vs_r_md,
+            "rust_p": p_vs_r_md,
+        })
 
-    print("\n" + "-" * 100)
-    print(f"{'总体平均 Cython 时间:':<30} {np.mean(all_cython_times)*1000:.4f} ms")
+    # 计算总体统计
+    all_python_times = []
+    all_cython_times = []
+    all_rust_times = []
+    all_c_vs_r = []
+    all_p_vs_r = []
+
+    for data in results_dict.values():
+        python_result = data.get("pydist")
+        cython_result = data.get("cydist")
+        rust_result = data.get("rust")
+
+        if python_result:
+            all_python_times.append(python_result["baseline_time"]["mean"])
+            if rust_result:
+                p_vs_r = python_result["baseline_time"]["mean"] / rust_result["rust_time"]["mean"]
+                all_p_vs_r.append(p_vs_r)
+
+        if cython_result:
+            all_cython_times.append(cython_result["baseline_time"]["mean"])
+            if rust_result:
+                c_vs_r = cython_result["baseline_time"]["mean"] / rust_result["rust_time"]["mean"]
+                all_c_vs_r.append(c_vs_r)
+
+        if rust_result:
+            all_rust_times.append(rust_result["rust_time"]["mean"])
+
+    print("\n" + "-" * 150)
+    if all_python_times:
+        print(f"{'总体平均 Python 时间:':<30} {np.mean(all_python_times)*1000:.4f} ms")
+    if all_cython_times:
+        print(f"{'总体平均 Cython 时间:':<30} {np.mean(all_cython_times)*1000:.4f} ms")
     print(f"{'总体平均 Rust 时间:':<30} {np.mean(all_rust_times)*1000:.4f} ms")
-    print(f"{'Rust vs Cython 平均提升:':<30} {np.mean(all_c_vs_r):.2f}x")
+    if all_c_vs_r:
+        print(f"{'Rust vs Cython 平均提升:':<30} {np.mean(all_c_vs_r):.2f}x")
+    if all_p_vs_r:
+        print(f"{'Rust vs Python 平均提升:':<30} {np.mean(all_p_vs_r):.2f}x")
     print("=" * 80)
 
-    return results
+    # 生成 markdown 表格并保存到文件
+    markdown_lines = []
+    markdown_lines.append("# 性能对比汇总报告\n")
+    markdown_lines.append("| 函数名 | 距离类型 | 超参数 | Python平均(ms) | Cython平均(ms) | Rust平均(ms) | Rust/C | Rust/P |")
+    markdown_lines.append("|--------|----------|--------|----------------|----------------|--------------|--------|--------|")
+
+    for row in table_rows:
+        markdown_lines.append(
+            f"| {row['function_name']} | {row['distance_type']} | {row['hyperparameter']} | {row['python_time']} | {row['cython_time']} | {row['rust_time']} | {row['rust_c']} | {row['rust_p']} |"
+        )
+
+    markdown_lines.append("\n## 总体统计\n")
+    if all_python_times:
+        markdown_lines.append(f"- **总体平均 Python 时间**: {np.mean(all_python_times)*1000:.4f} ms")
+    if all_cython_times:
+        markdown_lines.append(f"- **总体平均 Cython 时间**: {np.mean(all_cython_times)*1000:.4f} ms")
+    markdown_lines.append(f"- **总体平均 Rust 时间**: {np.mean(all_rust_times)*1000:.4f} ms")
+    if all_c_vs_r:
+        markdown_lines.append(f"- **Rust vs Cython 平均提升**: {np.mean(all_c_vs_r):.2f}x")
+    if all_p_vs_r:
+        markdown_lines.append(f"- **Rust vs Python 平均提升**: {np.mean(all_p_vs_r):.2f}x")
+
+    # 保存到文件
+    output_path = Path(__file__).parent.parent / "benchmark_results.md"
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(markdown_lines))
+
+    print(f"\n性能对比报告已保存到: {output_path}")
+
+    return results_dict
 
 
 if __name__ == "__main__":
@@ -267,7 +424,7 @@ if __name__ == "__main__":
         "--num-runs",
         type=int,
         default=10,
-        help="每个测试用例运行次数（用于计算平均耗时）",
+        help="每个测试用例运行次数（用于计算平均耗时），默认 10 次",
     )
     parser.add_argument(
         "--algorithm",
