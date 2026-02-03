@@ -4,8 +4,8 @@
 
 cd "$(dirname "$0")/.."
 
-# 激活虚拟环境（在 ../traj_dist/.venv 中）
-source ../traj_dist/.venv/bin/activate
+# 激活虚拟环境（在 ../traj-dist/.venv 中）
+source ../traj-dist/.venv/bin/activate
 
 # 确保输出目录存在
 mkdir -p py_tests/data/cython_samples py_tests/data/python_samples py_tests/data/metainfo
