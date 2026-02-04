@@ -2301,29 +2301,6 @@ wheels = [
 ]
 
 [[package]]
-name = "scipy"
-version = "1.11.0"
-source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
-dependencies = [
-    { name = "numpy" },
-]
-sdist = { url = "https://mirrors.aliyun.com/pypi/packages/fa/d0/724c8204f87b6f807e3e67de32b8b4922d579154a448ce94e89129064bf1/scipy-1.11.0.tar.gz", hash = "sha256:f9b0248cb9d08eead44cde47cbf6339f1e9aa0dfde28f5fb27950743e317bd5d" }
-wheels = [
-    { url = "https://mirrors.aliyun.com/pypi/packages/d9/3a/215f6fe227de718f3fd3e4ad9a6644e67ec944850c14d794b5c3febe5a9b/scipy-1.11.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:2e4f14c11fbf825319dbd7f467639a241e7c956c34edb1e036ec7bb6271e4f7b" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/72/08/f9920eeedf4953a631d0087a6e80bb2e091cf51e6efb55ec638d838b4e92/scipy-1.11.0-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:b269ed44e2e2e43611f2ae95ba551fd98abbdc1a7ea8268f72f75876982368c4" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/fc/17/49b393887ab0d8df6ea1d5d0a55c13c87008510762b0f6d128cfd338416c/scipy-1.11.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2c29bae479b17d85208dfdfc67e50d5944ee23211f236728aadde9b0b7c1c33e" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/5a/55/ec296aa9399d00f5d6794b90d96b5cce5eeb46c62450173fedb2b3b7ef72/scipy-1.11.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a53f9cebcfda6158c241c35a559407a4ef6b8cb0863eb4144958fe0a0b7c3dae" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/09/76/2d056ac41718348690051a0793776e99f04d67f67a53741c0bd2987bb486/scipy-1.11.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:ebf4b2ea26d50312731ddba2406389c5ddcbff9d777cf3277ea11decc81e5dfb" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/74/a3/eb008e104a30a5e743bf6d68df1497e2d4a8b98103731f9948bf8ca18e3a/scipy-1.11.0-cp310-cp310-win_amd64.whl", hash = "sha256:894ced9a2cdb050ff5e392f274617af46dca896d5c9112fa4a2019929554d321" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/2f/b5/b5387cdafc66805907424c3a95f773b84a5d452a0925801c6218727a766e/scipy-1.11.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:7a92bd3cd4acad2e0e0b360176d5ec68b100983c8145add8a8233acddf4e5fcc" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/3e/c1/e3072fa102974a0a89e34da19b863c97affa8a13ac00a1577771553c3d6b/scipy-1.11.0-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:586608ea35206257d4e0ce6f154a6cfef71723b2c1f6d40de5e0b0e8a81cd2ff" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/dc/4b/5e10e8b69cce946c29c2795188cd366571ca83987cbf652d795995d0a9a4/scipy-1.11.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d8e631c3c49c24f30828580b8126fe3be5cca5409dad5b797418a5b8965eeafa" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/27/10/985c0902929a424c8e0483f16ee54f92fc5e4fa07fbd83a36f3aa469b3fe/scipy-1.11.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ccc70892ea674f93183c5c4139557b611e42f644dd755da4b19ca974ab770672" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/e0/30/209e1065405819ec3c4da1d2c0b0ac7b1b17c86888604b8971249afc89d1/scipy-1.11.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:80015b8928f91bd40377b2b1010ba2e09b03680cbfc291208740494aeb8debf2" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/cc/e3/0b0dbdba0dc487161214fed41170f80c1e152c3bb6fd8e7fba014840fe5e/scipy-1.11.0-cp311-cp311-win_amd64.whl", hash = "sha256:6302c7cba5bf99c901653ff158746625526cc438f058bce41514d7469b79b2c3" },
-]
-
-[[package]]
 name = "send2trash"
 version = "2.1.0"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
@@ -2717,7 +2694,7 @@ wheels = [
 
 [[package]]
 name = "traj-dist-rs"
-version = "0.1.0"
+version = "0.1.0a1"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
@@ -2727,6 +2704,8 @@ dependencies = [
 dev = [
     { name = "autoflake" },
     { name = "black" },
+    { name = "ipython", version = "8.38.0", source = { registry = "https://mirrors.aliyun.com/pypi/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "ipython", version = "9.9.0", source = { registry = "https://mirrors.aliyun.com/pypi/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "isort" },
     { name = "jupyter" },
     { name = "linkify-it-py" },
@@ -2739,7 +2718,6 @@ dev = [
     { name = "pydantic" },
     { name = "pytest" },
     { name = "ruff" },
-    { name = "scipy" },
     { name = "setuptools" },
     { name = "sphinx", version = "8.1.3", source = { registry = "https://mirrors.aliyun.com/pypi/simple" }, marker = "python_full_version < '3.11'" },
     { name = "sphinx", version = "9.0.4", source = { registry = "https://mirrors.aliyun.com/pypi/simple" }, marker = "python_full_version == '3.11.*'" },
@@ -2754,6 +2732,7 @@ requires-dist = [{ name = "numpy", specifier = ">=1.21.6" }]
 dev = [
     { name = "autoflake", specifier = ">=2.3.1" },
     { name = "black", specifier = ">=24.8.0" },
+    { name = "ipython", specifier = ">=8.38.0" },
     { name = "isort", specifier = ">=5.13.2" },
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "linkify-it-py", specifier = ">=2.0.3" },
@@ -2766,7 +2745,6 @@ dev = [
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "ruff", specifier = ">=0.14.14" },
-    { name = "scipy", specifier = "==1.11" },
     { name = "setuptools", specifier = ">=75.3.3" },
     { name = "sphinx", specifier = ">=8.1.3" },
     { name = "tqdm", specifier = ">=4.67.1" },
