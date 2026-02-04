@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-生成单个算法的测试用例脚本（支持 Cython 和 Python 实现）
+生成单个算法的测试用例脚本（仅生成 Cython 实现）
 
-通过 argparse 指定算法名、超参数值、实现类型，生成 Parquet 文件和元数据 JSONL 文件。
+通过 argparse 指定算法名、超参数值，生成 Parquet 文件和元数据 JSONL 文件。
 Parquet 文件名包含算法名、距离类型、超参数值。
 文件包含 5 列：2 列轨迹数据、1 列距离值、1 列测量时间列表、1 列统计信息。
+
+注意：效果测试只使用 Cython 实现作为"正确答案"，Python 实现的性能测试由 benchmark 脚本处理。
 """
 
 import sys
@@ -20,22 +22,13 @@ import pyarrow.parquet as pq
 # 导入 Cython 实现
 import traj_dist.distance as tdist
 
-# 导入 Python 实现
-import traj_dist.pydist.sspd as py_sspd
-import traj_dist.pydist.dtw as py_dtw
-import traj_dist.pydist.hausdorff as py_hausdorff
-import traj_dist.pydist.lcss as py_lcss
-import traj_dist.pydist.edr as py_edr
-import traj_dist.pydist.erp as py_erp
-import traj_dist.pydist.discret_frechet as py_discret_frechet
-
 sys.path.append(str(Path(__file__).parent.parent))
 from py_tests.schemas import Metainfo, ImplementationType
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="生成单个算法的测试用例（支持 Cython 和 Python 实现）"
+        description="生成单个算法的测试用例（仅 Cython 实现）"
     )
     parser.add_argument("--algorithm", type=str, required=True, help="算法名称")
     parser.add_argument(
@@ -56,13 +49,6 @@ def parse_args():
     )
     parser.add_argument(
         "--converted", type=bool, default=None, help="SOWD 算法的 converted 参数"
-    )
-    parser.add_argument(
-        "--implementation",
-        type=str,
-        default="cython",
-        choices=["cython", "python", "both"],
-        help="实现类型：cython, python, 或 both",
     )
     parser.add_argument(
         "--output-dir", type=str, default="py_tests/data", help="输出目录"
@@ -107,60 +93,34 @@ def build_metainfo_filename(algorithm):
 
 def get_distance_function(args):
     """
-    根据算法、距离类型和实现类型返回对应的距离函数
+    根据 Cython 实现的算法和距离类型返回对应的距离函数
     """
-    if args.implementation == "cython":
-        if args.algorithm == "sspd":
-            return tdist.c_e_sspd if args.type_d == "euclidean" else tdist.c_g_sspd
-        elif args.algorithm == "dtw":
-            return tdist.c_e_dtw if args.type_d == "euclidean" else tdist.c_g_dtw
-        elif args.algorithm == "hausdorff":
-            return (
-                tdist.c_e_hausdorff if args.type_d == "euclidean" else tdist.c_g_hausdorff
-            )
-        elif args.algorithm == "discret_frechet":
-            return tdist.c_discret_frechet  # discret_frechet只支持欧几里得距离
-        elif args.algorithm == "lcss":
-            return tdist.c_e_lcss if args.type_d == "euclidean" else tdist.c_g_lcss
-        elif args.algorithm == "edr":
-            return tdist.c_e_edr if args.type_d == "euclidean" else tdist.c_g_edr
-        elif args.algorithm == "erp":
-            return tdist.c_e_erp if args.type_d == "euclidean" else tdist.c_g_erp
-        elif args.algorithm == "sowd_grid":
-            return tdist.c_sowd_grid  # SOWD only supports spherical/geographical
-        else:
-            raise ValueError(f"Unknown algorithm: {args.algorithm}")
-
-    elif args.implementation == "python":
-        if args.algorithm == "sspd":
-            return py_sspd.e_sspd if args.type_d == "euclidean" else py_sspd.s_sspd
-        elif args.algorithm == "dtw":
-            return py_dtw.e_dtw if args.type_d == "euclidean" else py_dtw.s_dtw
-        elif args.algorithm == "hausdorff":
-            return (
-                py_hausdorff.e_hausdorff if args.type_d == "euclidean" else py_hausdorff.s_hausdorff
-            )
-        elif args.algorithm == "discret_frechet":
-            return py_discret_frechet.discret_frechet  # discret_frechet只支持欧几里得距离
-        elif args.algorithm == "lcss":
-            return py_lcss.e_lcss if args.type_d == "euclidean" else py_lcss.s_lcss
-        elif args.algorithm == "edr":
-            return py_edr.e_edr if args.type_d == "euclidean" else py_edr.s_edr
-        elif args.algorithm == "erp":
-            return py_erp.e_erp if args.type_d == "euclidean" else py_erp.s_erp
-        else:
-            raise ValueError(f"Unknown algorithm: {args.algorithm}")
+    if args.algorithm == "sspd":
+        return tdist.c_e_sspd if args.type_d == "euclidean" else tdist.c_g_sspd
+    elif args.algorithm == "dtw":
+        return tdist.c_e_dtw if args.type_d == "euclidean" else tdist.c_g_dtw
+    elif args.algorithm == "hausdorff":
+        return (
+            tdist.c_e_hausdorff if args.type_d == "euclidean" else tdist.c_g_hausdorff
+        )
+    elif args.algorithm == "discret_frechet":
+        return tdist.c_discret_frechet  # discret_frechet只支持欧几里得距离
+    elif args.algorithm == "lcss":
+        return tdist.c_e_lcss if args.type_d == "euclidean" else tdist.c_g_lcss
+    elif args.algorithm == "edr":
+        return tdist.c_e_edr if args.type_d == "euclidean" else tdist.c_g_edr
+    elif args.algorithm == "erp":
+        return tdist.c_e_erp if args.type_d == "euclidean" else tdist.c_g_erp
+    elif args.algorithm == "sowd_grid":
+        return tdist.c_sowd_grid  # SOWD only supports spherical/geographical
     else:
-        raise ValueError(f"Unknown implementation type: {args.implementation}")
+        raise ValueError(f"Unknown algorithm: {args.algorithm}")
 
 
-def generate_test_cases_for_implementation(args, implementation_type):
+def generate_test_cases(args):
     """
-    为指定的实现类型生成测试用例
+    生成 Cython 实现的测试用例
     """
-    # 更新 args 中的实现类型
-    args.implementation = implementation_type
-
     # 加载轨迹数据
     traj_data_path = Path(args.traj_data)
     if not traj_data_path.exists():
@@ -193,8 +153,7 @@ def generate_test_cases_for_implementation(args, implementation_type):
 
     # 构建输出目录
     output_dir = Path(args.output_dir)
-    samples_subdir = "cython_samples" if implementation_type == "cython" else "python_samples"
-    samples_dir = output_dir / samples_subdir
+    samples_dir = output_dir / "cython_samples"
     metainfo_dir = output_dir / "metainfo"
     samples_dir.mkdir(parents=True, exist_ok=True)
     metainfo_dir.mkdir(parents=True, exist_ok=True)
@@ -205,7 +164,7 @@ def generate_test_cases_for_implementation(args, implementation_type):
     )
     sample_path = samples_dir / sample_filename
 
-    print(f"Generating test cases for: {args.algorithm} (using {implementation_type} implementation)")
+    print(f"Generating test cases for: {args.algorithm} (using Cython implementation)")
     print(f"Parameters: {params}")
     print(f"Sample file: {sample_path}")
 
@@ -226,7 +185,7 @@ def generate_test_cases_for_implementation(args, implementation_type):
 
             # SOWD 算法需要特殊处理：转换为 cell 格式
             call_params = {}
-            if args.algorithm == "sowd_grid" and implementation_type == "cython":
+            if args.algorithm == "sowd_grid":
                 from traj_dist.pydist.linecell import trajectory_set_grid
 
                 precision = params.get("precision", 7)
@@ -312,7 +271,7 @@ def generate_test_cases_for_implementation(args, implementation_type):
     print(f"Saved to: {sample_path}")
 
     # 构建元数据
-    impl_type = ImplementationType.CYTHON if implementation_type == "cython" else ImplementationType.PYTHON
+    impl_type = ImplementationType.CYTHON
     try:
         metainfo = Metainfo(
             algorithm=args.algorithm,
@@ -323,7 +282,7 @@ def generate_test_cases_for_implementation(args, implementation_type):
             precision=args.precision,
             converted=args.converted,
             # 路径相对于 metainfo_dir 的父目录
-            sample_file=f"{samples_subdir}/{sample_filename}",
+            sample_file=f"cython_samples/{sample_filename}",
         )
     except Exception as e:
         print(f"Error creating Pydantic model: {e}")
@@ -344,16 +303,11 @@ def generate_test_cases_for_implementation(args, implementation_type):
 def main():
     args = parse_args()
 
-    # 根据实现类型生成测试用例
-    if args.implementation == "both":
-        print("==========================================")
-        print("Generating test cases for both Cython and Python implementations")
-        print("==========================================")
-        generate_test_cases_for_implementation(args, "cython")
-        print()
-        generate_test_cases_for_implementation(args, "python")
-    else:
-        generate_test_cases_for_implementation(args, args.implementation)
+    # 生成 Cython 实现的测试用例
+    print("==========================================")
+    print("Generating test cases for Cython implementation (correctness validation)")
+    print("==========================================")
+    generate_test_cases(args)
 
 
 if __name__ == "__main__":
