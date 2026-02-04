@@ -67,3 +67,6 @@ traj-dist/build/
 
 # Wheel packages built by cibuildwheel
 wheelhouse/
+
+# Benchmark output
+benchmark_output/
