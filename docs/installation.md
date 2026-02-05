@@ -11,7 +11,7 @@ pip install traj-dist-rs
 ## From Source
 
 ```bash
-git clone https://github.com/your-repo/traj-dist-rs.git
+git clone https://github.com/Davidham3/traj-dist-rs.git
 cd traj-dist-rs
 pip install maturin
 maturin build --release
@@ -23,7 +23,7 @@ pip install dist/*.whl
 To set up a development environment:
 
 ```bash
-git clone https://github.com/your-repo/traj-dist-rs.git
+git clone https://github.com/Davidham3/traj-dist-rs.git
 cd traj-dist-rs
 pip install maturin
 maturin develop
