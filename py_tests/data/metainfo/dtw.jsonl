@@ -1,0 +1,2 @@
+{"algorithm":"dtw","type_d":"euclidean","implemented_by":"cydist","sample_file":"cython_samples/dtw_euclidean.parquet","eps":null,"g":null,"precision":null,"converted":null}
+{"algorithm":"dtw","type_d":"spherical","implemented_by":"cydist","sample_file":"cython_samples/dtw_spherical.parquet","eps":null,"g":null,"precision":null,"converted":null}

@@ -19,15 +19,18 @@ METAINFO_DIR = DATA_DIR / "metainfo"
 
 def pytest_configure(config):
     """pytest 配置钩子，在测试会话开始时执行"""
-    # 确保数据目录存在
+    # 确保数据目录存在，如果不存在则失败
     if not DATA_DIR.exists():
-        print(f"警告: 测试数据目录不存在: {DATA_DIR}")
+        raise RuntimeError(f"测试数据目录不存在: {DATA_DIR}\n"
+                          f"请确保已提交测试数据到 git 仓库。")
 
     if not SAMPLES_DIR.exists():
-        print(f"警告: 测试样本目录不存在: {SAMPLES_DIR}")
+        raise RuntimeError(f"测试样本目录不存在: {SAMPLES_DIR}\n"
+                          f"请运行 'bash scripts/generate_all_test_cases.sh' 生成测试数据。")
 
     if not METAINFO_DIR.exists():
-        print(f"警告: 测试元数据目录不存在: {METAINFO_DIR}")
+        raise RuntimeError(f"测试元数据目录不存在: {METAINFO_DIR}\n"
+                          f"请运行 'bash scripts/generate_all_test_cases.sh' 生成测试数据。")
 
 
 @pytest.fixture(scope="session")
@@ -74,10 +77,10 @@ def sspd_euclidean(all_metainfo, data_dir):
     """SSPD 欧几里得距离测试数据"""
 
     sspd_metainfo = all_metainfo.get("sspd", [])
-    euclidean_metainfo = [m for m in sspd_metainfo if m.type_d == "spherical"]
+    euclidean_metainfo = [m for m in sspd_metainfo if m.type_d == "euclidean"]
 
     if not euclidean_metainfo:
-        pytest.skip("SSPD 欧几里得距离测试数据不存在")
+        raise RuntimeError("SSPD 欧几里得距离测试数据不存在")
 
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
@@ -86,7 +89,7 @@ def sspd_euclidean(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 SSPD 欧几里得距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 SSPD 欧几里得距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -97,7 +100,7 @@ def sspd_spherical(all_metainfo, data_dir):
     spherical_metainfo = [m for m in sspd_metainfo if m["type_d"] == "spherical"]
 
     if not spherical_metainfo:
-        pytest.skip("SSPD 球面距离测试数据不存在")
+        raise RuntimeError("SSPD 球面距离测试数据不存在")
 
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
 
@@ -106,7 +109,7 @@ def sspd_spherical(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 SSPD 球面距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 SSPD 球面距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -117,7 +120,7 @@ def dtw_euclidean(all_metainfo, data_dir):
     euclidean_metainfo = [m for m in dtw_metainfo if m["type_d"] == "euclidean"]
 
     if not euclidean_metainfo:
-        pytest.skip("DTW 欧几里得距离测试数据不存在")
+        raise RuntimeError("DTW 欧几里得距离测试数据不存在")
 
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
@@ -126,7 +129,7 @@ def dtw_euclidean(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 DTW 欧几里得距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 DTW 欧几里得距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -137,7 +140,7 @@ def dtw_spherical(all_metainfo, data_dir):
     spherical_metainfo = [m for m in dtw_metainfo if m["type_d"] == "spherical"]
 
     if not spherical_metainfo:
-        pytest.skip("DTW 球面距离测试数据不存在")
+        raise RuntimeError("DTW 球面距离测试数据不存在")
 
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
 
@@ -146,7 +149,7 @@ def dtw_spherical(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 DTW 球面距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 DTW 球面距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -157,7 +160,7 @@ def hausdorff_euclidean(all_metainfo, data_dir):
     euclidean_metainfo = [m for m in hausdorff_metainfo if m["type_d"] == "euclidean"]
 
     if not euclidean_metainfo:
-        pytest.skip("Hausdorff 欧几里得距离测试数据不存在")
+        raise RuntimeError("Hausdorff 欧几里得距离测试数据不存在")
 
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
@@ -166,7 +169,7 @@ def hausdorff_euclidean(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 Hausdorff 欧几里得距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 Hausdorff 欧几里得距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -177,7 +180,7 @@ def hausdorff_spherical(all_metainfo, data_dir):
     spherical_metainfo = [m for m in hausdorff_metainfo if m["type_d"] == "spherical"]
 
     if not spherical_metainfo:
-        pytest.skip("Hausdorff 球面距离测试数据不存在")
+        raise RuntimeError("Hausdorff 球面距离测试数据不存在")
 
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
 
@@ -186,7 +189,7 @@ def hausdorff_spherical(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 Hausdorff 球面距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 Hausdorff 球面距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -197,7 +200,7 @@ def frechet_euclidean(all_metainfo, data_dir):
     euclidean_metainfo = [m for m in frechet_metainfo if m["type_d"] == "euclidean"]
 
     if not euclidean_metainfo:
-        pytest.skip("Frechet 欧几里得距离测试数据不存在")
+        raise RuntimeError("Frechet 欧几里得距离测试数据不存在")
 
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
@@ -206,7 +209,7 @@ def frechet_euclidean(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 Frechet 欧几里得距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 Frechet 欧几里得距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -219,7 +222,7 @@ def discret_frechet_euclidean(all_metainfo, data_dir):
     ]
 
     if not euclidean_metainfo:
-        pytest.skip("Discret Frechet 欧几里得距离测试数据不存在")
+        raise RuntimeError("Discret Frechet 欧几里得距离测试数据不存在")
 
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
@@ -228,7 +231,7 @@ def discret_frechet_euclidean(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 Discret Frechet 欧几里得距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 Discret Frechet 欧几里得距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -239,7 +242,7 @@ def lcss_euclidean(all_metainfo, data_dir):
     euclidean_metainfo = [m for m in lcss_metainfo if m["type_d"] == "euclidean"]
 
     if not euclidean_metainfo:
-        pytest.skip("LCSS 欧几里得距离测试数据不存在")
+        raise RuntimeError("LCSS 欧几里得距离测试数据不存在")
 
     # 使用第一个 eps 值
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
@@ -249,7 +252,7 @@ def lcss_euclidean(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 LCSS 欧几里得距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 LCSS 欧几里得距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -260,7 +263,7 @@ def lcss_spherical(all_metainfo, data_dir):
     spherical_metainfo = [m for m in lcss_metainfo if m["type_d"] == "spherical"]
 
     if not spherical_metainfo:
-        pytest.skip("LCSS 球面距离测试数据不存在")
+        raise RuntimeError("LCSS 球面距离测试数据不存在")
 
     # 使用第一个 eps 值
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
@@ -270,7 +273,7 @@ def lcss_spherical(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 LCSS 球面距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 LCSS 球面距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -281,7 +284,7 @@ def edr_euclidean(all_metainfo, data_dir):
     euclidean_metainfo = [m for m in edr_metainfo if m["type_d"] == "euclidean"]
 
     if not euclidean_metainfo:
-        pytest.skip("EDR 欧几里得距离测试数据不存在")
+        raise RuntimeError("EDR 欧几里得距离测试数据不存在")
 
     # 使用第一个 eps 值
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
@@ -291,7 +294,7 @@ def edr_euclidean(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 EDR 欧几里得距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 EDR 欧几里得距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -302,7 +305,7 @@ def edr_spherical(all_metainfo, data_dir):
     spherical_metainfo = [m for m in edr_metainfo if m["type_d"] == "spherical"]
 
     if not spherical_metainfo:
-        pytest.skip("EDR 球面距离测试数据不存在")
+        raise RuntimeError("EDR 球面距离测试数据不存在")
 
     # 使用第一个 eps 值
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
@@ -312,7 +315,7 @@ def edr_spherical(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 EDR 球面距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 EDR 球面距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -323,7 +326,7 @@ def erp_euclidean(all_metainfo, data_dir):
     euclidean_metainfo = [m for m in erp_metainfo if m["type_d"] == "euclidean"]
 
     if not euclidean_metainfo:
-        pytest.skip("ERP 欧几里得距离测试数据不存在")
+        raise RuntimeError("ERP 欧几里得距离测试数据不存在")
 
     # 使用第一个 g 值
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
@@ -333,7 +336,7 @@ def erp_euclidean(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 ERP 欧几里得距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 ERP 欧几里得距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -344,7 +347,7 @@ def erp_spherical(all_metainfo, data_dir):
     spherical_metainfo = [m for m in erp_metainfo if m["type_d"] == "spherical"]
 
     if not spherical_metainfo:
-        pytest.skip("ERP 球面距离测试数据不存在")
+        raise RuntimeError("ERP 球面距离测试数据不存在")
 
     # 使用第一个 g 值
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
@@ -354,7 +357,7 @@ def erp_spherical(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 ERP 球面距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 ERP 球面距离测试数据: {e}")
 
 
 @pytest.fixture(scope="session")
@@ -365,7 +368,7 @@ def sowd_spherical(all_metainfo, data_dir):
     spherical_metainfo = [m for m in sowd_metainfo if m["type_d"] == "spherical"]
 
     if not spherical_metainfo:
-        pytest.skip("SOWD 球面距离测试数据不存在")
+        raise RuntimeError("SOWD 球面距离测试数据不存在")
 
     # 使用第一个 precision 值
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
@@ -375,7 +378,7 @@ def sowd_spherical(all_metainfo, data_dir):
         df = pl.from_arrow(table)
         return df
     except Exception as e:
-        pytest.skip(f"无法读取 SOWD 球面距离测试数据: {e}")
+        raise RuntimeError(f"无法读取 SOWD 球面距离测试数据: {e}")
 
 
 # 辅助函数：获取算法的所有测试数据
@@ -402,6 +405,6 @@ def get_algorithm_test_data(algorithm_name, all_metainfo, data_dir):
             df = pl.from_arrow(table)
             test_data[metainfo] = df
         except Exception as e:
-            print(f"Warning: Failed to read {sample_path}: {e}")
+            raise RuntimeError(f"无法读取 {sample_path}: {e}")
 
     return test_data

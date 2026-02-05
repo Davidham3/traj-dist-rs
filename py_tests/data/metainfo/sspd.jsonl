@@ -1,0 +1,2 @@
+{"algorithm":"sspd","type_d":"euclidean","implemented_by":"cydist","sample_file":"cython_samples/sspd_euclidean.parquet","eps":null,"g":null,"precision":null,"converted":null}
+{"algorithm":"sspd","type_d":"spherical","implemented_by":"cydist","sample_file":"cython_samples/sspd_spherical.parquet","eps":null,"g":null,"precision":null,"converted":null}

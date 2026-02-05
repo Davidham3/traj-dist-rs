@@ -1,0 +1,2 @@
+{"algorithm":"hausdorff","type_d":"euclidean","implemented_by":"cydist","sample_file":"cython_samples/hausdorff_euclidean.parquet","eps":null,"g":null,"precision":null,"converted":null}
+{"algorithm":"hausdorff","type_d":"spherical","implemented_by":"cydist","sample_file":"cython_samples/hausdorff_spherical.parquet","eps":null,"g":null,"precision":null,"converted":null}

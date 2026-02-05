@@ -1,0 +1,6 @@
+{"algorithm":"erp","type_d":"euclidean","implemented_by":"cydist","sample_file":"cython_samples/erp_euclidean_g_-122.41443_37.77646.parquet","eps":null,"g":[-122.41443,37.77646],"precision":null,"converted":null}
+{"algorithm":"erp","type_d":"euclidean","implemented_by":"cydist","sample_file":"cython_samples/erp_euclidean_g_-122.40382_37.78038.parquet","eps":null,"g":[-122.40382,37.78038],"precision":null,"converted":null}
+{"algorithm":"erp","type_d":"euclidean","implemented_by":"cydist","sample_file":"cython_samples/erp_euclidean_g_-122.39607_37.78732.parquet","eps":null,"g":[-122.39607,37.78732],"precision":null,"converted":null}
+{"algorithm":"erp","type_d":"spherical","implemented_by":"cydist","sample_file":"cython_samples/erp_spherical_g_-122.41443_37.77646.parquet","eps":null,"g":[-122.41443,37.77646],"precision":null,"converted":null}
+{"algorithm":"erp","type_d":"spherical","implemented_by":"cydist","sample_file":"cython_samples/erp_spherical_g_-122.40382_37.78038.parquet","eps":null,"g":[-122.40382,37.78038],"precision":null,"converted":null}
+{"algorithm":"erp","type_d":"spherical","implemented_by":"cydist","sample_file":"cython_samples/erp_spherical_g_-122.39607_37.78732.parquet","eps":null,"g":[-122.39607,37.78732],"precision":null,"converted":null}
