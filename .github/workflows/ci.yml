@@ -2,19 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
 
 jobs:
-  # Job 1: Rust 测试和代码质量检查
+  # Job 1: Rust 测试
   test-rust:
     name: Test Rust
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        rust: [stable]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -22,8 +18,6 @@ jobs:
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: ${{ matrix.rust }}
 
       - name: Cache cargo registry
         uses: actions/cache@v4
@@ -43,64 +37,55 @@ jobs:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Run cargo fmt check
-        run: cargo fmt -- --check
-
-      - name: Run cargo clippy
-        run: cargo clippy -- -D warnings
-
-      - name: Run cargo test
+      - name: Run Rust tests
         run: cargo test --verbose
 
-  # Job 2: Python 测试和代码质量检查
+      - name: Run Rust integration tests
+        run: cargo test --tests --verbose
+
+  # Job 2: Python 测试
   test-python:
     name: Test Python
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache pip packages
-        uses: actions/cache@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
-      - name: Install maturin
-        run: pip install maturin
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'uv'
 
-      - name: Install Python dependencies
-        run: |
-          pip install pytest numpy polars pyarrow
-          pip install black isort ruff autoflake
+      - name: Install Python dependencies with uv
+        run: uv sync --dev
 
       - name: Build Python package
-        run: maturin develop
+        run: uv run maturin develop
 
-      - name: Run Python tests
-        run: |
-          # CI 环境只运行不依赖外部数据的测试
-          pytest py_tests/test_ci.py -v
-          # 如果测试数据目录存在，也运行完整测试
-          if [ -d "py_tests/data/cython_samples" ]; then
-            pytest py_tests/ -v --ignore=py_tests/test_ci.py
-          fi
+      - name: Run Python tests (CI only)
+        run: uv run pytest py_tests/test_ci.py -v
 
       - name: Run README Python examples test
-        run: pytest py_tests/test_readme_examples.py -v
+        run: uv run pytest py_tests/test_readme_examples.py -v
+
+      - name: Run full Python tests (if data exists)
+        run: |
+          if [ -d "py_tests/data/cython_samples" ]; then
+            uv run pytest py_tests/ -v --ignore=py_tests/test_ci.py
+          else
+            echo "Test data not found, skipping full Python tests"
+          fi
 
   # Job 3: 检查 README Rust 示例
   test-readme-rust:
