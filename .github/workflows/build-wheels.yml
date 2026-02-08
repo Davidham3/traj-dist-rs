@@ -11,54 +11,5 @@ on:
 
 jobs:
   build-wheels:
-    name: Build wheels on Linux
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: all
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21.3
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels
-          path: ./wheelhouse/*.whl
-
-  build-sdist:
-    name: Build source distribution
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install Python dependencies with uv
-        run: uv sync --dev
-
-      - name: Build sdist
-        run: uv run maturin build --release --sdist
-
-      - name: Upload sdist
-        uses: actions/upload-artifact@v4
-        with:
-          name: sdist
-          path: target/wheels/*.tar.gz
+    name: Build wheels (CI trigger)
+    uses: ./.github/workflows/build-wheels-reusable.yml
