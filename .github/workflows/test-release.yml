@@ -69,6 +69,12 @@ jobs:
           name: wheels
           path: wheelhouse/
 
+      - name: Download sdist
+        uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: wheelhouse/
+
       - name: Display structure of downloaded files
         run: ls -R wheelhouse/
 
