@@ -1,15 +1,9 @@
 name: Build Wheels
 
 on:
-  push:
-    branches: [main]
-    tags:
-      - 'v*'
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
   build-wheels:
-    name: Build wheels (CI trigger)
+    name: Build wheels (manual trigger)
     uses: ./.github/workflows/build-wheels-reusable.yml
