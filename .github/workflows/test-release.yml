@@ -59,6 +59,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [check-crates, build-wheels-reusable]
 
+    permissions:
+      id-token: write
+
     steps:
       - name: Download wheels
         uses: actions/download-artifact@v4
