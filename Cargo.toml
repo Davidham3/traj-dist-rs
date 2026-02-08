@@ -1,6 +1,6 @@
 [package]
 name = "traj-dist-rs"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 edition = "2024"
 authors = ["TrajDist-rs Contributors"]
 license = "MIT"

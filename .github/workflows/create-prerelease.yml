@@ -36,6 +36,12 @@ jobs:
           name: wheels
           path: wheelhouse/
 
+      - name: Download sdist
+        uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: wheelhouse/
+
       - name: Display structure of downloaded files
         run: ls -R wheelhouse/
 
@@ -102,6 +108,12 @@ jobs:
           name: wheels
           path: wheelhouse/
 
+      - name: Download sdist
+        uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: wheelhouse/
+
       - name: Display structure of downloaded files
         run: ls -R wheelhouse/
 
@@ -137,7 +149,9 @@ jobs:
             Add your changes here...
           draft: true
           prerelease: true
-          files: wheelhouse/*.whl
+          files: |
+            wheelhouse/*.whl
+            wheelhouse/*.tar.gz
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
