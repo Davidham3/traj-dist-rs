@@ -1,0 +1,117 @@
+name: Test Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to test (e.g., 0.1.0a1)'
+        required: false
+        type: string
+
+jobs:
+  check-crates:
+    name: Check crates.io publishing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run cargo publish dry-run
+        run: |
+          echo "Running cargo publish dry-run..."
+          cargo publish --dry-run --allow-dirty
+
+      - name: Check package metadata
+        run: |
+          echo "Checking package metadata..."
+          cargo package
+          cargo package --list
+
+      - name: Display package info
+        run: |
+          echo "Package information:"
+          cargo metadata --format-version 1 --no-deps | jq '.packages[] | select(.name == "traj-dist-rs") | {name, version, description, license, repository}'
+
+  build-and-publish-testpypi:
+    name: Build and publish to TestPyPI
+    runs-on: ubuntu-latest
+    needs: [check-crates, build-wheels-reusable]
+
+    steps:
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels
+          path: wheelhouse/
+
+      - name: Display structure of downloaded files
+        run: ls -R wheelhouse/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+          packages-dir: wheelhouse/
+
+  build-wheels-reusable:
+    name: Build wheels (reusable)
+    uses: ./.github/workflows/build-wheels-reusable.yml
+
+  test-install-from-testpypi:
+    name: Test install from TestPyPI
+    needs: build-and-publish-testpypi
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install from TestPyPI
+        run: |
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ traj-dist-rs
+
+      - name: Test import
+        run: python -c "import traj_dist_rs; print('Import successful')"
+
+      - name: Run basic functionality test
+        run: |
+          python -c "
+          import traj_dist_rs
+          traj1 = [[0.0, 0.0], [1.0, 1.0]]
+          traj2 = [[0.1, 0.1], [1.1, 1.1]]
+          dist = traj_dist_rs.sspd(traj1, traj2, dist_type='euclidean')
+          print(f'SSPD distance: {dist}')
+          assert dist > 0, 'Distance should be positive'
+          print('Basic functionality test passed')
+          "
