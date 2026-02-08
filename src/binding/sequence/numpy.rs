@@ -5,7 +5,7 @@ use crate::binding::sequence::types::PointRef;
 use crate::err::TrajDistError;
 use crate::traits::CoordSequence;
 
-/// 持有对 NumPy 数组的底层数据指针，实现零拷贝访问整个轨迹
+/// Holds the underlying data pointer of NumPy array, achieving zero-copy access to the entire trajectory
 #[derive(Debug, Clone, Copy)]
 pub struct TrajectoryRef<'a> {
     data_ptr: *const f64,
@@ -22,7 +22,7 @@ impl<'a> TrajectoryRef<'a> {
                 shape
             )));
         }
-        // 检查数组是否是连续的
+        // Check if array is contiguous
         let view = array.as_array();
         if view.is_standard_layout() {
             Ok(Self {
@@ -37,7 +37,7 @@ impl<'a> TrajectoryRef<'a> {
         }
     }
 
-    /// 获取底层数据切片（使用指针创建）
+    /// Get underlying data slice (created using pointer)
     #[inline(always)]
     fn get_data(&self) -> &'a [f64] {
         unsafe { std::slice::from_raw_parts(self.data_ptr, self.len * 2) }

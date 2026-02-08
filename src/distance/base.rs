@@ -3,16 +3,16 @@ use crate::{
     traits::{AsCoord, CoordSequence},
 };
 
-/// 所有距离计算器必须实现的 trait
+/// Trait that all distance calculators must implement
 ///
-/// 这个 trait 适用于只需要点对点距离的算法（如 DTW、LCSS、EDR、ERP、Discret Frechet）。
-/// 对于需要计算点到线段距离的算法（如 Hausdorff 和 SSPD），应该直接使用 CoordSequence。
+/// This trait is suitable for algorithms that only need point-to-point distances (e.g., DTW, LCSS, EDR, ERP, Discret Frechet).
+/// For algorithms that need to calculate point-to-segment distances (e.g., Hausdorff and SSPD), use CoordSequence directly.
 pub trait DistanceCalculator {
-    /// 计算两个序列中对应元素之间的距离
+    /// Calculate the distance between corresponding elements in two sequences
     fn dis_between(&self, seq_a_idx: usize, seq_b_idx: usize) -> f64;
 
-    /// 计算某个序列中的点与外部"锚点"之间的距离
-    /// seq_id: 0 表示第一个序列，1 表示第二个
+    /// Calculate the distance between a point in a sequence and an external "anchor" point
+    /// seq_id: 0 indicates the first sequence, 1 indicates the second
     fn compute_dis_for_extra_point<C: AsCoord>(
         &self,
         seq_id: usize,
@@ -20,14 +20,14 @@ pub trait DistanceCalculator {
         anchor: Option<&C>,
     ) -> f64;
 
-    /// 获取第一个序列的长度
+    /// Get the length of the first sequence
     fn len_seq1(&self) -> usize;
 
-    /// 获取第二个序列的长度
+    /// Get the length of the second sequence
     fn len_seq2(&self) -> usize;
 }
 
-/// 基于轨迹的距离计算器
+/// Distance calculator based on trajectories
 pub struct TrajectoryCalculator<'a, T, U>
 where
     T: CoordSequence + 'a,
@@ -92,7 +92,7 @@ where
     }
 }
 
-/// 基于预计算距离的距离计算器
+/// Distance calculator based on precomputed distances
 pub struct PrecomputedDistanceCalculator<'a> {
     distance_matrix: &'a Vec<Vec<f64>>,
     seq1_extra_dists: Option<&'a Vec<f64>>,

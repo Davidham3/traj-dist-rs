@@ -14,24 +14,24 @@
 
 #[derive(Debug, thiserror::Error)]
 pub enum TrajDistError {
-    #[error("ListArray<i64>的长度必须为1")]
+    #[error("ListArray<i64> must have length 1")]
     InvalidSizeOfListArray,
 
     #[error("InvalidParams")]
     InvalidParams(String),
 
-    #[error("坐标必须是长度为2的数组，但收到了 {0} 个元素")]
+    #[error("Coordinates must be an array of length 2, but received {0} elements")]
     InvalidCoordinate(usize),
 
     #[error("DataConvertionError: {0}")]
     DataConvertionError(String),
 
-    #[error("SeqType错误")]
+    #[error("Invalid SeqType")]
     InvalidSeqType,
 
-    #[error("converter异常")]
+    #[error("Invalid converter")]
     InvalidConverter,
 
-    #[error("越界")]
+    #[error("Out of bounds")]
     OutofIndex(String),
 }
