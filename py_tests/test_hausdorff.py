@@ -1,7 +1,7 @@
 """
-Hausdorff 算法测试用例
+Hausdorff algorithm test cases
 
-测试 Rust 实现的 Hausdorff 算法与原始 traj-dist 实现的准确率对比
+Tests the accuracy comparison between Rust implementation and original traj-dist implementation
 """
 
 import pytest
@@ -9,7 +9,7 @@ from test_framework import BaseDistanceTest, load_test_data_by_metainfo
 
 
 class TestHausdorffEuclidean(BaseDistanceTest):
-    """测试 Hausdorff 欧几里得距离"""
+    """Test Hausdorff Euclidean distance"""
 
     @property
     def algorithm_name(self) -> str:
@@ -17,38 +17,38 @@ class TestHausdorffEuclidean(BaseDistanceTest):
 
     def test_hausdorff_euclidean_accuracy(self, all_metainfo, data_dir):
         """
-        测试 Hausdorff 欧几里得距离的准确率
+        Test Hausdorff Euclidean distance accuracy
 
-        验证 Rust 实现的结果与原始 traj-dist 实现的误差在 1e-8 以内
+        Verify that Rust implementation results match original traj-dist implementation within 1e-8 tolerance
         """
         hausdorff_metainfo = all_metainfo.get("hausdorff", [])
         euclidean_metainfo = [m for m in hausdorff_metainfo if m.type_d == "euclidean"]
 
         if not euclidean_metainfo:
-            pytest.skip("Hausdorff 欧几里得距离测试数据不存在")
+            pytest.skip("Hausdorff Euclidean distance test data not found")
 
         test_data = load_test_data_by_metainfo(euclidean_metainfo[0], data_dir)
         self._test_accuracy(test_data, "euclidean")
 
     def test_hausdorff_euclidean_identical_trajectories(self):
-        """测试相同轨迹的距离应该接近 0"""
+        """Test that distance for identical trajectories should be close to 0"""
         self._check_identical_trajectories("euclidean", tolerance=1e-6)
 
     def test_hausdorff_euclidean_simple_case(self):
-        """测试简单轨迹对"""
+        """Test simple trajectory pair"""
         self._check_simple_case("euclidean")
 
     def test_hausdorff_euclidean_empty_trajectory(self):
-        """测试空轨迹的情况"""
+        """Test empty trajectory case"""
         self._check_empty_trajectory("euclidean")
 
     def test_hausdorff_euclidean_single_point(self):
-        """测试单点轨迹"""
+        """Test single point trajectory"""
         self._check_single_point("euclidean")
 
 
 class TestHausdorffSpherical(BaseDistanceTest):
-    """测试 Hausdorff 球面距离"""
+    """Test Hausdorff Spherical distance"""
 
     @property
     def algorithm_name(self) -> str:
@@ -56,43 +56,43 @@ class TestHausdorffSpherical(BaseDistanceTest):
 
     def test_hausdorff_spherical_accuracy(self, all_metainfo, data_dir):
         """
-        测试 Hausdorff 球面距离的准确率
+        Test Hausdorff Spherical distance accuracy
 
-        验证 Rust 实现的结果与原始 traj-dist 实现的误差在 1e-8 以内
+        Verify that Rust implementation results match original traj-dist implementation within 1e-8 tolerance
         """
         hausdorff_metainfo = all_metainfo.get("hausdorff", [])
         spherical_metainfo = [m for m in hausdorff_metainfo if m.type_d == "spherical"]
 
         if not spherical_metainfo:
-            pytest.skip("Hausdorff 球面距离测试数据不存在")
+            pytest.skip("Hausdorff Spherical distance test data not found")
 
         test_data = load_test_data_by_metainfo(spherical_metainfo[0], data_dir)
         self._test_accuracy(test_data, "spherical")
 
     def test_hausdorff_spherical_identical_trajectories(self):
-        """测试相同轨迹的距离应该接近 0"""
+        """Test that distance for identical trajectories should be close to 0"""
         self._check_identical_trajectories("spherical", tolerance=1e-6)
 
     def test_hausdorff_spherical_simple_case(self):
-        """测试简单轨迹对"""
+        """Test simple trajectory pair"""
         self._check_simple_case("spherical")
 
 
 class TestHausdorffParameterValidation(BaseDistanceTest):
-    """测试 Hausdorff 参数验证"""
+    """Test Hausdorff parameter validation"""
 
     @property
     def algorithm_name(self) -> str:
         return "hausdorff"
 
     def test_hausdorff_invalid_distance_type(self):
-        """测试无效的距离类型应该抛出异常"""
+        """Test that invalid distance type should raise exception"""
         self._check_invalid_distance_type()
 
     def test_hausdorff_valid_distance_types(self):
-        """测试有效的距离类型"""
+        """Test valid distance types"""
         self._check_valid_distance_types()
 
     def test_hausdorff_invalid_trajectory_format(self):
-        """测试无效的轨迹格式应该抛出异常"""
+        """Test that invalid trajectory format should raise exception"""
         self._check_invalid_trajectory_format()

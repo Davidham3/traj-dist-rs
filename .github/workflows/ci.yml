@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  # Job 1: Rust 测试
+  # Job 1: Rust tests
   test-rust:
     name: Test Rust
     runs-on: ubuntu-latest
@@ -43,7 +43,7 @@ jobs:
       - name: Run Rust integration tests
         run: cargo test --tests --verbose
 
-  # Job 2: Python 测试
+  # Job 2: Python tests
   test-python:
     name: Test Python
     runs-on: ubuntu-latest
@@ -86,7 +86,7 @@ jobs:
             echo "Test data not found, skipping full Python tests"
           fi
 
-  # Job 3: 检查 README Rust 示例
+  # Job 3: Check README Rust examples
   test-readme-rust:
     name: Test README Rust Examples
     runs-on: ubuntu-latest
