@@ -1,41 +1,41 @@
 #!/bin/bash
-# 性能测试主脚本
+# Performance testing main script
 
-# 设置脚本目录
+# Set script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 TRAJ_DIST_ROOT="$PROJECT_ROOT/traj-dist"
 TRAJ_DIST_RS_ROOT="$PROJECT_ROOT/traj-dist-rs"
 
-# 轨迹对数量（K值）
+# Number of trajectory pairs (K value)
 K=${K:-50}
 
-# 预热次数
+# Number of warmup runs
 WARMUP_RUNS=${WARMUP_RUNS:-5}
 
-# 测试次数
+# Number of test runs
 NUM_RUNS=${NUM_RUNS:-10}
 
-# 输出目录（放在 traj-dist-rs 根目录下）
+# Output directory (placed in traj-dist-rs root directory)
 OUTPUT_DIR="$TRAJ_DIST_RS_ROOT/benchmark_output"
 
-# 清理旧的输出
+# Clean old output
 rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
 echo "=========================================="
-echo "性能测试主脚本"
+echo "Performance Testing Main Script"
 echo "=========================================="
-echo "轨迹对数量 (K): $K"
-echo "预热次数: $WARMUP_RUNS"
-echo "测试次数: $NUM_RUNS"
-echo "输出目录: $OUTPUT_DIR"
+echo "Number of trajectory pairs (K): $K"
+echo "Warmup runs: $WARMUP_RUNS"
+echo "Test runs: $NUM_RUNS"
+echo "Output directory: $OUTPUT_DIR"
 echo "=========================================="
 echo ""
 
-# 步骤 1: 生成基准轨迹数据
+# Step 1: Generate baseline trajectory data
 echo "=========================================="
-echo "步骤 1: 生成基准轨迹数据"
+echo "Step 1: Generate baseline trajectory data"
 echo "=========================================="
 cd "$TRAJ_DIST_RS_ROOT"
 source .venv/bin/activate
@@ -47,16 +47,16 @@ python generate_baseline_trajectories.py \
     --output-dir "$OUTPUT_DIR"
 
 if [ $? -ne 0 ]; then
-    echo "错误: 基准轨迹数据生成失败"
+    echo "Error: Baseline trajectory data generation failed"
     exit 1
 fi
 echo ""
 
 deactivate
 
-# 步骤 2: 测试 traj-dist (Cython 实现)
+# Step 2: Test traj-dist (Cython implementation)
 echo "=========================================="
-echo "步骤 2: 测试 traj-dist (Cython 实现)"
+echo "Step 2: Test traj-dist (Cython implementation)"
 echo "=========================================="
 cd "$TRAJ_DIST_ROOT"
 source .venv/bin/activate
@@ -71,16 +71,16 @@ python benchmark_traj_dist.py \
     --output-dir "$OUTPUT_DIR"
 
 if [ $? -ne 0 ]; then
-    echo "错误: traj-dist (Cython) 性能测试失败"
+    echo "Error: traj-dist (Cython) performance test failed"
     exit 1
 fi
 echo ""
 
 deactivate
 
-# 步骤 3: 测试 traj-dist (Python 实现)
+# Step 3: Test traj-dist (Python implementation)
 echo "=========================================="
-echo "步骤 3: 测试 traj-dist (Python 实现)"
+echo "Step 3: Test traj-dist (Python implementation)"
 echo "=========================================="
 cd "$TRAJ_DIST_ROOT"
 source .venv/bin/activate
@@ -95,16 +95,16 @@ python benchmark_traj_dist.py \
     --output-dir "$OUTPUT_DIR"
 
 if [ $? -ne 0 ]; then
-    echo "错误: traj-dist (Python) 性能测试失败"
+    echo "Error: traj-dist (Python) performance test failed"
     exit 1
 fi
 echo ""
 
 deactivate
 
-# 步骤 4: 测试 traj-dist-rs (Rust 实现)
+# Step 4: Test traj-dist-rs (Rust implementation)
 echo "=========================================="
-echo "步骤 4: 测试 traj-dist-rs (Rust 实现)"
+echo "Step 4: Test traj-dist-rs (Rust implementation)"
 echo "=========================================="
 cd "$TRAJ_DIST_RS_ROOT"
 source .venv/bin/activate
@@ -118,16 +118,60 @@ python benchmark_traj_dist_rs.py \
     --output-dir "$OUTPUT_DIR"
 
 if [ $? -ne 0 ]; then
-    echo "错误: traj-dist-rs (Rust) 性能测试失败"
+    echo "Error: traj-dist-rs (Rust) performance test failed"
     exit 1
 fi
 echo ""
 
 deactivate
 
-# 步骤 5: 分析结果并直接生成报告到 docs 目录
+# Step 5: Test batch computation (pdist/cdist) - Cython implementation
 echo "=========================================="
-echo "步骤 5: 分析结果"
+echo "Step 5: Test batch computation - Cython implementation"
+echo "=========================================="
+cd "$TRAJ_DIST_ROOT"
+source .venv/bin/activate
+
+cd "$SCRIPT_DIR"
+python benchmark_batch_traj_dist.py \
+    --config-file "$SCRIPT_DIR/algorithms_config.json" \
+    --warmup-runs 1 \
+    --num-runs 1 \
+    --output-dir "$OUTPUT_DIR"
+
+if [ $? -ne 0 ]; then
+    echo "Error: Batch computation (Cython) performance test failed"
+    exit 1
+fi
+echo ""
+
+deactivate
+
+# Step 6: Test batch computation (pdist/cdist) - Rust implementation
+echo "=========================================="
+echo "Step 6: Test batch computation - Rust implementation"
+echo "=========================================="
+cd "$TRAJ_DIST_RS_ROOT"
+source .venv/bin/activate
+
+cd "$SCRIPT_DIR"
+python benchmark_batch_traj_dist_rs.py \
+    --config-file "$SCRIPT_DIR/algorithms_config.json" \
+    --warmup-runs 1 \
+    --num-runs 1 \
+    --output-dir "$OUTPUT_DIR"
+
+if [ $? -ne 0 ]; then
+    echo "Error: Batch computation (Rust) performance test failed"
+    exit 1
+fi
+echo ""
+
+deactivate
+
+# Step 7: Analyze results and generate report directly to docs directory
+echo "=========================================="
+echo "Step 7: Analyze results"
 echo "=========================================="
 cd "$TRAJ_DIST_RS_ROOT"
 source .venv/bin/activate
@@ -140,16 +184,16 @@ python analyze_benchmark_results.py \
 deactivate
 
 if [ $? -ne 0 ]; then
-    echo "错误: 结果分析失败"
+    echo "Error: Result analysis failed"
     exit 1
 fi
 
-# 完成
+# Complete
 echo "=========================================="
-echo "性能测试完成!"
+echo "Performance testing completed!"
 echo "=========================================="
-echo "报告位置: $TRAJ_DIST_RS_ROOT/docs/performance.md"
+echo "Report location: $TRAJ_DIST_RS_ROOT/docs/performance.md"
 echo ""
-echo "生成的文件:"
+echo "Generated files:"
 ls -lh "$OUTPUT_DIR"
 echo ""

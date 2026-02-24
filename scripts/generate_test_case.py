@@ -1,80 +1,88 @@
 #!/usr/bin/env python3
 """
-生成单个算法的测试用例脚本（仅生成 Cython 实现）
+Generate test cases for a single algorithm (Cython implementation only)
 
-通过 argparse 指定算法名、超参数值，生成 Parquet 文件和元数据 JSONL 文件。
-Parquet 文件名包含算法名、距离类型、超参数值。
-文件包含 5 列：2 列轨迹数据、1 列距离值、1 列测量时间列表、1 列统计信息。
+Use argparse to specify algorithm name and hyperparameter values, generate Parquet files and metadata JSONL files.
+Parquet file names include algorithm name, distance type, and hyperparameter values.
+Files contain 5 columns: 2 columns of trajectory data, 1 column of distance values, 1 column of measurement time lists, 1 column of statistics.
 
-注意：效果测试只使用 Cython 实现作为"正确答案"，Python 实现的性能测试由 benchmark 脚本处理。
+Note: Correctness validation only uses Cython implementation as "correct answer", Python implementation performance testing is handled by benchmark scripts.
 """
 
-import sys
 import argparse
 import pickle
+import sys
 import time
 from pathlib import Path
 
 import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
-
-# 导入 Cython 实现
+# Import Cython implementation
 import traj_dist.distance as tdist
 
 sys.path.append(str(Path(__file__).parent.parent))
-from py_tests.schemas import Metainfo, ImplementationType
+from py_tests.schemas import ImplementationType, Metainfo
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="生成单个算法的测试用例（仅 Cython 实现）"
+        description="Generate test cases for a single algorithm (Cython implementation only)"
     )
-    parser.add_argument("--algorithm", type=str, required=True, help="算法名称")
+    parser.add_argument("--algorithm", type=str, required=True, help="Algorithm name")
     parser.add_argument(
         "--type_d",
         type=str,
         default="euclidean",
         choices=["euclidean", "spherical"],
-        help="距离类型",
+        help="Distance type",
     )
     parser.add_argument(
-        "--eps", type=float, default=None, help="LCSS 和 EDR 算法的 eps 参数"
+        "--eps", type=float, default=None, help="LCSS and EDR algorithm eps parameter"
     )
     parser.add_argument(
-        "--g", type=float, nargs=2, default=None, help="ERP 算法的 g 参数（两个值）"
+        "--g",
+        type=float,
+        nargs=2,
+        default=None,
+        help="ERP algorithm g parameter (two values)",
     )
     parser.add_argument(
-        "--precision", type=int, default=None, help="SOWD 算法的 precision 参数"
+        "--precision", type=int, default=None, help="SOWD algorithm precision parameter"
     )
     parser.add_argument(
-        "--converted", type=bool, default=None, help="SOWD 算法的 converted 参数"
+        "--converted",
+        type=bool,
+        default=None,
+        help="SOWD algorithm converted parameter",
     )
     parser.add_argument(
-        "--output-dir", type=str, default="py_tests/data", help="输出目录"
+        "--output-dir", type=str, default="py_tests/data", help="Output directory"
     )
     parser.add_argument(
         "--traj-data",
         type=str,
         default="../traj-dist/data/benchmark_trajectories.pkl",
-        help="轨迹数据文件",
+        help="Trajectory data file",
     )
-    parser.add_argument("--num-traj", type=int, default=50, help="使用的轨迹数量")
+    parser.add_argument(
+        "--num-traj", type=int, default=50, help="Number of trajectories to use"
+    )
     return parser.parse_args()
 
 
 def build_sample_filename(algorithm, type_d, eps=None, g=None, precision=None):
     """
-    构建样本文件名，包含算法名、距离类型和超参数
+    Build sample file name, including algorithm name, distance type, and hyperparameters
 
-    格式: {algorithm}_{type_d}_{param}_{value}.parquet
-    例如: edr_euclidean_eps_0.01.parquet
+    Format: {algorithm}_{type_d}_{param}_{value}.parquet
+    Example: edr_euclidean_eps_0.01.parquet
     """
     parts = [algorithm, type_d]
     if eps is not None:
         parts.append(f"eps_{eps}")
     if g is not None:
-        # 对于 g 参数，使用特定的格式
+        # For g parameter, use specific format
         parts.append(f"g_{g[0]}_{g[1]}")
     if precision is not None:
         parts.append(f"precision_{precision}")
@@ -83,17 +91,17 @@ def build_sample_filename(algorithm, type_d, eps=None, g=None, precision=None):
 
 def build_metainfo_filename(algorithm):
     """
-    构建元数据文件名
+    Build metadata file name
 
-    格式: {algorithm}.jsonl
-    例如: edr.jsonl
+    Format: {algorithm}.jsonl
+    Example: edr.jsonl
     """
     return f"{algorithm}.jsonl"
 
 
 def get_distance_function(args):
     """
-    根据 Cython 实现的算法和距离类型返回对应的距离函数
+    Return the corresponding distance function based on Cython implementation algorithm and distance type
     """
     if args.algorithm == "sspd":
         return tdist.c_e_sspd if args.type_d == "euclidean" else tdist.c_g_sspd
@@ -104,7 +112,9 @@ def get_distance_function(args):
             tdist.c_e_hausdorff if args.type_d == "euclidean" else tdist.c_g_hausdorff
         )
     elif args.algorithm == "discret_frechet":
-        return tdist.c_discret_frechet  # discret_frechet只支持欧几里得距离
+        return (
+            tdist.c_discret_frechet
+        )  # discret_frechet only supports Euclidean distance
     elif args.algorithm == "lcss":
         return tdist.c_e_lcss if args.type_d == "euclidean" else tdist.c_g_lcss
     elif args.algorithm == "edr":
@@ -119,12 +129,12 @@ def get_distance_function(args):
 
 def generate_test_cases(args):
     """
-    生成 Cython 实现的测试用例
+    Generate Cython implementation test cases
     """
-    # 加载轨迹数据
+    # Load trajectory data
     traj_data_path = Path(args.traj_data)
     if not traj_data_path.exists():
-        # 尝试相对路径
+        # Try relative path
         traj_data_path = (
             Path(__file__).parent.parent.parent
             / "traj-dist"
@@ -136,11 +146,11 @@ def generate_test_cases(args):
     with open(traj_data_path, "rb") as f:
         traj_list = pickle.load(f, encoding="latin1")
 
-    # 使用指定数量的轨迹
+    # Use specified number of trajectories
     traj_list = traj_list[: args.num_traj]
     print(f"Using {len(traj_list)} trajectories")
 
-    # 构建参数字典
+    # Build parameter dictionary
     params = {"type_d": args.type_d}
     if args.eps is not None:
         params["eps"] = args.eps
@@ -151,14 +161,14 @@ def generate_test_cases(args):
     if args.converted is not None:
         params["converted"] = args.converted
 
-    # 构建输出目录
+    # Build output directory
     output_dir = Path(args.output_dir)
     samples_dir = output_dir / "cython_samples"
     metainfo_dir = output_dir / "metainfo"
     samples_dir.mkdir(parents=True, exist_ok=True)
     metainfo_dir.mkdir(parents=True, exist_ok=True)
 
-    # 构建样本文件名和路径
+    # Build sample file name and path
     sample_filename = build_sample_filename(
         args.algorithm, args.type_d, args.eps, args.g, args.precision
     )
@@ -168,22 +178,24 @@ def generate_test_cases(args):
     print(f"Parameters: {params}")
     print(f"Sample file: {sample_path}")
 
-    # 获取对应的距离函数
+    # Get the corresponding distance function
     dist_func = get_distance_function(args)
 
-    # 生成测试用例
+    # Generate test cases
     results = []
-    num_measurements = 10  # 测量次数：10 次通常足以获得可靠的统计信息
+    num_measurements = (
+        10  # Number of measurements: 10 is usually sufficient for reliable statistics
+    )
 
     for i, traj1_orig in enumerate(traj_list):
         for j, traj2_orig in enumerate(traj_list):
-            if i >= j:  # 避免重复计算
+            if i >= j:  # Avoid duplicate calculations
                 continue
 
             traj1 = traj1_orig
             traj2 = traj2_orig
 
-            # SOWD 算法需要特殊处理：转换为 cell 格式
+            # SOWD algorithm requires special handling: convert to cell format
             call_params = {}
             if args.algorithm == "sowd_grid":
                 from traj_dist.pydist.linecell import trajectory_set_grid
@@ -192,20 +204,20 @@ def generate_test_cases(args):
                 cells_list, _, _, _, _ = trajectory_set_grid([traj1, traj2], precision)
                 traj1 = np.array([[c[0], c[1]] for c in cells_list[0]], dtype=np.int64)
                 traj2 = np.array([[c[0], c[1]] for c in cells_list[1]], dtype=np.int64)
-                # sowd_grid 函数不接受 extra 参数
+                # sowd_grid function does not accept extra parameters
 
-            # 添加超参数
+            # Add hyperparameters
             if args.eps is not None:
                 call_params["eps"] = args.eps
             if args.g is not None:
                 call_params["g"] = np.array(args.g, dtype=np.float64)
-            # SOWD 算法的 precision 参数已经在转换为 cell 格式时使用，不需要传递给 sowd_grid 函数
+            # SOWD algorithm's precision parameter is already used when converting to cell format, no need to pass to sowd_grid function
 
-            # Warmup - 运行几次以预热缓存
+            # Warmup - run a few times to warm up the cache
             for _ in range(5):
                 dist_func(traj1, traj2, **call_params)
 
-            # 测量计算时间 - 多次测量以获得统计信息
+            # Measure computation time - multiple measurements for statistics
             times = []
             for _ in range(num_measurements):
                 start = time.perf_counter()
@@ -213,7 +225,7 @@ def generate_test_cases(args):
                 end = time.perf_counter()
                 times.append(end - start)
 
-            # 计算统计指标
+            # Calculate statistical metrics
             times_array = np.array(times)
             time_stats = {
                 "mean": float(np.mean(times_array)),
@@ -228,8 +240,8 @@ def generate_test_cases(args):
                     traj1.tolist(),
                     traj2.tolist(),
                     result,
-                    times,  # 存储所有测量时间
-                    time_stats,  # 存储统计信息
+                    times,  # Store all measurement times
+                    time_stats,  # Store statistical information
                 )
             )
     traj1, traj2, distance, times_list, time_stats_list = zip(*results)
@@ -237,7 +249,7 @@ def generate_test_cases(args):
     traj_type = pa.large_list(pa.list_(pa.float64(), 2))
     time_list_type = pa.list_(pa.float64())
 
-    # 将统计信息字典转换为结构体类型
+    # Convert statistics dictionary to struct type
     time_stats_fields = [
         ("mean", pa.float64()),
         ("std", pa.float64()),
@@ -270,7 +282,7 @@ def generate_test_cases(args):
     print(f"Generated {len(results)} test cases")
     print(f"Saved to: {sample_path}")
 
-    # 构建元数据
+    # Build metadata
     impl_type = ImplementationType.CYTHON
     try:
         metainfo = Metainfo(
@@ -278,23 +290,23 @@ def generate_test_cases(args):
             type_d=args.type_d,
             implemented_by=impl_type,
             eps=args.eps,
-            g=args.g,  # Pydantic 会自动处理 list
+            g=args.g,  # Pydantic will automatically handle list
             precision=args.precision,
             converted=args.converted,
-            # 路径相对于 metainfo_dir 的父目录
+            # Path relative to metainfo_dir's parent directory
             sample_file=f"cython_samples/{sample_filename}",
         )
     except Exception as e:
         print(f"Error creating Pydantic model: {e}")
         return
 
-    # 构建元数据文件名和路径
+    # Build metadata file name and path
     metainfo_filename = build_metainfo_filename(args.algorithm)
     metainfo_path = metainfo_dir / metainfo_filename
 
-    # 使用模型的 .json() 方法序列化并追加到元数据文件
+    # Serialize using model's .json() method and append to metadata file
     with open(metainfo_path, "a") as f:
-        # metainfo.json() 会生成一个紧凑的 JSON 字符串
+        # metainfo.json() will generate a compact JSON string
         f.write(metainfo.model_dump_json() + "\n")
 
     print(f"Metadata appended to: {metainfo_path}")
@@ -303,7 +315,7 @@ def generate_test_cases(args):
 def main():
     args = parse_args()
 
-    # 生成 Cython 实现的测试用例
+    # Generate test cases for Cython implementation
     print("==========================================")
     print("Generating test cases for Cython implementation (correctness validation)")
     print("==========================================")

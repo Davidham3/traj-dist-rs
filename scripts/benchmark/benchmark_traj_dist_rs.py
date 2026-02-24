@@ -1,80 +1,79 @@
 #!/usr/bin/env python3
 """
-traj-dist-rs 性能测试脚本
+traj-dist-rs performance benchmark script
 
-支持命令行参数指定预热次数和测试次数。
-将结果保存为 parquet 文件，包含算法、距离类型、超参数等元信息。
+Supports command-line arguments to specify warmup runs and test runs.
+Saves results as parquet files with algorithm, distance type, hyperparameters, and other metadata.
 """
 
 import argparse
 import json
 import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 import numpy as np
+import polars as pl
 import pyarrow as pa
 import pyarrow.parquet as pq
-import polars as pl
-
 import traj_dist_rs._lib as traj_dist_rs
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="traj-dist-rs 性能测试脚本"
+        description="traj-dist-rs performance benchmark script"
     )
     parser.add_argument(
         "--baseline-file",
         type=str,
         default="output/baseline_trajectories.parquet",
-        help="基准轨迹文件路径",
+        help="Baseline trajectory file path",
     )
     parser.add_argument(
         "--config-file",
         type=str,
         default="algorithms_config.json",
-        help="算法配置文件路径",
+        help="Algorithm configuration file path",
     )
     parser.add_argument(
         "--warmup-runs",
         type=int,
         default=5,
-        help="预热次数，默认 5 次",
+        help="Number of warmup runs, default 5",
     )
     parser.add_argument(
         "--num-runs",
         type=int,
         default=10,
-        help="测试次数，默认 10 次",
+        help="Number of test runs, default 10",
     )
     parser.add_argument(
         "--output-dir",
         type=str,
         default="output",
-        help="输出目录",
+        help="Output directory",
     )
     return parser.parse_args()
 
 
 def load_config(config_path: Path) -> Dict[str, Any]:
-    """加载算法配置"""
+    """Load algorithm configuration"""
     with open(config_path, "r") as f:
         config = json.load(f)
     return config
 
 
 def load_baseline_trajectories(baseline_path: Path) -> pl.DataFrame:
-    """加载基准轨迹数据"""
-    print(f"加载基准轨迹数据: {baseline_path}")
+    """Load baseline trajectory data"""
+    print(f"Loading baseline trajectory data: {baseline_path}")
     df = pl.read_parquet(baseline_path)
-    print(f"共加载 {len(df)} 个轨迹对")
+    print(f"Loaded {len(df)} trajectory pairs")
     return df
 
 
 def get_rust_function(algorithm_name: str):
-    """获取 Rust 算法函数"""
-    # 算法名称到函数名的映射
+    """Get Rust algorithm function"""
+    # Algorithm name to function name mapping
     function_map = {
         "sspd": "sspd",
         "dtw": "dtw",
@@ -102,22 +101,24 @@ def benchmark_algorithm(
     num_runs: int,
 ) -> List[Dict[str, Any]]:
     """
-    对单个算法的特定配置进行性能测试
+    Benchmark a single algorithm with specific configuration
 
     Returns:
-        测试结果列表，每个元素包含算法名称、距离类型、超参数、时间列表等
+        List of test results, each containing algorithm name, distance type, hyperparameters, time list, etc.
     """
     algorithm_name = algorithm_config["name"]
     has_hyperparameters = algorithm_config["has_hyperparameters"]
 
-    # 获取距离函数
+    # Get distance function
     try:
         rust_func = get_rust_function(algorithm_name)
     except ValueError:
-        print(f"警告: {algorithm_name} 在 Rust 实现中不可用，跳过")
+        print(
+            f"Warning: {algorithm_name} is not available in Rust implementation, skipping"
+        )
         return []
 
-    # 构建调用参数
+    # Build call parameters
     call_params = {}
     hyperparameter_value = None
 
@@ -125,37 +126,41 @@ def benchmark_algorithm(
         hyperparam = algorithm_config["hyperparameter"]
         hyperparam_name = hyperparam["name"]
         hyperparam_type = hyperparam["type"]
-        hyperparameter_value = hyperparam["values"][0]  # 只取第一个超参数值
+        hyperparameter_value = hyperparam["values"][
+            0
+        ]  # Only take the first hyperparameter value
 
         if hyperparam_type == "list":
-            call_params[hyperparam_name] = np.array(hyperparameter_value, dtype=np.float64)
+            call_params[hyperparam_name] = np.array(
+                hyperparameter_value, dtype=np.float64
+            )
         else:
             call_params[hyperparam_name] = hyperparameter_value
 
     results = []
 
-    print(f"\n测试: {algorithm_name} ({distance_type}) - Rust")
+    print(f"\nTesting: {algorithm_name} ({distance_type}) - Rust")
     if hyperparameter_value is not None:
-        print(f"  超参数: {hyperparam_name} = {hyperparameter_value}")
+        print(f"  Hyperparameter: {hyperparam_name} = {hyperparameter_value}")
 
     for row_idx in range(len(baseline_df)):
         row = baseline_df[row_idx]
         traj1 = row["traj1"].item().to_numpy()
         traj2 = row["traj2"].item().to_numpy()
 
-        # 预热
+        # Warmup
         for _ in range(warmup_runs):
             rust_func(traj1, traj2, distance_type, **call_params)
 
-        # 测量时间
+        # Measure time
         times = []
         for _ in range(num_runs):
             start = time.perf_counter()
-            result = rust_func(traj1, traj2, distance_type, **call_params)
+            rust_func(traj1, traj2, distance_type, **call_params)
             end = time.perf_counter()
             times.append(end - start)
 
-        # 存储结果
+        # Store results
         result_dict = {
             "algorithm": algorithm_name,
             "distance_type": distance_type,
@@ -169,7 +174,9 @@ def benchmark_algorithm(
             hyperparam_type = hyperparam["type"]
             hyperparameter_value = hyperparam["values"][0]
             if hyperparam_type == "list":
-                result_dict[f"hyperparam_{hyperparam_name}"] = json.dumps(hyperparameter_value)
+                result_dict[f"hyperparam_{hyperparam_name}"] = json.dumps(
+                    hyperparameter_value
+                )
             else:
                 result_dict[f"hyperparam_{hyperparam_name}"] = str(hyperparameter_value)
 
@@ -181,33 +188,35 @@ def benchmark_algorithm(
 
 
 def save_results(results: List[Dict[str, Any]], output_path: Path):
-    """将结果保存为 parquet 文件"""
-    # 准备数据
+    """Save results as parquet file"""
+    # Prepare data
     data = {}
 
-    # 提取所有可能的列名
+    # Extract all possible column names
     columns = set()
     for result in results:
         columns.update(result.keys())
         columns.discard("times")
 
-    # 添加 times 列
+    # Add times column
     columns.add("times")
 
-    # 按列整理数据
+    # Organize data by column
     for col in columns:
         if col == "times":
             data[col] = [r.get(col, []) for r in results]
         else:
             data[col] = [r.get(col, None) for r in results]
 
-    # 定义 schema
+    # Define schema
     schema_fields = []
     for col in sorted(columns):
         if col == "times":
             schema_fields.append((col, pa.list_(pa.float64())))
         elif col.startswith("hyperparam_"):
-            schema_fields.append((col, pa.string()))  # 超参数作为字符串存储
+            schema_fields.append(
+                (col, pa.string())
+            )  # Hyperparameters stored as strings
         elif col == "algorithm":
             schema_fields.append((col, pa.string()))
         elif col == "distance_type":
@@ -221,40 +230,40 @@ def save_results(results: List[Dict[str, Any]], output_path: Path):
 
     schema = pa.schema(schema_fields)
 
-    # 创建表格
+    # Create table
     table = pa.table(data, schema=schema)
 
-    # 保存
+    # Save
     pq.write_table(table, output_path)
-    print(f"已保存 {len(results)} 个结果到: {output_path}")
+    print(f"Saved {len(results)} results to: {output_path}")
 
 
 def main():
     args = parse_args()
 
-    # 创建输出目录
+    # Create output directory
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # 加载配置
+    # Load configuration
     config_path = Path(args.config_file)
     if not config_path.exists():
         config_path = Path(__file__).parent / args.config_file
 
     config = load_config(config_path)
 
-    # 加载基准轨迹
+    # Load baseline trajectories
     baseline_path = Path(args.baseline_file)
     if not baseline_path.exists():
         baseline_path = output_dir / args.baseline_file
 
     baseline_df = load_baseline_trajectories(baseline_path)
 
-    # 运行所有算法测试
+    # Run all algorithm tests
     all_results = []
 
     for algorithm_config in config["algorithms"]:
-        algorithm_name = algorithm_config["name"]
+        algorithm_config["name"]
 
         for distance_type in algorithm_config["distance_types"]:
             results = benchmark_algorithm(
@@ -266,12 +275,12 @@ def main():
             )
             all_results.extend(results)
 
-    # 保存结果
+    # Save results
     output_file = "traj_dist_rs_rust_benchmark.parquet"
     output_path = output_dir / output_file
     save_results(all_results, output_path)
 
-    print(f"\n测试完成! 共测试 {len(all_results)} 个用例")
+    print(f"\nTesting complete! Tested {len(all_results)} test cases")
 
 
 if __name__ == "__main__":

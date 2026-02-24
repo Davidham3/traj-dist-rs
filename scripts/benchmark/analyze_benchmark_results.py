@@ -1,57 +1,54 @@
 #!/usr/bin/env python3
 """
-结果汇总分析脚本
+Result summary analysis script
 
-读取三种类型的 parquet 文件（traj_dist_cython_benchmark.parquet、
-traj_dist_python_benchmark.parquet、traj_dist_rs_rust_benchmark.parquet），
-汇总耗时明细，并给出数据分析结果。
+Reads three types of parquet files (traj_dist_cython_benchmark.parquet,
+traj_dist_python_benchmark.parquet, traj_dist_rs_rust_benchmark.parquet),
+summarizes timing details, and provides data analysis results.
 """
 
 import argparse
-import json
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import polars as pl
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description="结果汇总分析脚本"
-    )
+    parser = argparse.ArgumentParser(description="Result summary analysis script")
     parser.add_argument(
         "--output-dir",
         type=str,
         default="output",
-        help="输出目录",
+        help="Output directory",
     )
     parser.add_argument(
         "--output-file",
         type=str,
         default="benchmark_analysis_report.md",
-        help="输出报告文件名",
+        help="Output report file name",
     )
     parser.add_argument(
         "--use-median",
         action="store_true",
         default=True,
-        help="使用中位数进行统计（默认）",
+        help="Use median for statistics (default)",
     )
     parser.add_argument(
         "--use-mean",
         action="store_true",
         default=False,
-        help="使用平均值进行统计",
+        help="Use mean for statistics",
     )
     return parser.parse_args()
 
 
 def load_benchmark_results(output_dir: Path) -> Dict[str, pl.DataFrame]:
-    """加载所有 benchmark 结果"""
+    """Load all benchmark results"""
     results = {}
 
-    # 尝试加载各个实现的结果
+    # Try to load results from each implementation
     files = {
         "cython": "traj_dist_cython_benchmark.parquet",
         "python": "traj_dist_python_benchmark.parquet",
@@ -61,10 +58,10 @@ def load_benchmark_results(output_dir: Path) -> Dict[str, pl.DataFrame]:
     for impl, filename in files.items():
         filepath = output_dir / filename
         if filepath.exists():
-            print(f"加载 {impl} 结果: {filepath}")
+            print(f"Loading {impl} results: {filepath}")
             results[impl] = pl.read_parquet(filepath)
         else:
-            print(f"警告: {impl} 结果文件不存在: {filepath}")
+            print(f"Warning: {impl} result file not found: {filepath}")
 
     return results
 
@@ -72,7 +69,7 @@ def load_benchmark_results(output_dir: Path) -> Dict[str, pl.DataFrame]:
 def calculate_statistics(
     times_list: List[float], use_median: bool = True
 ) -> Dict[str, float]:
-    """计算统计指标"""
+    """Calculate statistical metrics"""
     times_array = np.array(times_list)
 
     if use_median:
@@ -86,8 +83,12 @@ def calculate_statistics(
         "std": float(np.std(times_array)),
         "min": float(np.min(times_array)),
         "max": float(np.max(times_array)),
-        "central": float(central_value),  # 用于比较的中心值
-        "cv": float(np.std(times_array) / np.mean(times_array)) if np.mean(times_array) > 0 else 0.0,
+        "central": float(central_value),  # Central value for comparison
+        "cv": (
+            float(np.std(times_array) / np.mean(times_array))
+            if np.mean(times_array) > 0
+            else 0.0
+        ),
     }
 
 
@@ -95,27 +96,27 @@ def group_and_analyze(
     df: pl.DataFrame, use_median: bool = True
 ) -> Dict[Tuple[str, str, str], Dict[str, Any]]:
     """
-    按算法、距离类型、超参数分组并分析
+    Group by algorithm, distance type, and hyperparameters, then analyze
 
     Returns:
         {(algorithm, distance_type, hyperparam_str): {"times": [...], "stats": {...}}}
     """
     grouped = {}
 
-    # 获取超参数列
+    # Get hyperparameter columns
     hyperparam_cols = [col for col in df.columns if col.startswith("hyperparam_")]
 
     if not hyperparam_cols:
-        # 没有超参数的情况
+        # No hyperparameters
         for row in df.iter_rows(named=True):
             key = (row["algorithm"], row["distance_type"], "")
             if key not in grouped:
                 grouped[key] = {"times": []}
             grouped[key]["times"].extend(row["times"])
     else:
-        # 有超参数的情况
+        # With hyperparameters
         for row in df.iter_rows(named=True):
-            # 构建超参数字符串（使用分号分隔，避免与markdown表格冲突）
+            # Build hyperparameter string (use semicolon separator to avoid markdown table conflicts)
             hyperparam_str = "; ".join(
                 f"{col.replace('hyperparam_', '')}={row[col]}"
                 for col in hyperparam_cols
@@ -125,7 +126,7 @@ def group_and_analyze(
                 grouped[key] = {"times": []}
             grouped[key]["times"].extend(row["times"])
 
-    # 计算统计信息
+    # Calculate statistics
     for key in grouped:
         grouped[key]["stats"] = calculate_statistics(grouped[key]["times"], use_median)
 
@@ -137,19 +138,19 @@ def compare_implementations(
     use_median: bool = True,
 ) -> List[Dict[str, Any]]:
     """
-    比较不同实现的性能
+    Compare performance across different implementations
 
     Returns:
-        比较结果列表
+        List of comparison results
     """
-    # 获取所有唯一的 (algorithm, distance_type, hyperparam) 组合
+    # Get all unique (algorithm, distance_type, hyperparam) combinations
     all_keys = set()
 
     for impl, df in results.items():
         grouped = group_and_analyze(df, use_median)
         all_keys.update(grouped.keys())
 
-    # 比较结果
+    # Comparison results
     comparison_results = []
 
     for key in sorted(all_keys):
@@ -162,14 +163,14 @@ def compare_implementations(
             "implementations": {},
         }
 
-        # 获取各实现的统计信息
+        # Get statistics for each implementation
         for impl, df in results.items():
             grouped = group_and_analyze(df, use_median)
             if key in grouped:
                 stats = grouped[key]["stats"]
                 result["implementations"][impl] = stats
 
-        # 计算性能提升
+        # Calculate performance improvement
         impl_stats = result["implementations"]
 
         if "rust" in impl_stats and "cython" in impl_stats:
@@ -195,25 +196,512 @@ def compare_implementations(
     return comparison_results
 
 
+def analyze_batch_computation(output_dir: Path, use_median: bool = True) -> str:
+    """
+    Analyze batch computation (pdist/cdist) performance
+
+    Returns:
+        Markdown report section for batch computation
+    """
+    lines = []
+    lines.append("## Batch Computation Performance")
+    lines.append("")
+    lines.append(
+        "Performance comparison for batch distance computation (pdist and cdist):"
+    )
+    lines.append("")
+
+    # Load batch computation results
+    batch_files = {
+        "cython": "traj_dist_cython_batch_benchmark.parquet",
+        "rust": "traj_dist_rs_rust_batch_benchmark.parquet",
+    }
+
+    batch_results = {}
+    for impl, filename in batch_files.items():
+        filepath = output_dir / filename
+        if filepath.exists():
+            print(f"Loading {impl} batch results: {filepath}")
+            batch_results[impl] = pl.read_parquet(filepath)
+        else:
+            print(f"Warning: {impl} batch result file not found: {filepath}")
+
+    if not batch_results:
+        return ""
+
+    # Add test configuration section
+    lines.append("### Test Configuration")
+    lines.append("")
+
+    # Get test configuration from first result
+    first_impl = list(batch_results.keys())[0]
+    first_df = batch_results[first_impl]
+    if first_df.height > 0:
+        first_row = first_df.row(0, named=True)
+        lines.append(f"- **Algorithm**: {first_row['algorithm']}")
+
+        # Get number of trajectories (should be fixed at 5)
+        num_traj = first_row["num_trajectories"]
+        if num_traj is not None:
+            lines.append(f"- **Number of trajectories**: {num_traj} (fixed)")
+
+            # Calculate number of distances
+            if first_row["function"] == "pdist":
+                num_distances = num_traj * (num_traj - 1) // 2
+                lines.append(
+                    f"- **pdist computation**: {num_distances} distances ({num_traj}×{num_traj-1}/2)"
+                )
+            else:
+                num_distances = num_traj * num_traj
+                lines.append(
+                    f"- **cdist computation**: {num_distances} distances ({num_traj}×{num_traj})"
+                )
+
+        # Get trajectory lengths
+        traj_lengths = sorted(first_df["trajectory_length"].unique().to_list())
+        lines.append(
+            f"- **Trajectory lengths tested**: {', '.join(map(str, traj_lengths))} points"
+        )
+
+        # Get distance types
+        distance_types = sorted(first_df["distance_type"].unique().to_list())
+        lines.append(f"- **Distance types**: {', '.join(distance_types)}")
+
+    lines.append("")
+
+    # Separate pdist and cdist results
+    pdist_results = {}
+    cdist_results = {}
+
+    for impl, df in batch_results.items():
+        pdist_results[impl] = df.filter(pl.col("function") == "pdist")
+        cdist_results[impl] = df.filter(pl.col("function") == "cdist")
+
+    # pdist analysis
+    if (
+        pdist_results["cython"].height > 0
+        or "rust" in pdist_results
+        and pdist_results["rust"].height > 0
+    ):
+        lines.append("### pdist Performance")
+        lines.append("")
+        lines.append(
+            "Performance for pairwise distance computation (compressed distance matrix) with varying trajectory lengths:"
+        )
+        lines.append("")
+        lines.append(
+            "| Distance Type | Traj Length | Distances | Cython (ms) | Rust Seq (ms) | Rust Par (ms) | Speedup (Seq) | Speedup (Par) | Parallel Efficiency |"
+        )
+        lines.append(
+            "|---------------|-------------|-----------|-------------|--------------|--------------|--------------|--------------|---------------------|"
+        )
+
+        # Get unique trajectory lengths and distance types
+        traj_lengths = set()
+        distance_types = set()
+        for impl, df in pdist_results.items():
+            if df.height > 0:
+                traj_lengths.update(df["trajectory_length"].unique().to_list())
+                distance_types.update(df["distance_type"].unique().to_list())
+
+        for distance_type in sorted(distance_types):
+            for traj_length in sorted(traj_lengths):
+                row_data = {
+                    "cython": None,
+                    "rust_seq": None,
+                    "rust_par": None,
+                    "num_distances": None,
+                }
+
+                # Get Cython results
+                if pdist_results["cython"].height > 0:
+                    cython_rows = pdist_results["cython"].filter(
+                        (pl.col("distance_type") == distance_type)
+                        & (pl.col("trajectory_length") == traj_length)
+                    )
+                    if cython_rows.height > 0:
+                        row = cython_rows.row(0, named=True)
+                        times = row["times"]
+                        if times:
+                            row_data["cython"] = (
+                                np.median(times) if use_median else np.mean(times)
+                            )
+                            row_data["num_distances"] = row["num_distances"]
+
+                # Get Rust sequential results
+                if "rust" in pdist_results:
+                    rust_rows = pdist_results["rust"].filter(
+                        (pl.col("distance_type") == distance_type)
+                        & (pl.col("trajectory_length") == traj_length)
+                        & (not pl.col("parallel"))
+                    )
+                    if rust_rows.height > 0:
+                        row = rust_rows.row(0, named=True)
+                        times = row["times"]
+                        if times:
+                            row_data["rust_seq"] = (
+                                np.median(times) if use_median else np.mean(times)
+                            )
+
+                # Get Rust parallel results
+                if "rust" in pdist_results:
+                    rust_rows = pdist_results["rust"].filter(
+                        (pl.col("distance_type") == distance_type)
+                        & (pl.col("trajectory_length") == traj_length)
+                        & (pl.col("parallel"))
+                    )
+                    if rust_rows.height > 0:
+                        row = rust_rows.row(0, named=True)
+                        times = row["times"]
+                        if times:
+                            row_data["rust_par"] = (
+                                np.median(times) if use_median else np.mean(times)
+                            )
+
+                # Calculate speedups
+                num_distances = (
+                    row_data["num_distances"]
+                    if row_data["num_distances"] is not None
+                    else "N/A"
+                )
+                cython_str = (
+                    f"{row_data['cython']*1000:.4f}"
+                    if row_data["cython"] is not None
+                    else "N/A"
+                )
+                rust_seq_str = (
+                    f"{row_data['rust_seq']*1000:.4f}"
+                    if row_data["rust_seq"] is not None
+                    else "N/A"
+                )
+                rust_par_str = (
+                    f"{row_data['rust_par']*1000:.4f}"
+                    if row_data["rust_par"] is not None
+                    else "N/A"
+                )
+
+                speedup_seq = (
+                    row_data["cython"] / row_data["rust_seq"]
+                    if row_data["cython"] and row_data["rust_seq"]
+                    else None
+                )
+                speedup_par = (
+                    row_data["cython"] / row_data["rust_par"]
+                    if row_data["cython"] and row_data["rust_par"]
+                    else None
+                )
+                parallel_eff = (
+                    row_data["rust_seq"] / row_data["rust_par"]
+                    if row_data["rust_seq"] and row_data["rust_par"]
+                    else None
+                )
+
+                speedup_seq_str = f"{speedup_seq:.2f}x" if speedup_seq else "N/A"
+                speedup_par_str = f"{speedup_par:.2f}x" if speedup_par else "N/A"
+                parallel_eff_str = f"{parallel_eff:.3f}x" if parallel_eff else "N/A"
+
+                lines.append(
+                    f"| {distance_type} | {traj_length} | {num_distances} | {cython_str} | {rust_seq_str} | {rust_par_str} | "
+                    f"{speedup_seq_str} | {speedup_par_str} | {parallel_eff_str} |"
+                )
+
+        lines.append("")
+
+    # cdist analysis
+    if (
+        cdist_results["cython"].height > 0
+        or "rust" in cdist_results
+        and cdist_results["rust"].height > 0
+    ):
+        lines.append("### cdist Performance")
+        lines.append("")
+        lines.append(
+            "Performance for distance computation between two trajectory collections with varying trajectory lengths:"
+        )
+        lines.append("")
+        lines.append(
+            "| Distance Type | Traj Length | Distances | Cython (ms) | Rust Seq (ms) | Rust Par (ms) | Speedup (Seq) | Speedup (Par) | Parallel Efficiency |"
+        )
+        lines.append(
+            "|---------------|-------------|-----------|-------------|--------------|--------------|--------------|--------------|---------------------|"
+        )
+
+        # Get unique trajectory lengths and distance types
+        traj_lengths = set()
+        distance_types = set()
+        for impl, df in cdist_results.items():
+            if df.height > 0:
+                traj_lengths.update(df["trajectory_length"].unique().to_list())
+                distance_types.update(df["distance_type"].unique().to_list())
+
+        for distance_type in sorted(distance_types):
+            for traj_length in sorted(traj_lengths):
+                row_data = {
+                    "cython": None,
+                    "rust_seq": None,
+                    "rust_par": None,
+                    "num_distances": None,
+                }
+
+                # Get Cython results
+                if cdist_results["cython"].height > 0:
+                    cython_rows = cdist_results["cython"].filter(
+                        (pl.col("distance_type") == distance_type)
+                        & (pl.col("trajectory_length") == traj_length)
+                    )
+                    if cython_rows.height > 0:
+                        row = cython_rows.row(0, named=True)
+                        times = row["times"]
+                        if times:
+                            row_data["cython"] = (
+                                np.median(times) if use_median else np.mean(times)
+                            )
+                            row_data["num_distances"] = row["num_distances"]
+
+                # Get Rust sequential results
+                if "rust" in cdist_results:
+                    rust_rows = cdist_results["rust"].filter(
+                        (pl.col("distance_type") == distance_type)
+                        & (pl.col("trajectory_length") == traj_length)
+                        & (not pl.col("parallel"))
+                    )
+                    if rust_rows.height > 0:
+                        row = rust_rows.row(0, named=True)
+                        times = row["times"]
+                        if times:
+                            row_data["rust_seq"] = (
+                                np.median(times) if use_median else np.mean(times)
+                            )
+
+                # Get Rust parallel results
+                if "rust" in cdist_results:
+                    rust_rows = cdist_results["rust"].filter(
+                        (pl.col("distance_type") == distance_type)
+                        & (pl.col("trajectory_length") == traj_length)
+                        & (pl.col("parallel"))
+                    )
+                    if rust_rows.height > 0:
+                        row = rust_rows.row(0, named=True)
+                        times = row["times"]
+                        if times:
+                            row_data["rust_par"] = (
+                                np.median(times) if use_median else np.mean(times)
+                            )
+
+                # Calculate speedups
+                num_distances = (
+                    row_data["num_distances"]
+                    if row_data["num_distances"] is not None
+                    else "N/A"
+                )
+                cython_str = (
+                    f"{row_data['cython']*1000:.4f}"
+                    if row_data["cython"] is not None
+                    else "N/A"
+                )
+                rust_seq_str = (
+                    f"{row_data['rust_seq']*1000:.4f}"
+                    if row_data["rust_seq"] is not None
+                    else "N/A"
+                )
+                rust_par_str = (
+                    f"{row_data['rust_par']*1000:.4f}"
+                    if row_data["rust_par"] is not None
+                    else "N/A"
+                )
+
+                speedup_seq = (
+                    row_data["cython"] / row_data["rust_seq"]
+                    if row_data["cython"] and row_data["rust_seq"]
+                    else None
+                )
+                speedup_par = (
+                    row_data["cython"] / row_data["rust_par"]
+                    if row_data["cython"] and row_data["rust_par"]
+                    else None
+                )
+                parallel_eff = (
+                    row_data["rust_seq"] / row_data["rust_par"]
+                    if row_data["rust_seq"] and row_data["rust_par"]
+                    else None
+                )
+
+                speedup_seq_str = f"{speedup_seq:.2f}x" if speedup_seq else "N/A"
+                speedup_par_str = f"{speedup_par:.2f}x" if speedup_par else "N/A"
+                parallel_eff_str = f"{parallel_eff:.3f}x" if parallel_eff else "N/A"
+
+                lines.append(
+                    f"| {distance_type} | {traj_length} | {num_distances} | {cython_str} | {rust_seq_str} | {rust_par_str} | "
+                    f"{speedup_seq_str} | {speedup_par_str} | {parallel_eff_str} |"
+                )
+
+        lines.append("")
+
+    # Batch computation summary
+    lines.append("### Batch Computation Summary")
+    lines.append("")
+
+    # Calculate overall speedups by distance type
+    for distance_type in ["euclidean", "spherical"]:
+        lines.append(f"**{distance_type.capitalize()} Distance**:")
+
+        # Collect pdist speedups
+        pdist_speedups_seq = []
+        pdist_speedups_par = []
+
+        if "cython" in pdist_results and "rust" in pdist_results:
+            for traj_length in sorted(traj_lengths):
+                cython_time = None
+                rust_seq_time = None
+                rust_par_time = None
+
+                cython_rows = pdist_results["cython"].filter(
+                    (pl.col("distance_type") == distance_type)
+                    & (pl.col("trajectory_length") == traj_length)
+                )
+                if cython_rows.height > 0:
+                    row = cython_rows.row(0, named=True)
+                    times = row["times"]
+                    if times:
+                        cython_time = np.median(times) if use_median else np.mean(times)
+
+                rust_rows = pdist_results["rust"].filter(
+                    (pl.col("distance_type") == distance_type)
+                    & (pl.col("trajectory_length") == traj_length)
+                    & (not pl.col("parallel"))
+                )
+                if rust_rows.height > 0:
+                    row = rust_rows.row(0, named=True)
+                    times = row["times"]
+                    if times:
+                        rust_seq_time = (
+                            np.median(times) if use_median else np.mean(times)
+                        )
+
+                rust_rows = pdist_results["rust"].filter(
+                    (pl.col("distance_type") == distance_type)
+                    & (pl.col("trajectory_length") == traj_length)
+                    & (pl.col("parallel"))
+                )
+                if rust_rows.height > 0:
+                    row = rust_rows.row(0, named=True)
+                    times = row["times"]
+                    if times:
+                        rust_par_time = (
+                            np.median(times) if use_median else np.mean(times)
+                        )
+
+                if cython_time and rust_seq_time and rust_seq_time > 0:
+                    pdist_speedups_seq.append(cython_time / rust_seq_time)
+                if cython_time and rust_par_time and rust_par_time > 0:
+                    pdist_speedups_par.append(cython_time / rust_par_time)
+
+        if pdist_speedups_seq:
+            avg_seq = np.mean(pdist_speedups_seq)
+            lines.append(
+                f"- **pdist** - Rust (sequential) vs Cython: Average {avg_seq:.2f}x speedup (range: {np.min(pdist_speedups_seq):.2f}x - {np.max(pdist_speedups_seq):.2f}x)"
+            )
+        if pdist_speedups_par:
+            avg_par = np.mean(pdist_speedups_par)
+            lines.append(
+                f"- **pdist** - Rust (parallel) vs Cython: Average {avg_par:.2f}x speedup (range: {np.min(pdist_speedups_par):.2f}x - {np.max(pdist_speedups_par):.2f}x)"
+            )
+
+        # Collect cdist speedups
+        cdist_speedups_seq = []
+        cdist_speedups_par = []
+
+        if "cython" in cdist_results and "rust" in cdist_results:
+            for traj_length in sorted(traj_lengths):
+                cython_time = None
+                rust_seq_time = None
+                rust_par_time = None
+
+                cython_rows = cdist_results["cython"].filter(
+                    (pl.col("distance_type") == distance_type)
+                    & (pl.col("trajectory_length") == traj_length)
+                )
+                if cython_rows.height > 0:
+                    row = cython_rows.row(0, named=True)
+                    times = row["times"]
+                    if times:
+                        cython_time = np.median(times) if use_median else np.mean(times)
+
+                rust_rows = cdist_results["rust"].filter(
+                    (pl.col("distance_type") == distance_type)
+                    & (pl.col("trajectory_length") == traj_length)
+                    & (not pl.col("parallel"))
+                )
+                if rust_rows.height > 0:
+                    row = rust_rows.row(0, named=True)
+                    times = row["times"]
+                    if times:
+                        rust_seq_time = (
+                            np.median(times) if use_median else np.mean(times)
+                        )
+
+                rust_rows = cdist_results["rust"].filter(
+                    (pl.col("distance_type") == distance_type)
+                    & (pl.col("trajectory_length") == traj_length)
+                    & (pl.col("parallel"))
+                )
+                if rust_rows.height > 0:
+                    row = rust_rows.row(0, named=True)
+                    times = row["times"]
+                    if times:
+                        rust_par_time = (
+                            np.median(times) if use_median else np.mean(times)
+                        )
+
+                if cython_time and rust_seq_time and rust_seq_time > 0:
+                    cdist_speedups_seq.append(cython_time / rust_seq_time)
+                if cython_time and rust_par_time and rust_par_time > 0:
+                    cdist_speedups_par.append(cython_time / rust_par_time)
+
+        if cdist_speedups_seq:
+            avg_seq = np.mean(cdist_speedups_seq)
+            lines.append(
+                f"- **cdist** - Rust (sequential) vs Cython: Average {avg_seq:.2f}x speedup (range: {np.min(cdist_speedups_seq):.2f}x - {np.max(cdist_speedups_seq):.2f}x)"
+            )
+        if cdist_speedups_par:
+            avg_par = np.mean(cdist_speedups_par)
+            lines.append(
+                f"- **cdist** - Rust (parallel) vs Cython: Average {avg_par:.2f}x speedup (range: {np.min(cdist_speedups_par):.2f}x - {np.max(cdist_speedups_par):.2f}x)"
+            )
+
+        lines.append("")
+
+    lines.append(
+        "**Note**: Parallel efficiency measures how much faster the parallel implementation is compared to the sequential implementation. For small datasets, parallel overhead may outweigh benefits."
+    )
+
+    return "\n".join(lines)
+
+
 def generate_markdown_report(
     comparison_results: List[Dict[str, Any]],
+    output_dir: Path,
     use_median: bool = True,
 ) -> str:
-    """生成 Markdown 格式的报告"""
-    central_metric = "中位数" if use_median else "平均值"
+    """Generate Markdown format report"""
+    central_metric = "Median" if use_median else "Mean"
 
     lines = []
-    lines.append("# 性能测试报告")
+    lines.append("# Performance Benchmark Report")
     lines.append("")
-    lines.append(f"**统计指标**: {central_metric}")
+    lines.append(f"**Statistical Metric**: {central_metric}")
     lines.append("")
 
-    # 汇总表
-    lines.append("## 汇总表")
+    # Summary table
+    lines.append("## Summary Table")
     lines.append("")
-    # 汇总表列顺序：算法、距离类型、超参数、Rust、Cython、Python、Rust/Cython、Rust/Python
-    lines.append("| 算法 | 距离类型 | 超参数 | Rust | Cython | Python | Rust/Cython | Rust/Python |")
-    lines.append("|------|----------|--------|------|--------|--------|-------------|-------------|")
+    # Summary table column order: Algorithm, Distance Type, Hyperparameters, Rust, Cython, Python, Rust/Cython, Rust/Python
+    lines.append(
+        "| Algorithm | Distance Type | Hyperparameters | Rust | Cython | Python | Rust/Cython | Rust/Python |"
+    )
+    lines.append(
+        "|-----------|---------------|-----------------|------|--------|--------|-------------|-------------|"
+    )
 
     for result in comparison_results:
         impl_stats = result["implementations"]
@@ -246,8 +734,8 @@ def generate_markdown_report(
 
     lines.append("")
 
-    # 详细统计表
-    lines.append("## 详细统计")
+    # Detailed statistics table
+    lines.append("## Detailed Statistics")
     lines.append("")
 
     for result in comparison_results:
@@ -257,16 +745,20 @@ def generate_markdown_report(
 
         lines.append(f"### {algorithm.upper()} ({distance_type})")
         if hyperparam != "N/A":
-            lines.append(f"超参数: {hyperparam}")
+            lines.append(f"Hyperparameters: {hyperparam}")
         lines.append("")
 
         impl_stats = result["implementations"]
 
-        # 创建耗时统计表格 - 顺序：Rust、Cython、Python
-        lines.append("#### 耗时统计")
+        # Create time statistics table - order: Rust, Cython, Python
+        lines.append("#### Time Statistics")
         lines.append("")
-        lines.append("| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |")
-        lines.append("|------|-------------|-------------|-------------|-------------|-------------|--------------|")
+        lines.append(
+            "| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |"
+        )
+        lines.append(
+            "|----------------|-------------|-----------|--------------|----------|----------|--------|"
+        )
 
         for impl in ["rust", "cython", "python"]:
             if impl in impl_stats:
@@ -278,8 +770,8 @@ def generate_markdown_report(
 
         lines.append("")
 
-        # 性能提升 - 重点突出 Rust vs Cython，删除 Cython vs Python
-        lines.append("#### 性能提升")
+        # Performance improvement - focus on Rust vs Cython, remove Cython vs Python
+        lines.append("#### Performance Improvement")
         lines.append("")
 
         if "rust_vs_cython" in result:
@@ -289,13 +781,15 @@ def generate_markdown_report(
 
         lines.append("")
 
-    # 按算法分析
-    lines.append("## 按算法分析")
+    # Analysis by algorithm
+    lines.append("## Analysis by Algorithm")
     lines.append("")
-    lines.append("各算法在不同实现下的性能表现对比：")
+    lines.append(
+        "Performance comparison across different implementations for each algorithm:"
+    )
     lines.append("")
 
-    # 按算法分组
+    # Group by algorithm
     algorithm_stats = {}
     for result in comparison_results:
         algorithm = result["algorithm"]
@@ -318,24 +812,25 @@ def generate_markdown_report(
 
         if rust_vs_cython_speedups:
             avg = np.mean(rust_vs_cython_speedups)
-            lines.append(f"- **Rust vs Cython**: 平均提升 {avg:.2f}x (范围: {np.min(rust_vs_cython_speedups):.2f}x - {np.max(rust_vs_cython_speedups):.2f}x)")
+            lines.append(
+                f"- **Rust vs Cython**: Average improvement {avg:.2f}x (range: {np.min(rust_vs_cython_speedups):.2f}x - {np.max(rust_vs_cython_speedups):.2f}x)"
+            )
         if rust_vs_python_speedups:
             avg = np.mean(rust_vs_python_speedups)
-            lines.append(f"- Rust vs Python: 平均提升 {avg:.2f}x (范围: {np.min(rust_vs_python_speedups):.2f}x - {np.max(rust_vs_python_speedups):.2f}x)")
+            lines.append(
+                f"- Rust vs Python: Average improvement {avg:.2f}x (range: {np.min(rust_vs_python_speedups):.2f}x - {np.max(rust_vs_python_speedups):.2f}x)"
+            )
 
         lines.append("")
 
-    # 按距离类型分析
-    lines.append("## 按距离类型分析")
+    # Analysis by distance type
+    lines.append("## Analysis by Distance Type")
     lines.append("")
-    lines.append("不同距离类型下的性能表现对比：")
+    lines.append("Performance comparison across different distance types:")
     lines.append("")
 
-    # 按距离类型分组
-    distance_type_stats = {
-        "euclidean": [],
-        "spherical": []
-    }
+    # Group by distance type
+    distance_type_stats = {"euclidean": [], "spherical": []}
 
     for result in comparison_results:
         distance_type = result["distance_type"]
@@ -343,7 +838,7 @@ def generate_markdown_report(
             distance_type_stats[distance_type].append(result)
 
     for distance_type in ["euclidean", "spherical"]:
-        lines.append(f"### {distance_type.upper()} 距离")
+        lines.append(f"### {distance_type.upper()} Distance")
         lines.append("")
 
         rust_vs_cython_speedups = []
@@ -357,28 +852,37 @@ def generate_markdown_report(
 
         if rust_vs_cython_speedups:
             avg = np.mean(rust_vs_cython_speedups)
-            lines.append(f"- **Rust vs Cython**: 平均提升 {avg:.2f}x (范围: {np.min(rust_vs_cython_speedups):.2f}x - {np.max(rust_vs_cython_speedups):.2f}x)")
+            lines.append(
+                f"- **Rust vs Cython**: Average improvement {avg:.2f}x (range: {np.min(rust_vs_cython_speedups):.2f}x - {np.max(rust_vs_cython_speedups):.2f}x)"
+            )
         if rust_vs_python_speedups:
             avg = np.mean(rust_vs_python_speedups)
-            lines.append(f"- Rust vs Python: 平均提升 {avg:.2f}x (范围: {np.min(rust_vs_python_speedups):.2f}x - {np.max(rust_vs_python_speedups):.2f}x)")
+            lines.append(
+                f"- Rust vs Python: Average improvement {avg:.2f}x (range: {np.min(rust_vs_python_speedups):.2f}x - {np.max(rust_vs_python_speedups):.2f}x)"
+            )
 
-        # 找出该距离类型下性能提升最高的算法（基于 Rust vs Cython）
+        # Find the algorithm with the best performance improvement for this distance type (based on Rust vs Cython)
         if rust_vs_cython_speedups:
             max_speedup = np.max(rust_vs_cython_speedups)
             best_algo = None
             for result in distance_type_stats[distance_type]:
-                if "rust_vs_cython" in result and result["rust_vs_cython"] == max_speedup:
+                if (
+                    "rust_vs_cython" in result
+                    and result["rust_vs_cython"] == max_speedup
+                ):
                     best_algo = result["algorithm"]
                     break
-            lines.append(f"- **最佳性能提升算法**: {best_algo} ({max_speedup:.2f}x)")
+            lines.append(
+                f"- **Best Performance Improvement Algorithm**: {best_algo} ({max_speedup:.2f}x)"
+            )
 
         lines.append("")
 
-    # 总体统计
-    lines.append("## 总体统计")
+    # Overall statistics
+    lines.append("## Overall Statistics")
     lines.append("")
 
-    # 计算各实现的总体平均时间
+    # Calculate overall average time for each implementation
     overall_stats = {
         "python": {"times": []},
         "cython": {"times": []},
@@ -390,28 +894,39 @@ def generate_markdown_report(
             if impl in overall_stats:
                 overall_stats[impl]["times"].append(stats["central"])
 
-    # 按顺序输出：Rust、Cython、Python
+    # Output in order: Rust, Cython, Python
     for impl in ["rust", "cython", "python"]:
         if overall_stats[impl]["times"]:
             avg_time = np.mean(overall_stats[impl]["times"])
-            lines.append(f"- {impl.upper()} 总体平均时间: {avg_time*1000:.4f} ms")
+            lines.append(
+                f"- {impl.upper()} overall average time: {avg_time*1000:.4f} ms"
+            )
 
     lines.append("")
 
-    # 计算总体性能提升：Rust vs Cython、Rust vs Python
+    # Calculate overall performance improvement: Rust vs Cython, Rust vs Python
     if "rust" in overall_stats and "cython" in overall_stats:
         if overall_stats["rust"]["times"] and overall_stats["cython"]["times"]:
             rust_avg = np.mean(overall_stats["rust"]["times"])
             cython_avg = np.mean(overall_stats["cython"]["times"])
             if rust_avg > 0:
-                lines.append(f"- Rust vs Cython 总体平均提升: {cython_avg/rust_avg:.2f}x")
+                lines.append(
+                    f"- Rust vs Cython overall average improvement: {cython_avg/rust_avg:.2f}x"
+                )
 
     if "rust" in overall_stats and "python" in overall_stats:
         if overall_stats["rust"]["times"] and overall_stats["python"]["times"]:
             rust_avg = np.mean(overall_stats["rust"]["times"])
             python_avg = np.mean(overall_stats["python"]["times"])
             if rust_avg > 0:
-                lines.append(f"- Rust vs Python 总体平均提升: {python_avg/rust_avg:.2f}x")
+                lines.append(
+                    f"- Rust vs Python overall average improvement: {python_avg/rust_avg:.2f}x"
+                )
+
+    # Batch computation analysis
+    batch_report = analyze_batch_computation(output_dir, use_median)
+    if batch_report:
+        lines.append("\n" + batch_report)
 
     return "\n".join(lines)
 
@@ -419,37 +934,39 @@ def generate_markdown_report(
 def main():
     args = parse_args()
 
-    # 确定使用中位数还是平均值
+    # Determine whether to use median or mean
     use_median = args.use_median and not args.use_mean
 
-    # 创建输出目录
+    # Create output directory
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # 加载所有 benchmark 结果
+    # Load all benchmark results
     results = load_benchmark_results(output_dir)
 
     if not results:
-        raise ValueError("错误: 没有找到任何 benchmark 结果文件")
+        raise ValueError("Error: No benchmark result files found")
 
-    # 比较实现
+    # Compare implementations
     comparison_results = compare_implementations(results, use_median)
 
-    # 生成报告
-    report = generate_markdown_report(comparison_results, use_median)
+    # Generate report
+    report = generate_markdown_report(comparison_results, output_dir, use_median)
 
-    # 保存报告
+    # Save report
     output_path = output_dir / args.output_file
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(report)
 
-    print(f"\n报告已保存到: {output_path}")
+    print(f"\nReport saved to: {output_path}")
 
-    # 打印汇总表
+    # Print summary table
     print("\n" + "=" * 100)
-    print("性能对比汇总")
+    print("Performance Comparison Summary")
     print("=" * 100)
-    print(f"\n{'算法':<15} {'距离类型':<12} {'超参数':<20} {'Python(ms)':<15} {'Cython(ms)':<15} {'Rust(ms)':<15} {'Rust/C':<10} {'Rust/P':<10} {'C/P':<10}")
+    print(
+        f"\n{'Algorithm':<15} {'Distance Type':<12} {'Hyperparameters':<20} {'Python(ms)':<15} {'Cython(ms)':<15} {'Rust(ms)':<15} {'Rust/C':<10} {'Rust/P':<10} {'C/P':<10}"
+    )
     print("-" * 140)
 
     for result in comparison_results:
