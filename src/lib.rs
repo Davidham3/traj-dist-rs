@@ -56,6 +56,13 @@ fn _lib(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Register the DpResult class
     m.add_class::<crate::binding::PyDpResult>()?;
 
+    // Register the Metric class for batch computation
+    m.add_class::<crate::binding::batch::PyMetric>()?;
+
+    // Register batch computation functions
+    m.add_function(wrap_pyfunction!(crate::binding::batch::pdist, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::binding::batch::cdist, m)?)?;
+
     // Register distance functions
     m.add_function(wrap_pyfunction!(crate::binding::distance::sspd::sspd, m)?)?;
     m.add_function(wrap_pyfunction!(crate::binding::distance::dtw::dtw, m)?)?;
@@ -101,5 +108,12 @@ fn _lib(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
         crate::binding::distance::erp::erp_standard_with_matrix,
         m
     )?)?;
+
+    // Register helper function for pickle deserialization
+    m.add_function(wrap_pyfunction!(
+        crate::binding::__dp_result_from_pickle,
+        m
+    )?)?;
+
     Ok(())
 }

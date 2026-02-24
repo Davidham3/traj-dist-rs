@@ -3,6 +3,7 @@ use crate::distance::distance_type::DistanceType;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
+use std::str::FromStr;
 
 /// Compute the Hausdorff distance between two trajectories
 ///
@@ -25,9 +26,9 @@ use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn hausdorff(
-    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]]", imports=("typing")))]
+    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]] | numpy.ndarray", imports=("typing", "numpy")))]
     t1: &Bound<'_, PyAny>,
-    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]]", imports=("typing")))]
+    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]] | numpy.ndarray", imports=("typing", "numpy")))]
     t2: &Bound<'_, PyAny>,
     dist_type: String,
 ) -> PyResult<f64> {
@@ -35,17 +36,13 @@ pub fn hausdorff(
     let traj1 = PyTrajectoryType::try_from(t1)?;
     let traj2 = PyTrajectoryType::try_from(t2)?;
 
-    // Compute distance based on type (PyTrajectoryType implements CoordSequence)
-    let distance_type = match dist_type.to_lowercase().as_str() {
-        "euclidean" => DistanceType::Euclidean,
-        "spherical" => DistanceType::Spherical,
-        _ => {
-            return Err(PyValueError::new_err(format!(
-                "Invalid distance type '{}'. Expected 'euclidean' or 'spherical'",
-                dist_type
-            )));
-        }
-    };
+    // Parse distance type using FromStr from strum
+    let distance_type = DistanceType::from_str(&dist_type).map_err(|_| {
+        PyValueError::new_err(format!(
+            "Invalid distance type '{}'. Expected 'euclidean' or 'spherical'",
+            dist_type
+        ))
+    })?;
 
     // Hausdorff distance requires direct access to trajectory coordinates
     // to compute point-to-segment distances, so we use the CoordSequence version

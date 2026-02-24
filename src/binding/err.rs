@@ -5,9 +5,10 @@ use crate::err::TrajDistError;
 impl From<TrajDistError> for PyErr {
     fn from(err: TrajDistError) -> PyErr {
         match err {
-            TrajDistError::InvalidCoordinate(n) => {
-                PyValueError::new_err(format!("Coordinates must contain two values (longitude, latitude), but received {}", n))
-            }
+            TrajDistError::InvalidCoordinate(n) => PyValueError::new_err(format!(
+                "Coordinates must contain two values (longitude, latitude), but received {}",
+                n
+            )),
             TrajDistError::InvalidParams(s) => {
                 PyValueError::new_err(format!("InvalidParams: {}", s))
             }

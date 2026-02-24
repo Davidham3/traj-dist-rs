@@ -668,6 +668,8 @@ mod tests {
 
         let calculator = crate::distance::base::PrecomputedDistanceCalculator::with_extra_distances(
             &distance_matrix,
+            t0.len(),
+            t1.len(),
             Some(&gt0_dist),
             Some(&gt1_dist),
         );

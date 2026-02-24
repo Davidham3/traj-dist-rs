@@ -1,11 +1,11 @@
-/// 测试 README.md 中的 Rust 代码示例
+/// Test Rust code examples in README.md
 ///
-/// 此模块从 README.md 中提取所有 Rust 代码块并编译它们，
-/// 确保文档中的代码示例能够正常编译。
+/// This module extracts all Rust code blocks from README.md and compiles them,
+/// ensuring that code examples in documentation can compile normally.
 use std::fs;
 use std::path::PathBuf;
 
-/// 从 README.md 中提取所有 Rust 代码块
+/// Extract all Rust code blocks from README.md
 fn extract_rust_code_from_readme() -> Result<Vec<String>, Box<dyn std::error::Error>> {
     let mut readme_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     readme_path.push("README.md");
@@ -16,7 +16,7 @@ fn extract_rust_code_from_readme() -> Result<Vec<String>, Box<dyn std::error::Er
 
     let content = fs::read_to_string(&readme_path)?;
 
-    // 提取 ```rust 和 ``` 之间的代码块
+    // Extract code blocks between ```rust and ```
     let mut rust_blocks = Vec::new();
     let mut in_rust_block = false;
     let mut current_block = String::new();
@@ -39,18 +39,18 @@ fn extract_rust_code_from_readme() -> Result<Vec<String>, Box<dyn std::error::Er
     Ok(rust_blocks)
 }
 
-/// 测试单个 Rust 代码块是否能够编译
+/// Test if a single Rust code block can compile
 
 fn test_rust_code_compilation(code: &str, _index: usize) -> Result<(), String> {
     use std::fs;
 
     use std::path::PathBuf;
 
-    // 创建临时测试文件
+    // Create temporary test file
 
     let temp_dir = tempfile::tempdir().map_err(|e| format!("Failed to create temp dir: {}", e))?;
 
-    // 构建 Cargo 项目结构
+    // Build Cargo project structure
 
     let cargo_dir = temp_dir.path().join("readme_test");
 
@@ -58,11 +58,11 @@ fn test_rust_code_compilation(code: &str, _index: usize) -> Result<(), String> {
 
     fs::create_dir_all(&src_dir).map_err(|e| format!("Failed to create directories: {}", e))?;
 
-    // 获取项目根目录的绝对路径
+    // Get absolute path to project root
 
     let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
-    // 创建 Cargo.toml
+    // Create Cargo.toml
 
     let cargo_toml = format!(
         r#"
@@ -88,7 +88,7 @@ traj-dist-rs = {{ path = "{}" }}
     fs::write(cargo_dir.join("Cargo.toml"), cargo_toml)
         .map_err(|e| format!("Failed to write Cargo.toml: {}", e))?;
 
-    // 解析代码，提取 use 语句和主代码
+    // Parse code, extract use statements and main code
 
     let use_statements: Vec<&str> = code
         .lines()
@@ -100,14 +100,14 @@ traj-dist-rs = {{ path = "{}" }}
         .filter(|line| !line.trim().starts_with("use ") && !line.trim().starts_with("fn main()"))
         .collect();
 
-    // 构建完整的 main.rs
+    // Build complete main.rs
 
     let full_code = if code.contains("fn main()") {
-        // 如果代码已经有 main 函数，直接使用
+        // If code already has main function, use directly
 
         code.trim().to_string()
     } else {
-        // 否则，包裹在 main 函数中
+        // Otherwise, wrap in main function
 
         format!(
             r#"
@@ -131,7 +131,7 @@ fn main() {{
     fs::write(src_dir.join("main.rs"), full_code)
         .map_err(|e| format!("Failed to write main.rs: {}", e))?;
 
-    // 尝试编译代码
+    // Try to compile code
 
     let output = std::process::Command::new("cargo")
         .arg("check")
@@ -178,11 +178,11 @@ fn test_readme_rust_examples() {
                 println!("Testing Example {}...", i + 1);
                 println!("-----------------------------------");
 
-                // 显示代码片段（前 200 字符）
+                // Display code snippet (first 200 characters)
                 let code_preview = code.lines().next().unwrap_or("").trim();
                 println!("Code preview: {}...", code_preview);
 
-                // 测试编译
+                // Test compilation
                 match test_rust_code_compilation(code, i + 1) {
                     Ok(_) => {
                         println!("✅ Example {} passed", i + 1);

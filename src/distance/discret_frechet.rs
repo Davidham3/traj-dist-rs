@@ -283,8 +283,11 @@ mod tests {
         let distance_matrix =
             crate::distance::utils::precompute_distance_matrix(&t0, &t1, DistanceType::Euclidean);
 
-        let calculator =
-            crate::distance::base::PrecomputedDistanceCalculator::new(&distance_matrix);
+        let calculator = crate::distance::base::PrecomputedDistanceCalculator::new(
+            &distance_matrix,
+            t0.len(),
+            t1.len(),
+        );
 
         let result = discret_frechet(&calculator, false);
 

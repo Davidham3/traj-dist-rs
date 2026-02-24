@@ -93,28 +93,39 @@ where
 }
 
 /// Distance calculator based on precomputed distances
+///
+/// This calculator uses a flat array representation for zero-copy NumPy integration.
+/// The distance matrix is stored as a contiguous 1D array with row-major ordering.
 pub struct PrecomputedDistanceCalculator<'a> {
-    distance_matrix: &'a Vec<Vec<f64>>,
-    seq1_extra_dists: Option<&'a Vec<f64>>,
-    seq2_extra_dists: Option<&'a Vec<f64>>,
+    distance_matrix: &'a [f64],
+    seq1_len: usize,
+    seq2_len: usize,
+    seq1_extra_dists: Option<&'a [f64]>,
+    seq2_extra_dists: Option<&'a [f64]>,
 }
 
 impl<'a> PrecomputedDistanceCalculator<'a> {
-    pub fn new(distance_matrix: &'a Vec<Vec<f64>>) -> Self {
+    pub fn new(distance_matrix: &'a [f64], seq1_len: usize, seq2_len: usize) -> Self {
         Self {
+            distance_matrix,
+            seq1_len,
+            seq2_len,
             seq1_extra_dists: None,
             seq2_extra_dists: None,
-            distance_matrix,
         }
     }
 
     pub fn with_extra_distances(
-        distance_matrix: &'a Vec<Vec<f64>>,
-        seq1_dists: Option<&'a Vec<f64>>,
-        seq2_dists: Option<&'a Vec<f64>>,
+        distance_matrix: &'a [f64],
+        seq1_len: usize,
+        seq2_len: usize,
+        seq1_dists: Option<&'a [f64]>,
+        seq2_dists: Option<&'a [f64]>,
     ) -> Self {
         Self {
             distance_matrix,
+            seq1_len,
+            seq2_len,
             seq1_extra_dists: seq1_dists,
             seq2_extra_dists: seq2_dists,
         }
@@ -123,7 +134,8 @@ impl<'a> PrecomputedDistanceCalculator<'a> {
 
 impl<'a> DistanceCalculator for PrecomputedDistanceCalculator<'a> {
     fn dis_between(&self, idx1: usize, idx2: usize) -> f64 {
-        self.distance_matrix[idx1][idx2]
+        // Row-major ordering: index = idx1 * seq2_len + idx2
+        self.distance_matrix[idx1 * self.seq2_len + idx2]
     }
 
     fn compute_dis_for_extra_point<C: AsCoord>(
@@ -140,14 +152,10 @@ impl<'a> DistanceCalculator for PrecomputedDistanceCalculator<'a> {
     }
 
     fn len_seq1(&self) -> usize {
-        self.distance_matrix.len()
+        self.seq1_len
     }
 
     fn len_seq2(&self) -> usize {
-        if self.distance_matrix.is_empty() {
-            0
-        } else {
-            self.distance_matrix[0].len()
-        }
+        self.seq2_len
     }
 }

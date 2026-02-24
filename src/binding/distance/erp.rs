@@ -6,6 +6,7 @@ use crate::traits::{AsCoord, CoordSequence};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
+use std::str::FromStr;
 
 /// Compute the ERP (Edit distance with Real Penalty) distance between two trajectories
 ///
@@ -48,9 +49,9 @@ use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
 #[gen_stub_pyfunction]
 #[pyfunction(signature = (t1, t2, dist_type, g, use_full_matrix=false))]
 pub fn erp_compat_traj_dist(
-    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]]", imports=("typing")))]
+    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]] | numpy.ndarray", imports=("typing", "numpy")))]
     t1: &Bound<'_, PyAny>,
-    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]]", imports=("typing")))]
+    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]] | numpy.ndarray", imports=("typing", "numpy")))]
     t2: &Bound<'_, PyAny>,
     dist_type: String,
     #[gen_stub(
@@ -103,17 +104,13 @@ pub fn erp_compat_traj_dist(
         [sum_x / total, sum_y / total]
     };
 
-    // Compute distance based on type
-    let distance_type = match dist_type.to_lowercase().as_str() {
-        "euclidean" => DistanceType::Euclidean,
-        "spherical" => DistanceType::Spherical,
-        _ => {
-            return Err(PyValueError::new_err(format!(
-                "Invalid distance type '{}'. Expected 'euclidean' or 'spherical'",
-                dist_type
-            )));
-        }
-    };
+    // Parse distance type using FromStr from strum
+    let distance_type = DistanceType::from_str(&dist_type).map_err(|_| {
+        PyValueError::new_err(format!(
+            "Invalid distance type '{}'. Expected 'euclidean' or 'spherical'",
+            dist_type
+        ))
+    })?;
 
     let gap_point = PointRef::new(&gap_point, 0);
     let calculator = TrajectoryCalculator::new(&traj1, &traj2, distance_type);
@@ -164,9 +161,9 @@ pub fn erp_compat_traj_dist(
 #[gen_stub_pyfunction]
 #[pyfunction(signature = (t1, t2, dist_type, g, use_full_matrix=false))]
 pub fn erp_standard(
-    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]]", imports=("typing")))]
+    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]] | numpy.ndarray", imports=("typing", "numpy")))]
     t1: &Bound<'_, PyAny>,
-    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]]", imports=("typing")))]
+    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]] | numpy.ndarray", imports=("typing", "numpy")))]
     t2: &Bound<'_, PyAny>,
     dist_type: String,
     #[gen_stub(
@@ -219,17 +216,13 @@ pub fn erp_standard(
         [sum_x / total, sum_y / total]
     };
 
-    // Compute distance based on type
-    let distance_type = match dist_type.to_lowercase().as_str() {
-        "euclidean" => DistanceType::Euclidean,
-        "spherical" => DistanceType::Spherical,
-        _ => {
-            return Err(PyValueError::new_err(format!(
-                "Invalid distance type '{}'. Expected 'euclidean' or 'spherical'",
-                dist_type
-            )));
-        }
-    };
+    // Parse distance type using FromStr from strum
+    let distance_type = DistanceType::from_str(&dist_type).map_err(|_| {
+        PyValueError::new_err(format!(
+            "Invalid distance type '{}'. Expected 'euclidean' or 'spherical'",
+            dist_type
+        ))
+    })?;
 
     let gap_point = PointRef::new(&gap_point, 0);
     let calculator = TrajectoryCalculator::new(&traj1, &traj2, distance_type);
@@ -295,7 +288,7 @@ pub fn erp_compat_traj_dist_with_matrix<'py>(
 ) -> PyResult<PyDpResult> {
     use numpy::{PyArrayMethods, PyUntypedArrayMethods};
 
-    // Convert distance_matrix to Vec<Vec<f64>>
+    // Convert distance_matrix to flat array (zero-copy)
     let dist_array = distance_matrix
         .downcast::<numpy::PyArray2<f64>>()
         .map_err(|_| {
@@ -313,14 +306,21 @@ pub fn erp_compat_traj_dist_with_matrix<'py>(
     }
 
     let n0 = dist_shape[0];
+    let n1 = dist_shape[1];
 
-    let dist_matrix_view = dist_readonly.as_array();
-    let mut distance_matrix_vec: Vec<Vec<f64>> = Vec::with_capacity(n0);
-    for row in dist_matrix_view.rows() {
-        distance_matrix_vec.push(row.to_vec());
+    // Check if array is contiguous (C-order) for zero-copy
+    let dist_view = dist_readonly.as_array();
+    if !dist_view.is_standard_layout() {
+        return Err(PyValueError::new_err(
+            "distance_matrix must be contiguous (C-order)",
+        ));
     }
 
-    // Convert seq0_gap_dists to Vec<f64>
+    // Zero-copy: get raw pointer directly
+    let dist_data_ptr = dist_view.as_ptr();
+    let distance_matrix_slice = unsafe { std::slice::from_raw_parts(dist_data_ptr, n0 * n1) };
+
+    // Convert seq0_gap_dists to slice (zero-copy)
     let seq0_array = seq0_gap_dists
         .downcast::<numpy::PyArray1<f64>>()
         .map_err(|_| {
@@ -328,9 +328,9 @@ pub fn erp_compat_traj_dist_with_matrix<'py>(
         })?;
 
     let seq0_readonly = seq0_array.readonly();
-    let seq0_vec = seq0_readonly.as_slice()?.to_vec();
+    let seq0_slice = seq0_readonly.as_slice()?;
 
-    // Convert seq1_gap_dists to Vec<f64>
+    // Convert seq1_gap_dists to slice (zero-copy)
     let seq1_array = seq1_gap_dists
         .downcast::<numpy::PyArray1<f64>>()
         .map_err(|_| {
@@ -338,20 +338,22 @@ pub fn erp_compat_traj_dist_with_matrix<'py>(
         })?;
 
     let seq1_readonly = seq1_array.readonly();
-    let seq1_vec = seq1_readonly.as_slice()?.to_vec();
+    let seq1_slice = seq1_readonly.as_slice()?;
 
-    // Create a precomputed distance calculator with extra distances
+    // Create a precomputed distance calculator with extra distances (zero-copy)
     let calculator = crate::distance::base::PrecomputedDistanceCalculator::with_extra_distances(
-        &distance_matrix_vec,
-        Some(&seq0_vec),
-        Some(&seq1_vec),
+        distance_matrix_slice,
+        n0,
+        n1,
+        Some(seq0_slice),
+        Some(seq1_slice),
     );
 
     // Compute ERP using the calculator
     let result = crate::distance::erp::erp_compat_traj_dist_with_distances(
         &calculator,
-        &seq0_vec,
-        &seq1_vec,
+        seq0_slice,
+        seq1_slice,
         use_full_matrix,
     );
 
@@ -416,7 +418,7 @@ pub fn erp_standard_with_matrix<'py>(
 ) -> PyResult<PyDpResult> {
     use numpy::{PyArrayMethods, PyUntypedArrayMethods};
 
-    // Convert distance_matrix to Vec<Vec<f64>>
+    // Convert distance_matrix to flat array (zero-copy)
     let dist_array = distance_matrix
         .downcast::<numpy::PyArray2<f64>>()
         .map_err(|_| {
@@ -434,14 +436,21 @@ pub fn erp_standard_with_matrix<'py>(
     }
 
     let n0 = dist_shape[0];
+    let n1 = dist_shape[1];
 
-    let dist_matrix_view = dist_readonly.as_array();
-    let mut distance_matrix_vec: Vec<Vec<f64>> = Vec::with_capacity(n0);
-    for row in dist_matrix_view.rows() {
-        distance_matrix_vec.push(row.to_vec());
+    // Check if array is contiguous (C-order) for zero-copy
+    let dist_view = dist_readonly.as_array();
+    if !dist_view.is_standard_layout() {
+        return Err(PyValueError::new_err(
+            "distance_matrix must be contiguous (C-order)",
+        ));
     }
 
-    // Convert seq0_gap_dists to Vec<f64>
+    // Zero-copy: get raw pointer directly
+    let dist_data_ptr = dist_view.as_ptr();
+    let distance_matrix_slice = unsafe { std::slice::from_raw_parts(dist_data_ptr, n0 * n1) };
+
+    // Convert seq0_gap_dists to slice (zero-copy)
     let seq0_array = seq0_gap_dists
         .downcast::<numpy::PyArray1<f64>>()
         .map_err(|_| {
@@ -449,9 +458,9 @@ pub fn erp_standard_with_matrix<'py>(
         })?;
 
     let seq0_readonly = seq0_array.readonly();
-    let seq0_vec = seq0_readonly.as_slice()?.to_vec();
+    let seq0_slice = seq0_readonly.as_slice()?;
 
-    // Convert seq1_gap_dists to Vec<f64>
+    // Convert seq1_gap_dists to slice (zero-copy)
     let seq1_array = seq1_gap_dists
         .downcast::<numpy::PyArray1<f64>>()
         .map_err(|_| {
@@ -459,20 +468,22 @@ pub fn erp_standard_with_matrix<'py>(
         })?;
 
     let seq1_readonly = seq1_array.readonly();
-    let seq1_vec = seq1_readonly.as_slice()?.to_vec();
+    let seq1_slice = seq1_readonly.as_slice()?;
 
-    // Create a precomputed distance calculator with extra distances
+    // Create a precomputed distance calculator with extra distances (zero-copy)
     let calculator = crate::distance::base::PrecomputedDistanceCalculator::with_extra_distances(
-        &distance_matrix_vec,
-        Some(&seq0_vec),
-        Some(&seq1_vec),
+        distance_matrix_slice,
+        n0,
+        n1,
+        Some(seq0_slice),
+        Some(seq1_slice),
     );
 
     // Compute ERP using the calculator
     let result = crate::distance::erp::erp_standard_with_distances(
         &calculator,
-        &seq0_vec,
-        &seq1_vec,
+        seq0_slice,
+        seq1_slice,
         use_full_matrix,
     );
 

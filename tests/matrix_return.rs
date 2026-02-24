@@ -246,7 +246,8 @@ fn test_dtw_with_precomputed_matrix() {
     let distance_matrix = precompute_distance_matrix(&traj1, &traj2, DistanceType::Euclidean);
 
     // Use PrecomputedDistanceCalculator
-    let precomp_calc = PrecomputedDistanceCalculator::new(&distance_matrix);
+    let precomp_calc =
+        PrecomputedDistanceCalculator::new(&distance_matrix, traj1.len(), traj2.len());
 
     let result = dtw(&precomp_calc, true);
 
@@ -272,7 +273,8 @@ fn test_dtw_consistency_between_calculators() {
 
     // Using PrecomputedDistanceCalculator
     let distance_matrix = precompute_distance_matrix(&traj1, &traj2, DistanceType::Euclidean);
-    let precomp_calc = PrecomputedDistanceCalculator::new(&distance_matrix);
+    let precomp_calc =
+        PrecomputedDistanceCalculator::new(&distance_matrix, traj1.len(), traj2.len());
     let result_precomp = dtw(&precomp_calc, true);
 
     // Both should produce the same distance and matrix
@@ -318,7 +320,8 @@ fn test_discret_frechet_consistency_between_calculators() {
 
     // Using PrecomputedDistanceCalculator
     let distance_matrix = precompute_distance_matrix(&traj1, &traj2, DistanceType::Euclidean);
-    let precomp_calc = PrecomputedDistanceCalculator::new(&distance_matrix);
+    let precomp_calc =
+        PrecomputedDistanceCalculator::new(&distance_matrix, traj1.len(), traj2.len());
     let result_precomp = discret_frechet(&precomp_calc, true);
 
     // Both should produce the same distance and matrix

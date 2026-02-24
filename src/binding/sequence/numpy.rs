@@ -13,6 +13,12 @@ pub struct TrajectoryRef<'a> {
     _phantom: PhantomData<&'a f64>,
 }
 
+// SAFETY: TrajectoryRef only contains a pointer to immutable NumPy array data
+// that is guaranteed to be valid for the lifetime 'a. The pointer is never
+// dereferenced mutably, so it's safe to share between threads.
+unsafe impl<'a> Send for TrajectoryRef<'a> {}
+unsafe impl<'a> Sync for TrajectoryRef<'a> {}
+
 impl<'a> TrajectoryRef<'a> {
     pub fn new(array: PyReadonlyArray2<'a, f64>) -> Result<Self, TrajDistError> {
         let shape = array.shape();

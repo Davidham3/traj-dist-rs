@@ -5,6 +5,7 @@ use crate::distance::distance_type::DistanceType;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
+use std::str::FromStr;
 
 /// Compute the EDR (Edit Distance on Real sequence) distance between two trajectories
 ///
@@ -41,9 +42,9 @@ use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
 #[gen_stub_pyfunction]
 #[pyfunction(signature = (t1, t2, dist_type, eps, use_full_matrix=false))]
 pub fn edr(
-    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]]", imports=("typing")))]
+    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]] | numpy.ndarray", imports=("typing", "numpy")))]
     t1: &Bound<'_, PyAny>,
-    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]]", imports=("typing")))]
+    #[gen_stub(override_type(type_repr="typing.List[typing.List[float]] | numpy.ndarray", imports=("typing", "numpy")))]
     t2: &Bound<'_, PyAny>,
     dist_type: String,
     eps: f64,
@@ -53,17 +54,13 @@ pub fn edr(
     let traj1 = PyTrajectoryType::try_from(t1)?;
     let traj2 = PyTrajectoryType::try_from(t2)?;
 
-    // Compute distance based on type
-    let distance_type = match dist_type.to_lowercase().as_str() {
-        "euclidean" => DistanceType::Euclidean,
-        "spherical" => DistanceType::Spherical,
-        _ => {
-            return Err(PyValueError::new_err(format!(
-                "Invalid distance type '{}'. Expected 'euclidean' or 'spherical'",
-                dist_type
-            )));
-        }
-    };
+    // Parse distance type using FromStr from strum
+    let distance_type = DistanceType::from_str(&dist_type).map_err(|_| {
+        PyValueError::new_err(format!(
+            "Invalid distance type '{}'. Expected 'euclidean' or 'spherical'",
+            dist_type
+        ))
+    })?;
 
     let calculator = TrajectoryCalculator::new(&traj1, &traj2, distance_type);
     let result = crate::distance::edr::edr(&calculator, eps, use_full_matrix);
@@ -135,17 +132,23 @@ pub fn edr_with_matrix<'py>(
     }
 
     let n0 = shape[0];
+    let n1 = shape[1];
 
-    // Convert to Vec<Vec<f64>>
-    let matrix_view = readonly_array.as_array();
-    let mut distance_matrix_vec: Vec<Vec<f64>> = Vec::with_capacity(n0);
-    for row in matrix_view.rows() {
-        distance_matrix_vec.push(row.to_vec());
+    // Check if array is contiguous (C-order) for zero-copy
+    let view = readonly_array.as_array();
+    if !view.is_standard_layout() {
+        return Err(PyValueError::new_err(
+            "distance_matrix must be contiguous (C-order)",
+        ));
     }
 
-    // Create a precomputed distance calculator
+    // Zero-copy: get raw pointer directly
+    let data_ptr = view.as_ptr();
+    let distance_matrix_slice = unsafe { std::slice::from_raw_parts(data_ptr, n0 * n1) };
+
+    // Create a precomputed distance calculator with flat array (zero-copy)
     let calculator =
-        crate::distance::base::PrecomputedDistanceCalculator::new(&distance_matrix_vec);
+        crate::distance::base::PrecomputedDistanceCalculator::new(distance_matrix_slice, n0, n1);
 
     // Compute EDR using the calculator
     let result = crate::distance::edr::edr(&calculator, eps, use_full_matrix);

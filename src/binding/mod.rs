@@ -1,4 +1,7 @@
 #[cfg(feature = "python-binding")]
+pub mod batch;
+
+#[cfg(feature = "python-binding")]
 pub mod distance;
 
 #[cfg(feature = "python-binding")]
@@ -14,7 +17,7 @@ use numpy::PyArray1;
 use pyo3::prelude::*;
 
 #[cfg(feature = "python-binding")]
-use pyo3_stub_gen_derive::{gen_stub_pyclass, gen_stub_pymethods};
+use pyo3_stub_gen_derive::{gen_stub_pyclass, gen_stub_pyfunction, gen_stub_pymethods};
 
 /// Python wrapper for the Rust DpResult struct
 ///
@@ -64,4 +67,46 @@ impl PyDpResult {
     fn __str__(&self) -> String {
         self.__repr__()
     }
+
+    /// Pickle serialization support using __reduce__
+    ///
+    /// Uses bincode to serialize the entire DpResult::inner as bytes for better performance.
+    /// Returns a tuple (callable, args) that pickle can use to reconstruct the object.
+    fn __reduce__(&self, py: Python) -> PyResult<(Py<PyAny>, Py<PyAny>, Py<PyAny>)> {
+        use pyo3::prelude::*;
+        use pyo3::types::{PyBytes, PyTuple};
+
+        // Import the module and get the helper function
+        let module = py.import("traj_dist_rs")?;
+        let helper_func = module.getattr("__dp_result_from_pickle")?;
+
+        // Serialize the entire DpResult using bincode
+        let serialized =
+            bincode::encode_to_vec(&self.inner, bincode::config::standard()).map_err(|e| {
+                pyo3::exceptions::PyRuntimeError::new_err(format!("Serialization failed: {}", e))
+            })?;
+
+        // Create args tuple containing the serialized bytes
+        let bytes_py = PyBytes::new(py, &serialized);
+        let args_tuple = PyTuple::new(py, [bytes_py.as_any()])?;
+
+        // Return (helper_func, args, state) where state is None
+        Ok((helper_func.unbind(), args_tuple.unbind().into(), py.None()))
+    }
+}
+
+/// Helper function to create DpResult from pickle data
+///
+/// Deserializes the DpResult from bincode-encoded bytes.
+#[cfg(feature = "python-binding")]
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn __dp_result_from_pickle(
+    #[gen_stub(override_type(type_repr = "bytes"))] data: &[u8],
+) -> PyResult<PyDpResult> {
+    bincode::decode_from_slice(data, bincode::config::standard())
+        .map(|(dp_result, _)| PyDpResult { inner: dp_result })
+        .map_err(|e| {
+            pyo3::exceptions::PyRuntimeError::new_err(format!("Deserialization failed: {}", e))
+        })
 }

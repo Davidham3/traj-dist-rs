@@ -25,7 +25,7 @@
 ///
 /// Contains the computed distance and optionally the full DP matrix.
 /// The matrix is flattened as a 1D vector in row-major order.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, bincode::Encode, bincode::Decode)]
 pub struct DpResult {
     /// The computed distance value
     pub distance: f64,
@@ -61,6 +61,7 @@ impl DpResult {
 }
 
 pub mod base;
+pub mod batch;
 pub mod discret_frechet;
 pub mod distance_type;
 pub mod dtw;
