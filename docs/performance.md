@@ -1,295 +1,349 @@
-# 性能测试报告
+# Performance Benchmark Report
 
-**统计指标**: 中位数
+**Statistical Metric**: Median
 
-## 汇总表
+## Summary Table
 
-| 算法 | 距离类型 | 超参数 | Rust | Cython | Python | Rust/Cython | Rust/Python |
-|------|----------|--------|------|--------|--------|-------------|-------------|
-| discret_frechet | euclidean | eps=None; g=None | 0.0019ms | 0.0126ms | 1.0733ms | 6.52x | 554.07x |
-| dtw | euclidean | eps=None; g=None | 0.0018ms | 0.0151ms | 1.0546ms | 8.53x | 594.74x |
-| dtw | spherical | eps=None; g=None | 0.0086ms | 0.0237ms | 0.9381ms | 2.75x | 108.73x |
-| edr | euclidean | eps=0.01; g=None | 0.0022ms | 0.0132ms | 0.7389ms | 6.06x | 339.62x |
-| edr | spherical | eps=0.01; g=None | 0.0098ms | 0.0205ms | 0.5209ms | 2.08x | 52.97x |
-| erp | euclidean | eps=None; g=[-122.41443, 37.77646] | 0.0034ms | 0.0411ms | 0.6388ms | 12.03x | 187.20x |
-| erp | spherical | eps=None; g=[-122.41443, 37.77646] | 0.0124ms | 0.0650ms | 2.0747ms | 5.24x | 167.14x |
-| hausdorff | euclidean | eps=None; g=None | 0.0030ms | 0.0426ms | 0.9704ms | 14.07x | 320.79x |
-| hausdorff | spherical | eps=None; g=None | 0.0779ms | 0.1786ms | 3.3325ms | 2.29x | 42.76x |
-| lcss | euclidean | eps=0.01; g=None | 0.0019ms | 0.0122ms | 0.7103ms | 6.56x | 381.35x |
-| lcss | spherical | eps=0.01; g=None | 0.0103ms | 0.0204ms | 0.4271ms | 1.97x | 41.30x |
-| sspd | euclidean | eps=None; g=None | 0.0028ms | 0.0447ms | 0.9582ms | 16.13x | 345.70x |
-| sspd | spherical | eps=None; g=None | 0.1102ms | 0.1789ms | 4.5326ms | 1.62x | 41.13x |
+| Algorithm | Distance Type | Hyperparameters | Rust | Cython | Python | Rust/Cython | Rust/Python |
+|-----------|---------------|-----------------|------|--------|--------|-------------|-------------|
+| discret_frechet | euclidean | eps=None; g=None | 0.0011ms | 0.0075ms | 0.5376ms | 6.82x | 488.73x |
+| dtw | euclidean | eps=None; g=None | 0.0009ms | 0.0088ms | 0.5509ms | 9.78x | 612.06x |
+| dtw | spherical | eps=None; g=None | 0.0040ms | 0.0124ms | 0.4879ms | 3.10x | 121.99x |
+| edr | euclidean | eps=0.01; g=None | 0.0012ms | 0.0074ms | 0.4072ms | 6.17x | 339.33x |
+| edr | spherical | eps=0.01; g=None | 0.0044ms | 0.0108ms | 0.2607ms | 2.45x | 59.25x |
+| erp | euclidean | eps=None; g=[-122.41443, 37.77646] | 0.0020ms | 0.0243ms | 0.3381ms | 12.15x | 169.07x |
+| erp | spherical | eps=None; g=[-122.41443, 37.77646] | 0.0057ms | 0.0490ms | 1.1078ms | 8.60x | 194.34x |
+| hausdorff | euclidean | eps=None; g=None | 0.0015ms | 0.0205ms | 0.5484ms | 13.67x | 365.60x |
+| hausdorff | spherical | eps=None; g=None | 0.0377ms | 0.0902ms | 1.8017ms | 2.39x | 47.79x |
+| lcss | euclidean | eps=0.01; g=None | 0.0010ms | 0.0068ms | 0.3532ms | 6.75x | 353.20x |
+| lcss | spherical | eps=0.01; g=None | 0.0041ms | 0.0100ms | 0.2031ms | 2.44x | 49.52x |
+| sspd | euclidean | eps=None; g=None | 0.0017ms | 0.0215ms | 0.6564ms | 12.65x | 386.15x |
+| sspd | spherical | eps=None; g=None | 0.0543ms | 0.0964ms | 2.5505ms | 1.78x | 46.97x |
 
-## 详细统计
+## Detailed Statistics
 
 ### DISCRET_FRECHET (euclidean)
-超参数: eps=None; g=None
+Hyperparameters: eps=None; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0019 | 0.0021 | 0.0012 | 0.0010 | 0.1505 | 54.90 |
-| CYTHON | 0.0126 | 0.0147 | 0.0366 | 0.0042 | 7.9078 | 249.33 |
-| PYTHON | 1.0733 | 1.2719 | 0.9208 | 0.1497 | 27.0066 | 72.39 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0011 | 0.0012 | 0.0006 | 0.0007 | 0.0097 | 52.78 |
+| CYTHON | 0.0075 | 0.0083 | 0.0032 | 0.0040 | 0.0308 | 38.89 |
+| PYTHON | 0.5376 | 0.6172 | 0.3100 | 0.2249 | 2.6063 | 50.23 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 6.52x
-- Rust vs Python: 554.07x
+- **Rust vs Cython**: 6.82x
+- Rust vs Python: 488.73x
 
 ### DTW (euclidean)
-超参数: eps=None; g=None
+Hyperparameters: eps=None; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0018 | 0.0021 | 0.0013 | 0.0010 | 0.1110 | 61.97 |
-| CYTHON | 0.0151 | 0.0172 | 0.0710 | 0.0044 | 10.9811 | 411.81 |
-| PYTHON | 1.0546 | 1.2293 | 0.8072 | 0.1497 | 19.2838 | 65.66 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0009 | 0.0009 | 0.0003 | 0.0006 | 0.0048 | 29.96 |
+| CYTHON | 0.0088 | 0.0097 | 0.0043 | 0.0044 | 0.0664 | 44.85 |
+| PYTHON | 0.5509 | 0.6453 | 0.2961 | 0.2404 | 2.0142 | 45.89 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 8.53x
-- Rust vs Python: 594.74x
+- **Rust vs Cython**: 9.78x
+- Rust vs Python: 612.06x
 
 ### DTW (spherical)
-超参数: eps=None; g=None
+Hyperparameters: eps=None; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0086 | 0.0100 | 0.0326 | 0.0020 | 7.0963 | 326.68 |
-| CYTHON | 0.0237 | 0.0270 | 0.0740 | 0.0055 | 13.0645 | 273.78 |
-| PYTHON | 0.9381 | 1.0933 | 0.7418 | 0.1314 | 19.7951 | 67.85 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0040 | 0.0043 | 0.0016 | 0.0020 | 0.0092 | 37.56 |
+| CYTHON | 0.0124 | 0.0133 | 0.0053 | 0.0057 | 0.0365 | 40.00 |
+| PYTHON | 0.4879 | 0.5314 | 0.2376 | 0.1848 | 1.6567 | 44.72 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 2.75x
-- Rust vs Python: 108.73x
+- **Rust vs Cython**: 3.10x
+- Rust vs Python: 121.99x
 
 ### EDR (euclidean)
-超参数: eps=0.01; g=None
+Hyperparameters: eps=0.01; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0022 | 0.0025 | 0.0013 | 0.0012 | 0.0933 | 53.69 |
-| CYTHON | 0.0132 | 0.0155 | 0.0107 | 0.0033 | 1.1092 | 69.16 |
-| PYTHON | 0.7389 | 0.8665 | 0.6377 | 0.1006 | 21.7618 | 73.60 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0012 | 0.0013 | 0.0005 | 0.0008 | 0.0080 | 36.11 |
+| CYTHON | 0.0074 | 0.0082 | 0.0034 | 0.0035 | 0.0253 | 41.01 |
+| PYTHON | 0.4072 | 0.4476 | 0.2148 | 0.1481 | 1.6577 | 48.00 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 6.06x
-- Rust vs Python: 339.62x
+- **Rust vs Cython**: 6.17x
+- Rust vs Python: 339.33x
 
 ### EDR (spherical)
-超参数: eps=0.01; g=None
+Hyperparameters: eps=0.01; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0098 | 0.0122 | 0.0997 | 0.0023 | 20.1035 | 816.14 |
-| CYTHON | 0.0205 | 0.0237 | 0.0860 | 0.0044 | 13.9327 | 363.01 |
-| PYTHON | 0.5209 | 0.6095 | 0.4324 | 0.0706 | 17.9411 | 70.95 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0044 | 0.0048 | 0.0019 | 0.0022 | 0.0170 | 38.89 |
+| CYTHON | 0.0108 | 0.0124 | 0.0058 | 0.0048 | 0.0393 | 47.01 |
+| PYTHON | 0.2607 | 0.2836 | 0.1280 | 0.0981 | 0.9082 | 45.14 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 2.08x
-- Rust vs Python: 52.97x
+- **Rust vs Cython**: 2.45x
+- Rust vs Python: 59.25x
 
 ### ERP (euclidean)
-超参数: eps=None; g=[-122.41443, 37.77646]
+Hyperparameters: eps=None; g=[-122.41443, 37.77646]
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0034 | 0.0038 | 0.0016 | 0.0023 | 0.1012 | 41.57 |
-| CYTHON | 0.0411 | 0.0491 | 0.1090 | 0.0088 | 12.1774 | 222.02 |
-| PYTHON | 0.6388 | 0.7323 | 0.5141 | 0.1376 | 20.0939 | 70.21 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0020 | 0.0025 | 0.0042 | 0.0016 | 0.0677 | 169.55 |
+| CYTHON | 0.0243 | 0.0256 | 0.0108 | 0.0107 | 0.0990 | 42.32 |
+| PYTHON | 0.3381 | 0.4181 | 0.5273 | 0.1536 | 7.0076 | 126.11 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 12.03x
-- Rust vs Python: 187.20x
+- **Rust vs Cython**: 12.15x
+- Rust vs Python: 169.07x
 
 ### ERP (spherical)
-超参数: eps=None; g=[-122.41443, 37.77646]
+Hyperparameters: eps=None; g=[-122.41443, 37.77646]
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0124 | 0.0141 | 0.0303 | 0.0038 | 4.4511 | 215.60 |
-| CYTHON | 0.0650 | 0.0762 | 0.1397 | 0.0122 | 13.7314 | 183.45 |
-| PYTHON | 2.0747 | 2.4149 | 1.5364 | 0.2974 | 30.6827 | 63.62 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0057 | 0.0065 | 0.0038 | 0.0033 | 0.0591 | 58.90 |
+| CYTHON | 0.0490 | 0.0561 | 0.0293 | 0.0174 | 0.2268 | 52.23 |
+| PYTHON | 1.1078 | 1.2283 | 0.5478 | 0.4133 | 3.4123 | 44.60 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 5.24x
-- Rust vs Python: 167.14x
+- **Rust vs Cython**: 8.60x
+- Rust vs Python: 194.34x
 
 ### HAUSDORFF (euclidean)
-超参数: eps=None; g=None
+Hyperparameters: eps=None; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0030 | 0.0035 | 0.0027 | 0.0013 | 0.3615 | 76.21 |
-| CYTHON | 0.0426 | 0.0462 | 0.0464 | 0.0158 | 4.5596 | 100.46 |
-| PYTHON | 0.9704 | 1.1219 | 0.7552 | 0.1538 | 19.6490 | 67.32 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0015 | 0.0018 | 0.0023 | 0.0009 | 0.0457 | 129.17 |
+| CYTHON | 0.0205 | 0.0218 | 0.0053 | 0.0128 | 0.0529 | 24.38 |
+| PYTHON | 0.5484 | 0.5882 | 0.2619 | 0.2034 | 1.8606 | 44.52 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 14.07x
-- Rust vs Python: 320.79x
+- **Rust vs Cython**: 13.67x
+- Rust vs Python: 365.60x
 
 ### HAUSDORFF (spherical)
-超参数: eps=None; g=None
+Hyperparameters: eps=None; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0779 | 0.0907 | 0.1226 | 0.0095 | 17.0394 | 135.16 |
-| CYTHON | 0.1786 | 0.2111 | 0.2574 | 0.0293 | 21.4406 | 121.95 |
-| PYTHON | 3.3325 | 3.9085 | 2.4974 | 0.3791 | 54.3565 | 63.90 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0377 | 0.0431 | 0.0236 | 0.0152 | 0.3098 | 54.78 |
+| CYTHON | 0.0902 | 0.0987 | 0.0421 | 0.0374 | 0.2439 | 42.68 |
+| PYTHON | 1.8017 | 1.9683 | 0.9336 | 0.6499 | 6.9395 | 47.43 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 2.29x
-- Rust vs Python: 42.76x
+- **Rust vs Cython**: 2.39x
+- Rust vs Python: 47.79x
 
 ### LCSS (euclidean)
-超参数: eps=0.01; g=None
+Hyperparameters: eps=0.01; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0019 | 0.0022 | 0.0046 | 0.0012 | 0.9647 | 213.20 |
-| CYTHON | 0.0122 | 0.0145 | 0.0800 | 0.0032 | 13.0706 | 552.61 |
-| PYTHON | 0.7103 | 0.8274 | 0.5570 | 0.0962 | 20.3571 | 67.32 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0010 | 0.0011 | 0.0010 | 0.0007 | 0.0232 | 96.04 |
+| CYTHON | 0.0068 | 0.0076 | 0.0031 | 0.0032 | 0.0340 | 41.23 |
+| PYTHON | 0.3532 | 0.4059 | 0.1907 | 0.1425 | 1.2419 | 46.98 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 6.56x
-- Rust vs Python: 381.35x
+- **Rust vs Cython**: 6.75x
+- Rust vs Python: 353.20x
 
 ### LCSS (spherical)
-超参数: eps=0.01; g=None
+Hyperparameters: eps=0.01; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0103 | 0.0124 | 0.0516 | 0.0024 | 6.7781 | 415.97 |
-| CYTHON | 0.0204 | 0.0239 | 0.0449 | 0.0042 | 5.4000 | 188.02 |
-| PYTHON | 0.4271 | 0.5029 | 0.4216 | 0.0590 | 18.0151 | 83.84 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0041 | 0.0045 | 0.0018 | 0.0021 | 0.0139 | 39.18 |
+| CYTHON | 0.0100 | 0.0113 | 0.0057 | 0.0047 | 0.0868 | 50.60 |
+| PYTHON | 0.2031 | 0.2240 | 0.0989 | 0.0831 | 0.6964 | 44.13 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 1.97x
-- Rust vs Python: 41.30x
+- **Rust vs Cython**: 2.44x
+- Rust vs Python: 49.52x
 
 ### SSPD (euclidean)
-超参数: eps=None; g=None
+Hyperparameters: eps=None; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.0028 | 0.0033 | 0.0024 | 0.0010 | 0.3483 | 75.08 |
-| CYTHON | 0.0447 | 0.0489 | 0.0850 | 0.0157 | 15.5631 | 173.97 |
-| PYTHON | 0.9582 | 1.1149 | 0.7530 | 0.1547 | 24.1980 | 67.54 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0017 | 0.0019 | 0.0015 | 0.0009 | 0.0310 | 78.81 |
+| CYTHON | 0.0215 | 0.0235 | 0.0100 | 0.0136 | 0.1476 | 42.70 |
+| PYTHON | 0.6564 | 0.8227 | 0.6013 | 0.2140 | 5.7540 | 73.09 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 16.13x
-- Rust vs Python: 345.70x
+- **Rust vs Cython**: 12.65x
+- Rust vs Python: 386.15x
 
 ### SSPD (spherical)
-超参数: eps=None; g=None
+Hyperparameters: eps=None; g=None
 
-#### 耗时统计
+#### Time Statistics
 
-| 实现 | 中位数 (ms) | 平均值 (ms) | 标准差 (ms) | 最小值 (ms) | 最大值 (ms) | 变异系数 (%) |
-|------|-------------|-------------|-------------|-------------|-------------|--------------|
-| RUST | 0.1102 | 0.1308 | 0.1855 | 0.0123 | 20.5743 | 141.78 |
-| CYTHON | 0.1789 | 0.2099 | 0.2456 | 0.0263 | 20.3294 | 116.99 |
-| PYTHON | 4.5326 | 5.3131 | 3.3610 | 0.5060 | 73.5058 | 63.26 |
+| Implementation | Median (ms) | Mean (ms) | Std Dev (ms) | Min (ms) | Max (ms) | CV (%) |
+|----------------|-------------|-----------|--------------|----------|----------|--------|
+| RUST | 0.0543 | 0.0615 | 0.0311 | 0.0217 | 0.2733 | 50.57 |
+| CYTHON | 0.0964 | 0.1108 | 0.0528 | 0.0388 | 0.4146 | 47.69 |
+| PYTHON | 2.5505 | 2.8694 | 1.4265 | 0.9137 | 9.8789 | 49.71 |
 
-#### 性能提升
+#### Performance Improvement
 
-- **Rust vs Cython**: 1.62x
-- Rust vs Python: 41.13x
+- **Rust vs Cython**: 1.78x
+- Rust vs Python: 46.97x
 
-## 按算法分析
+## Analysis by Algorithm
 
-各算法在不同实现下的性能表现对比：
+Performance comparison across different implementations for each algorithm:
 
 ### DISCRET_FRECHET
 
-- **Rust vs Cython**: 平均提升 6.52x (范围: 6.52x - 6.52x)
-- Rust vs Python: 平均提升 554.07x (范围: 554.07x - 554.07x)
+- **Rust vs Cython**: Average improvement 6.82x (range: 6.82x - 6.82x)
+- Rust vs Python: Average improvement 488.73x (range: 488.73x - 488.73x)
 
 ### DTW
 
-- **Rust vs Cython**: 平均提升 5.64x (范围: 2.75x - 8.53x)
-- Rust vs Python: 平均提升 351.73x (范围: 108.73x - 594.74x)
+- **Rust vs Cython**: Average improvement 6.44x (range: 3.10x - 9.78x)
+- Rust vs Python: Average improvement 367.02x (range: 121.99x - 612.06x)
 
 ### EDR
 
-- **Rust vs Cython**: 平均提升 4.07x (范围: 2.08x - 6.06x)
-- Rust vs Python: 平均提升 196.29x (范围: 52.97x - 339.62x)
+- **Rust vs Cython**: Average improvement 4.31x (range: 2.45x - 6.17x)
+- Rust vs Python: Average improvement 199.29x (range: 59.25x - 339.33x)
 
 ### ERP
 
-- **Rust vs Cython**: 平均提升 8.64x (范围: 5.24x - 12.03x)
-- Rust vs Python: 平均提升 177.17x (范围: 167.14x - 187.20x)
+- **Rust vs Cython**: Average improvement 10.37x (range: 8.60x - 12.15x)
+- Rust vs Python: Average improvement 181.71x (range: 169.07x - 194.34x)
 
 ### HAUSDORFF
 
-- **Rust vs Cython**: 平均提升 8.18x (范围: 2.29x - 14.07x)
-- Rust vs Python: 平均提升 181.78x (范围: 42.76x - 320.79x)
+- **Rust vs Cython**: Average improvement 8.03x (range: 2.39x - 13.67x)
+- Rust vs Python: Average improvement 206.70x (range: 47.79x - 365.60x)
 
 ### LCSS
 
-- **Rust vs Cython**: 平均提升 4.27x (范围: 1.97x - 6.56x)
-- Rust vs Python: 平均提升 211.32x (范围: 41.30x - 381.35x)
+- **Rust vs Cython**: Average improvement 4.59x (range: 2.44x - 6.75x)
+- Rust vs Python: Average improvement 201.36x (range: 49.52x - 353.20x)
 
 ### SSPD
 
-- **Rust vs Cython**: 平均提升 8.88x (范围: 1.62x - 16.13x)
-- Rust vs Python: 平均提升 193.42x (范围: 41.13x - 345.70x)
+- **Rust vs Cython**: Average improvement 7.21x (range: 1.78x - 12.65x)
+- Rust vs Python: Average improvement 216.56x (range: 46.97x - 386.15x)
 
-## 按距离类型分析
+## Analysis by Distance Type
 
-不同距离类型下的性能表现对比：
+Performance comparison across different distance types:
 
-### EUCLIDEAN 距离
+### EUCLIDEAN Distance
 
-- **Rust vs Cython**: 平均提升 9.99x (范围: 6.06x - 16.13x)
-- Rust vs Python: 平均提升 389.07x (范围: 187.20x - 594.74x)
-- **最佳性能提升算法**: sspd (16.13x)
+- **Rust vs Cython**: Average improvement 9.71x (range: 6.17x - 13.67x)
+- Rust vs Python: Average improvement 387.74x (range: 169.07x - 612.06x)
+- **Best Performance Improvement Algorithm**: hausdorff (13.67x)
 
-### SPHERICAL 距离
+### SPHERICAL Distance
 
-- **Rust vs Cython**: 平均提升 2.66x (范围: 1.62x - 5.24x)
-- Rust vs Python: 平均提升 75.67x (范围: 41.13x - 167.14x)
-- **最佳性能提升算法**: erp (5.24x)
+- **Rust vs Cython**: Average improvement 3.46x (range: 1.78x - 8.60x)
+- Rust vs Python: Average improvement 86.64x (range: 46.97x - 194.34x)
+- **Best Performance Improvement Algorithm**: erp (8.60x)
 
-## 总体统计
+## Overall Statistics
 
-- RUST 总体平均时间: 0.0189 ms
-- CYTHON 总体平均时间: 0.0514 ms
-- PYTHON 总体平均时间: 1.3823 ms
+- RUST overall average time: 0.0092 ms
+- CYTHON overall average time: 0.0281 ms
+- PYTHON overall average time: 0.7541 ms
 
-- Rust vs Cython 总体平均提升: 2.71x
-- Rust vs Python 总体平均提升: 72.96x
+- Rust vs Cython overall average improvement: 3.06x
+- Rust vs Python overall average improvement: 81.97x
+
+## Batch Computation Performance
+
+Performance comparison for batch distance computation (pdist and cdist):
+
+### Test Configuration
+
+- **Algorithm**: dtw
+- **Number of trajectories**: 5 (fixed)
+- **pdist computation**: 10 distances (5×4/2)
+- **Trajectory lengths tested**: 10, 100, 1000 points
+- **Distance types**: euclidean, spherical
+
+### pdist Performance
+
+Performance for pairwise distance computation (compressed distance matrix) with varying trajectory lengths:
+
+| Distance Type | Traj Length | Distances | Cython (ms) | Rust Seq (ms) | Rust Par (ms) | Speedup (Seq) | Speedup (Par) | Parallel Efficiency |
+|---------------|-------------|-----------|-------------|--------------|--------------|--------------|--------------|---------------------|
+| euclidean | 10 | 10 | 0.1042 | 0.0130 | 0.7254 | 8.02x | 0.14x | 0.018x |
+| euclidean | 100 | 10 | 8.2472 | 0.5305 | 0.7843 | 15.55x | 10.52x | 0.676x |
+| euclidean | 1000 | 10 | 798.9234 | 50.7034 | 9.5785 | 15.76x | 83.41x | 5.293x |
+| spherical | 10 | 10 | 0.1425 | 0.1204 | 0.6776 | 1.18x | 0.21x | 0.178x |
+| spherical | 100 | 10 | 12.0262 | 5.7171 | 2.1539 | 2.10x | 5.58x | 2.654x |
+| spherical | 1000 | 10 | 1262.5977 | 595.2448 | 114.9133 | 2.12x | 10.99x | 5.180x |
+
+### cdist Performance
+
+Performance for distance computation between two trajectory collections with varying trajectory lengths:
+
+| Distance Type | Traj Length | Distances | Cython (ms) | Rust Seq (ms) | Rust Par (ms) | Speedup (Seq) | Speedup (Par) | Parallel Efficiency |
+|---------------|-------------|-----------|-------------|--------------|--------------|--------------|--------------|---------------------|
+| euclidean | 10 | 25 | 0.2187 | 0.0138 | 0.2192 | 15.85x | 1.00x | 0.063x |
+| euclidean | 100 | 25 | 18.2095 | 1.1974 | 1.2021 | 15.21x | 15.15x | 0.996x |
+| euclidean | 1000 | 25 | 1897.6417 | 124.8654 | 31.1265 | 15.20x | 60.97x | 4.012x |
+| spherical | 10 | 25 | 1.4174 | 0.1932 | 0.4156 | 7.34x | 3.41x | 0.465x |
+| spherical | 100 | 25 | 34.5021 | 17.7861 | 5.8351 | 1.94x | 5.91x | 3.048x |
+| spherical | 1000 | 25 | 3302.5918 | 1417.0407 | 461.1969 | 2.33x | 7.16x | 3.073x |
+
+### Batch Computation Summary
+
+**Euclidean Distance**:
+- **pdist** - Rust (sequential) vs Cython: Average 13.11x speedup (range: 8.02x - 15.76x)
+- **pdist** - Rust (parallel) vs Cython: Average 31.36x speedup (range: 0.14x - 83.41x)
+- **cdist** - Rust (sequential) vs Cython: Average 15.42x speedup (range: 15.20x - 15.85x)
+- **cdist** - Rust (parallel) vs Cython: Average 25.70x speedup (range: 1.00x - 60.97x)
+
+**Spherical Distance**:
+- **pdist** - Rust (sequential) vs Cython: Average 1.80x speedup (range: 1.18x - 2.12x)
+- **pdist** - Rust (parallel) vs Cython: Average 5.59x speedup (range: 0.21x - 10.99x)
+- **cdist** - Rust (sequential) vs Cython: Average 3.87x speedup (range: 1.94x - 7.34x)
+- **cdist** - Rust (parallel) vs Cython: Average 5.49x speedup (range: 3.41x - 7.16x)
+
+**Note**: Parallel efficiency measures how much faster the parallel implementation is compared to the sequential implementation. For small datasets, parallel overhead may outweigh benefits.
