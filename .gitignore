@@ -46,10 +46,6 @@ ENV/
 # Rust
 target/
 
-# PyO3 / Maturin
-python/traj_dist_rs/_lib.*
-python/traj_dist_rs/_lib/
-
 # Documentation
 docs/_build/
 

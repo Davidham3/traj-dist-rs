@@ -25,13 +25,14 @@ Examples:
 """
 
 # Import all functions from the compiled Rust module
-from ._lib import (discret_frechet, discret_frechet_with_matrix, dtw,
+from ._lib import (DpResult, Metric, __dp_result_from_pickle, cdist,
+                   discret_frechet, discret_frechet_with_matrix, dtw,
                    dtw_with_matrix, edr, edr_with_matrix, erp_compat_traj_dist,
                    erp_compat_traj_dist_with_matrix, erp_standard,
                    erp_standard_with_matrix, hausdorff, lcss, lcss_with_matrix,
-                   sspd)
+                   pdist, sspd)
 
-__version__ = "0.1.0"
+__version__ = "1.0.0-alpha.1"
 __author__ = "traj-dist-rs contributors"
 __all__ = [
     "sspd",
@@ -48,4 +49,9 @@ __all__ = [
     "erp_compat_traj_dist_with_matrix",
     "erp_standard",
     "erp_standard_with_matrix",
+    "pdist",
+    "cdist",
+    "Metric",
+    "DpResult",
+    "__dp_result_from_pickle",
 ]
