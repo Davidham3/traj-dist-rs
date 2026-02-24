@@ -177,7 +177,7 @@ Compared to the original traj-dist implementation (based on median values from K
 
 ```bash
 cd traj-dist-rs
-pip install pytest numpy polars pyarrow
+uv sync --dev
 pytest py_tests/
 ```
 
@@ -252,12 +252,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Issues**: Report bugs and request features via GitHub Issues
 - **Discussions**: Join discussions about usage and development
 - **Documentation**: Check the [docs](docs/) directory for detailed guides
-
-## 🗺️ Roadmap
-
-For information about upcoming features and releases, see [roadmap_0.1.0a1.md](../roadmap_0.1.0a1.md).
-
----
-
-**Version**: 0.1.0-alpha.1  
-**Last Updated**: 2026-02-05

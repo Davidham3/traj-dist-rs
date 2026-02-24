@@ -832,6 +832,15 @@ wheels = [
 ]
 
 [[package]]
+name = "joblib"
+version = "1.5.3"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/41/f2/d34e8b3a08a9cc79a50b2208a93dce981fe615b64d5a4d4abee421d898df/joblib-1.5.3.tar.gz", hash = "sha256:8561a3269e6801106863fd0d6d84bb737be9e7631e33aaed3fb9ce5953688da3" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/7b/91/984aca2ec129e2757d1e4e3c81c3fcda9d0f85b74670a094cc443d9ee949/joblib-1.5.3-py3-none-any.whl", hash = "sha256:5fc3c5039fc5ca8c0276333a188bbd59d6b7ab37fe6632daa76bc7f9ec18e713" },
+]
+
+[[package]]
 name = "json5"
 version = "0.13.0"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
@@ -2694,7 +2703,7 @@ wheels = [
 
 [[package]]
 name = "traj-dist-rs"
-version = "0.1.0a1"
+version = "1.0.0a1"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
@@ -2704,9 +2713,11 @@ dependencies = [
 dev = [
     { name = "autoflake" },
     { name = "black" },
+    { name = "ipykernel" },
     { name = "ipython", version = "8.38.0", source = { registry = "https://mirrors.aliyun.com/pypi/simple" }, marker = "python_full_version < '3.11'" },
     { name = "ipython", version = "9.9.0", source = { registry = "https://mirrors.aliyun.com/pypi/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "isort" },
+    { name = "joblib" },
     { name = "jupyter" },
     { name = "linkify-it-py" },
     { name = "maturin" },
@@ -2732,8 +2743,10 @@ requires-dist = [{ name = "numpy", specifier = ">=1.21.6" }]
 dev = [
     { name = "autoflake", specifier = ">=2.3.1" },
     { name = "black", specifier = ">=24.8.0" },
+    { name = "ipykernel", specifier = ">=7.1.0" },
     { name = "ipython", specifier = ">=8.38.0" },
     { name = "isort", specifier = ">=5.13.2" },
+    { name = "joblib", specifier = ">=1.5.3" },
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "linkify-it-py", specifier = ">=2.0.3" },
     { name = "maturin", specifier = ">=1.11.5" },
