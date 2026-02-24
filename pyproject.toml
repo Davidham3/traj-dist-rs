@@ -1,6 +1,6 @@
 [project]
 name = "traj-dist-rs"
-version = "0.1.0a3"
+version = "1.0.0a1"
 description = "High-performance trajectory distance calculations in Rust with Python bindings"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,8 +36,10 @@ default = true
 dev = [
     "autoflake>=2.3.1",
     "black>=24.8.0",
+    "ipykernel>=7.1.0",
     "ipython>=8.38.0",
     "isort>=5.13.2",
+    "joblib>=1.5.3",
     "jupyter>=1.1.1",
     "linkify-it-py>=2.0.3",
     "maturin>=1.11.5",
@@ -61,7 +63,7 @@ build-backend = "maturin"
 [tool.maturin]
 python-source = "python"
 module-name = "traj_dist_rs._lib"
-features = ["python-binding", "pyo3/extension-module"]
+features = ["python-binding", "parallel", "pyo3/extension-module"]
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
