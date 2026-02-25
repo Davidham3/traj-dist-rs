@@ -72,6 +72,7 @@ archs = ["x86_64", "aarch64"]
 environment = { CARGO_TERM_COLOR = "always" }
 
 [tool.cibuildwheel.macos]
+before-build = "rustup target add x86_64-apple-darwin"
 # Build for both Intel (x86_64) and Apple Silicon (arm64)
 archs = ["x86_64", "arm64"]
 environment = { CARGO_TERM_COLOR = "always", MACOSX_DEPLOYMENT_TARGET = "11.0" }
