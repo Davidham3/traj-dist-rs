@@ -67,7 +67,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Python dependencies with uv
-        run: uv sync --dev
+        run: uv sync --dev --extra test
 
       - name: Build Python package
         run: uv run maturin develop
