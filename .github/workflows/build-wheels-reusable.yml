@@ -36,7 +36,7 @@ jobs:
 
   build-wheels-macos:
     name: Build wheels on macOS
-    runs-on: macos-13
+    runs-on: macos-14-large
 
     steps:
       - name: Checkout code
