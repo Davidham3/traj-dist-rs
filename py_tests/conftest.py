@@ -7,7 +7,6 @@ Globally load test data, use pyarrow to read Parquet files and convert to pl.Dat
 from pathlib import Path
 
 import polars as pl
-import pyarrow.parquet as pq
 import pytest
 from test_framework import get_sample_path, load_all_metainfo_from_data_dir
 
@@ -91,8 +90,7 @@ def sspd_euclidean(all_metainfo, data_dir):
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read SSPD Euclidean distance test data: {e}")
@@ -111,8 +109,7 @@ def sspd_spherical(all_metainfo, data_dir):
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read SSPD Spherical distance test data: {e}")
@@ -131,8 +128,7 @@ def dtw_euclidean(all_metainfo, data_dir):
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read DTW Euclidean distance test data: {e}")
@@ -151,8 +147,7 @@ def dtw_spherical(all_metainfo, data_dir):
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read DTW Spherical distance test data: {e}")
@@ -171,8 +166,7 @@ def hausdorff_euclidean(all_metainfo, data_dir):
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(
@@ -193,8 +187,7 @@ def hausdorff_spherical(all_metainfo, data_dir):
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(
@@ -215,8 +208,7 @@ def frechet_euclidean(all_metainfo, data_dir):
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read Frechet Euclidean distance test data: {e}")
@@ -237,8 +229,7 @@ def discret_frechet_euclidean(all_metainfo, data_dir):
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(
@@ -260,8 +251,7 @@ def lcss_euclidean(all_metainfo, data_dir):
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read LCSS Euclidean distance test data: {e}")
@@ -281,8 +271,7 @@ def lcss_spherical(all_metainfo, data_dir):
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read LCSS Spherical distance test data: {e}")
@@ -302,8 +291,7 @@ def edr_euclidean(all_metainfo, data_dir):
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read EDR Euclidean distance test data: {e}")
@@ -323,8 +311,7 @@ def edr_spherical(all_metainfo, data_dir):
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read EDR Spherical distance test data: {e}")
@@ -344,8 +331,7 @@ def erp_euclidean(all_metainfo, data_dir):
     sample_path = get_sample_path(euclidean_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read ERP Euclidean distance test data: {e}")
@@ -365,8 +351,7 @@ def erp_spherical(all_metainfo, data_dir):
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read ERP Spherical distance test data: {e}")
@@ -386,8 +371,7 @@ def sowd_spherical(all_metainfo, data_dir):
     sample_path = get_sample_path(spherical_metainfo[0], data_dir)
 
     try:
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read SOWD Spherical distance test data: {e}")

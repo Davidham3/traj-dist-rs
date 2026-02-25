@@ -769,10 +769,8 @@ def load_test_data_by_metainfo(metainfo: Metainfo, data_dir):
 
     try:
         import polars as pl
-        import pyarrow.parquet as pq
-
-        table = pq.read_table(sample_path)
-        df = pl.from_arrow(table)
+        
+        df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
         pytest.skip(f"Failed to read test data {sample_path}: {e}")

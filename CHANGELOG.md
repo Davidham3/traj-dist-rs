@@ -7,7 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.0-alpha.1] - 2026-02-12
+---
+
+## [1.0.0-beta.1] - 2026-02-25
+
+### Added
+
+#### Cross-Platform Support
+- Complete multi-platform wheel support for Linux, macOS, and Windows
+- Linux: Support for both glibc (manylinux) and musl (musllinux) C libraries
+  - x86_64 and aarch64 architectures
+  - 16 wheels total (8 manylinux + 8 musllinux)
+- macOS: Support for Intel (x86_64) and Apple Silicon (arm64) architectures
+  - 8 wheels total
+- Windows: Support for AMD64 architecture
+  - 4 wheels total
+- Total: 37 distribution packages (29 wheels + 1 source + 7 pre-release wheels)
+
+#### Testing Infrastructure
+- Added optional test dependencies via `[project.optional-dependencies.test]`
+  - polars>=1.8.2 for efficient parquet file reading
+  - pydantic>=2.12.5 for data validation
+  - pytest>=8.3.5 for test framework
+- Removed pyarrow dependency from test requirements
+  - Replaced with polars for better performance and smaller dependency footprint
+  - Simplified test environment setup
+  - Reduced wheel build complexity
+
+#### Comprehensive Testing
+- Full pytest integration for all platform builds
+- 164 test cases covering:
+  - All distance algorithms (SSPD, DTW, Hausdorff, LCSS, EDR, ERP, Discret Frechet)
+  - Both Euclidean and Spherical distance types
+  - Batch computation (pdist, cdist)
+  - Pickle serialization
+  - Precomputed distance matrices
+  - Boundary cases and error handling
+- Automated testing in CI for all platforms
+- Test data automatically copied to build environment
+
+#### GitHub Actions CI/CD
+- Multi-platform wheel building workflow
+- Automated testing on Linux, macOS, and Windows
+- Support for Python 3.10, 3.11, 3.12, 3.13
+- Configured cibuildwheel for reliable cross-platform builds
+
+### Changed
+
+#### Dependencies
+- Removed pyarrow from test dependencies
+  - Replaced with polars for parquet file reading in tests
+  - Reduced build complexity and dependency size
+  - Improved cross-platform compatibility
+- Added optional test dependencies via `[project.optional-dependencies.test]`
+  - Users can now install test dependencies with: `pip install traj-dist-rs[test]`
+  - Cleaner separation between runtime and test dependencies
+
+### Fixed
+
+#### Test Dependencies
+- Fixed test dependency issues in cross-platform builds
+  - Resolved pyarrow compilation failures in manylinux containers
+  - Used precompiled pyarrow in build environment when needed
+  - Simplified test setup to avoid complex build-time dependencies
 
 ### Added
 
@@ -395,6 +457,8 @@ print(f"DTW distance: {result.distance}")
 
 ---
 
-[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-alpha.1...HEAD
+[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-beta.1...HEAD
+[1.0.0]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0
+[1.0.0-beta.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.1
 [1.0.0-alpha.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-alpha.1
 [0.1.0-alpha.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v0.1.0-alpha.1

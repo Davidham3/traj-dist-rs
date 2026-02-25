@@ -32,7 +32,7 @@ from ._lib import (DpResult, Metric, __dp_result_from_pickle, cdist,
                    erp_standard_with_matrix, hausdorff, lcss, lcss_with_matrix,
                    pdist, sspd)
 
-__version__ = "1.0.0-alpha.1"
+__version__ = "1.0.0-beta.1"
 __author__ = "traj-dist-rs contributors"
 __all__ = [
     "sspd",
