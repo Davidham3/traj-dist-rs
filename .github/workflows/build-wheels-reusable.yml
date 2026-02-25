@@ -26,10 +26,6 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21.3
-        env:
-          CIBW_BUILD: cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64 cp310-musllinux_x86_64 cp311-musllinux_x86_64 cp312-musllinux_x86_64 cp313-musllinux_x86_64 cp310-manylinux_aarch64 cp311-manylinux_aarch64 cp312-manylinux_aarch64 cp313-manylinux_aarch64 cp310-musllinux_aarch64 cp311-musllinux_aarch64 cp312-musllinux_aarch64 cp313-musllinux_aarch64
-          CIBW_BEFORE_ALL_LINUX: "pip install --only-binary :all: pyarrow==17.0.0 && cp -r py_tests /project/"
-          CIBW_TEST_REQUIRES: "pytest numpy polars"
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -48,9 +44,6 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21.3
-        env:
-          CIBW_BUILD: cp310-macosx_x86_64 cp311-macosx_x86_64 cp312-macosx_x86_64 cp313-macosx_x86_64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64 cp313-macosx_arm64
-          CIBW_BEFORE_ALL_MACOS: "pip install pytest polars pyarrow && cp -r py_tests/data /project/py_tests/"
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -69,9 +62,6 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21.3
-        env:
-          CIBW_BUILD: cp310-win_amd64 cp311-win_amd64 cp312-win_amd64 cp313-win_amd64
-          CIBW_BEFORE_ALL_WINDOWS: "pip install pytest polars pyarrow && xcopy /E /I /Y py_tests\\data %USERPROFILE%\\py_tests\\data"
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
