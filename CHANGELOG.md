@@ -15,14 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Cross-Platform Support
 - Complete multi-platform wheel support for Linux, macOS, and Windows
-- Linux: Support for both glibc (manylinux) and musl (musllinux) C libraries
+- Linux: Support for glibc (manylinux) C library
   - x86_64 and aarch64 architectures
-  - 16 wheels total (8 manylinux + 8 musllinux)
+  - 8 wheels total (manylinux only)
 - macOS: Support for Intel (x86_64) and Apple Silicon (arm64) architectures
   - 8 wheels total
 - Windows: Support for AMD64 architecture
   - 4 wheels total
-- Total: 37 distribution packages (29 wheels + 1 source + 7 pre-release wheels)
+- Total: 21 distribution packages (20 wheels + 1 source)
 
 #### Testing Infrastructure
 - Added optional test dependencies via `[project.optional-dependencies.test]`
