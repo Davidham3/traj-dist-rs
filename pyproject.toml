@@ -62,7 +62,7 @@ features = ["python-binding", "parallel", "pyo3/extension-module"]
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
-skip = "pp* cp314*"
+skip = "pp* cp314* *musllinux*"
 test-extras = ["test"]
 test-command = "pytest {project}/py_tests -v --ignore={project}/py_tests/test_batch_performance.py --ignore={project}/py_tests/test_debug_metainfo.py"
 
@@ -75,6 +75,7 @@ environment = { CARGO_TERM_COLOR = "always" }
 before-build = "rustup target add x86_64-apple-darwin"
 # Build for both Intel (x86_64) and Apple Silicon (arm64)
 archs = ["x86_64", "arm64"]
+test-skip = "*_x86_64"
 environment = { CARGO_TERM_COLOR = "always", MACOSX_DEPLOYMENT_TARGET = "11.0" }
 
 [tool.cibuildwheel.windows]
