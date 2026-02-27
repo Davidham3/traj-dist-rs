@@ -160,43 +160,17 @@ pip install traj-dist-rs[test]
 **Build and install:**
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/Davidham3/traj-dist-rs.git
 cd traj-dist-rs
 
-# Install development dependencies
-pip install maturin
-
-# Build and install in development mode
-maturin develop
-
-# Or build a release wheel
-maturin build --release
-pip install target/wheels/*.whl
+# Compile and install via uv
+uv pip install .
 ```
 
 **Rust-only build:**
 ```bash
-cargo build --release
+cargo build --release --features parallel
 ```
-
-## 📦 Dependency Comparison
-
-One of the biggest advantages of traj-dist-rs is its minimal dependency footprint. Compare with alternatives:
-
-| Library | Core Dependencies | Total Size* |
-|---------|-----------------|-------------|
-| **traj-dist-rs** | **numpy >= 1.21** | **~2 MB** |
-| traj-dist | numpy, Cython, Shapely, geohash2, pandas, scipy | ~200 MB |
-| Similar libraries | numpy, pandas, scikit-learn, etc. | ~300-500 MB |
-
-*Estimated total size including all transitive dependencies
-
-**Benefits of Minimal Dependencies:**
-- ✅ **Faster Installation**: Only needs numpy, which is likely already installed
-- ✅ **Smaller Disk Footprint**: ~2 MB vs ~200+ MB for alternatives
-- ✅ **Fewer Conflicts**: Less likely to have version conflicts with other packages
-- ✅ **Better for Production**: Smaller attack surface, faster startup time
-- ✅ **Ideal for Containers**: Smaller Docker images, faster build times
 
 ## 📊 Performance
 
@@ -219,23 +193,11 @@ Compared to the original traj-dist implementation (based on median values from K
 - Rust vs Python: **~87x** faster (range: 47x - 194x)
 - Rust vs Cython: **~3.5x** faster (range: 1.8x - 8.6x)
 
-### Best Performing Algorithms
-
-**Rust vs Cython (Euclidean):**
-- ERP: **12.15x** faster
-- Hausdorff: **13.67x** faster
-- SSPD: **12.65x** faster
-
-**Rust vs Python (Euclidean):**
-- DTW: **612x** faster
-- Discret Frechet: **489x** faster
-- SSPD: **386x** faster
-
 ### Batch Computation Performance
 
 **pdist (DTW, 5 trajectories, varying lengths):**
 
-| Trajectory Length | Rust Seq vs Cython | Rust Par vs Cython |
+| Trajectory Length | Rust Seq vs `traj-dist` | Rust Par vs `traj-dist` |
 |-------------------|-------------------|-------------------|
 | 10 points | 8.02x | 0.14x (parallel overhead) |
 | 100 points | 15.55x | 10.52x |
@@ -243,7 +205,7 @@ Compared to the original traj-dist implementation (based on median values from K
 
 **cdist (DTW, 5×5, varying lengths):**
 
-| Trajectory Length | Rust Seq vs Cython | Rust Par vs Cython |
+| Trajectory Length | Rust Seq vs `traj-dist` | Rust Par vs `traj-dist` |
 |-------------------|-------------------|-------------------|
 | 10 points | 15.85x | 1.00x (parallel overhead) |
 | 100 points | 15.21x | 15.15x |
@@ -252,7 +214,7 @@ Compared to the original traj-dist implementation (based on median values from K
 **Real-world Example: TrajCL Data Preprocessing**
 - Dataset: 7,000 trajectories (Porto dataset)
 - Task: DTW distance matrix computation
-- Performance: **18.8x** faster than traj-dist baseline (3111s → 166s)
+- Performance: **31.8x** faster than traj-dist baseline (2933s → 92s)
 
 *For detailed performance analysis with statistics, see [docs/performance.md](docs/performance.md).*
 
@@ -268,24 +230,8 @@ Compared to the original traj-dist implementation (based on median values from K
 
 ## 🧪 Testing
 
-### Python Tests
-
-```bash
-cd traj-dist-rs
-uv sync --dev
-pytest py_tests/
-```
-
-### Rust Tests
-
-```bash
-cd traj-dist-rs
-cargo test
-```
-
-### Integration Tests
-
 Run comprehensive integration tests:
+
 ```bash
 bash scripts/pre_build.sh
 ```
@@ -297,11 +243,10 @@ We welcome contributions! Please see our contributing guidelines:
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
-4. Run tests and ensure they pass
-5. Format your code (`cargo fmt` for Rust, `black` for Python)
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
+4. Run tests and ensure they pass via `bash scripts/pre_build.sh`
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
 ### Development Workflow
 
