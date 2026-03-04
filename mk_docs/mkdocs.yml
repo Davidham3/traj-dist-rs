@@ -1,0 +1,65 @@
+site_name: traj-dist-rs
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Python User Guide: usage_for_python.ipynb
+  - Rust User Guide: usage_for_rust.ipynb
+  - Performance: performance.md
+  - Benchmark Reproduction Guide: benchmark_guide.md
+  - API Reference: api_reference.md
+
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.sections
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["../python"]
+          options:
+            allow_inspection: true
+            import_stubs: true
+            show_source: true
+            show_root_heading: true
+            show_type_annotations: true
+            filters:
+              - "!^__.*__$"
+  - gen-files:
+      scripts:
+        - gen_ref_pages.py
+  - mkdocs-jupyter:
+      execute: true
+      allow_errors: false
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite:
+  - pymdownx.snippets:
+  - pymdownx.superfences:
+  - admonition:
+  - pymdownx.snippets:
+      base_path: [".."]
+
+exclude_docs: |
+  .ipynb_checkpoints/*

@@ -303,6 +303,7 @@ def generate_batch_performance_section():
 
     # Euclidean summary
     output.append("**Euclidean Distance**:")
+    output.append("")  # Add empty line for proper markdown list formatting
     output.append(
         f"- **pdist** - Rust (sequential) vs Cython: Average {np.mean(euclidean_pdist_seq_speedups):.2f}x speedup (range: {min(euclidean_pdist_seq_speedups):.2f}x - {max(euclidean_pdist_seq_speedups):.2f}x)"
     )
@@ -319,6 +320,7 @@ def generate_batch_performance_section():
 
     # Spherical summary
     output.append("**Spherical Distance**:")
+    output.append("")  # Add empty line for proper markdown list formatting
     output.append(
         f"- **pdist** - Rust (sequential) vs Cython: Average {np.mean(spherical_pdist_seq_speedups):.2f}x speedup (range: {min(spherical_pdist_seq_speedups):.2f}x - {max(spherical_pdist_seq_speedups):.2f}x)"
     )
@@ -338,3 +340,44 @@ def generate_batch_performance_section():
     )
 
     return "\n".join(output)
+
+
+def main():
+    """Main function to generate and save batch performance report"""
+    import argparse
+    from pathlib import Path
+
+    parser = argparse.ArgumentParser(
+        description="Analyze batch computation performance results"
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="benchmark_output",
+        help="Output directory (default: benchmark_output)",
+    )
+    parser.add_argument(
+        "--output-file",
+        type=str,
+        default="batch_performance_section.md",
+        help="Output report file name (default: batch_performance_section.md)",
+    )
+    args = parser.parse_args()
+
+    # Create output directory
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Generate report
+    report = generate_batch_performance_section()
+
+    # Save report
+    output_path = output_dir / args.output_file
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(report)
+
+    print(f"Batch performance report saved to: {output_path}")
+
+
+if __name__ == "__main__":
+    main()

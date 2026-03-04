@@ -66,3 +66,6 @@ wheelhouse/
 
 # Benchmark output
 benchmark_output/
+
+# mkdocs
+site/

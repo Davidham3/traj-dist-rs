@@ -333,7 +333,7 @@ def analyze_batch_computation(output_dir: Path, use_median: bool = True) -> str:
                     rust_rows = pdist_results["rust"].filter(
                         (pl.col("distance_type") == distance_type)
                         & (pl.col("trajectory_length") == traj_length)
-                        & (not pl.col("parallel"))
+                        & (~pl.col("parallel"))
                     )
                     if rust_rows.height > 0:
                         row = rust_rows.row(0, named=True)
@@ -463,7 +463,7 @@ def analyze_batch_computation(output_dir: Path, use_median: bool = True) -> str:
                     rust_rows = cdist_results["rust"].filter(
                         (pl.col("distance_type") == distance_type)
                         & (pl.col("trajectory_length") == traj_length)
-                        & (not pl.col("parallel"))
+                        & (~pl.col("parallel"))
                     )
                     if rust_rows.height > 0:
                         row = rust_rows.row(0, named=True)
@@ -544,6 +544,7 @@ def analyze_batch_computation(output_dir: Path, use_median: bool = True) -> str:
     # Calculate overall speedups by distance type
     for distance_type in ["euclidean", "spherical"]:
         lines.append(f"**{distance_type.capitalize()} Distance**:")
+        lines.append("")  # Add empty line for proper markdown list formatting
 
         # Collect pdist speedups
         pdist_speedups_seq = []
@@ -568,7 +569,7 @@ def analyze_batch_computation(output_dir: Path, use_median: bool = True) -> str:
                 rust_rows = pdist_results["rust"].filter(
                     (pl.col("distance_type") == distance_type)
                     & (pl.col("trajectory_length") == traj_length)
-                    & (not pl.col("parallel"))
+                    & (~pl.col("parallel"))
                 )
                 if rust_rows.height > 0:
                     row = rust_rows.row(0, named=True)
@@ -630,7 +631,7 @@ def analyze_batch_computation(output_dir: Path, use_median: bool = True) -> str:
                 rust_rows = cdist_results["rust"].filter(
                     (pl.col("distance_type") == distance_type)
                     & (pl.col("trajectory_length") == traj_length)
-                    & (not pl.col("parallel"))
+                    & (~pl.col("parallel"))
                 )
                 if rust_rows.height > 0:
                     row = rust_rows.row(0, named=True)

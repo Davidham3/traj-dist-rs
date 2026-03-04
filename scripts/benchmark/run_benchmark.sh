@@ -179,7 +179,7 @@ source .venv/bin/activate
 cd "$SCRIPT_DIR"
 python analyze_benchmark_results.py \
     --output-dir "$OUTPUT_DIR" \
-    --output-file "../docs/performance.md"
+    --output-file "../mk_docs/docs/performance.md"
 
 deactivate
 
@@ -192,7 +192,7 @@ fi
 echo "=========================================="
 echo "Performance testing completed!"
 echo "=========================================="
-echo "Report location: $TRAJ_DIST_RS_ROOT/docs/performance.md"
+echo "Report location: $TRAJ_DIST_RS_ROOT/mk_docs/docs/performance.md"
 echo ""
 echo "Generated files:"
 ls -lh "$OUTPUT_DIR"

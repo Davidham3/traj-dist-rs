@@ -77,7 +77,7 @@ impl PyDpResult {
         use pyo3::types::{PyBytes, PyTuple};
 
         // Import the module and get the helper function
-        let module = py.import("traj_dist_rs")?;
+        let module = py.import("traj_dist_rs._lib")?;
         let helper_func = module.getattr("__dp_result_from_pickle")?;
 
         // Serialize the entire DpResult using bincode

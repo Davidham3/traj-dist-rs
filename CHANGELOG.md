@@ -52,6 +52,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Python 3.10, 3.11, 3.12, 3.13
 - Configured cibuildwheel for reliable cross-platform builds
 
+#### MkDocs Documentation
+- Integrated MkDocs for modern, lightweight static site generation
+- Comprehensive documentation structure with:
+  - API reference pages automatically generated from Python docstrings
+  - User guides for Python and Rust APIs
+  - Installation and quick start guides
+  - Performance benchmark reports with detailed statistics
+  - Migration guides for version upgrades
+- Live preview support with `mkdocs serve` for local development
+- Production builds with `mkdocs build` for static website deployment
+- Custom theme configuration for polished, professional appearance
+- Navigation structure optimized for easy content discovery
+
 ### Changed
 
 #### Dependencies
@@ -62,14 +75,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added optional test dependencies via `[project.optional-dependencies.test]`
   - Users can now install test dependencies with: `pip install traj-dist-rs[test]`
   - Cleaner separation between runtime and test dependencies
+- Added optional documentation dependencies via `[project.optional-dependencies.docs]`
+  - Users can now install documentation dependencies with: `pip install traj-dist-rs[docs]`
+  - Enables local documentation preview and production builds with MkDocs
 
-### Fixed
+---
 
-#### Test Dependencies
-- Fixed test dependency issues in cross-platform builds
-  - Resolved pyarrow compilation failures in manylinux containers
-  - Used precompiled pyarrow in build environment when needed
-  - Simplified test setup to avoid complex build-time dependencies
+## [1.0.0-alpha.1] - 2026-02-12
 
 ### Added
 

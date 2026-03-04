@@ -125,17 +125,19 @@ def cdist(
     from two collections. The result is a full distance matrix (2D array)
     with shape (n_a, n_b).
 
-    # When to Use `cdist` vs `pdist`
+    When to Use `cdist` vs `pdist`
 
-    - **Use `cdist`** when:
-      - Computing distances between two different trajectory collections
-      - Your distance metric is **asymmetric** (distance(A, B) != distance(B, A))
-      - You need the full distance matrix for both directions
+    - Use `cdist` when:
 
-    - **Use `pdist`** when:
-      - Computing distances within a single trajectory collection
-      - Your distance metric is **symmetric** (distance(A, B) == distance(B, A))
-      - You want to save memory by using the compressed distance matrix format
+      1. Computing distances between two different trajectory collections
+      2. Your distance metric is **asymmetric** (distance(A, B) != distance(B, A))
+      3. You need the full distance matrix for both directions
+
+    - Use `pdist` when:
+
+      1. Computing distances within a single trajectory collection
+      2. Your distance metric is **symmetric** (distance(A, B) == distance(B, A))
+      3. You want to save memory by using the compressed distance matrix format
 
     # Arguments
     * `trajectories_a` - First collection of trajectories, where each trajectory is a
@@ -239,7 +241,7 @@ def discret_frechet_with_matrix(
     distances between trajectory points on the fly.
 
     # Arguments
-    * `distance_matrix` - A 2D numpy array where matrix[i][j] is the distance between
+    * `distance_matrix` - A 2D numpy array where `matrix[i][j]` is the distance between
                           point i of trajectory 1 and point j of trajectory 2
     * `use_full_matrix` - If true, compute and return the full DP matrix;
                            if false (default), return None for the matrix to save space
@@ -323,7 +325,7 @@ def dtw_with_matrix(
     - You have custom distance calculations that don't fit the standard distance types
 
     # Arguments
-    * `distance_matrix` - A 2D numpy array where matrix[i][j] is the distance between
+    * `distance_matrix` - A 2D numpy array where `matrix[i][j]` is the distance between
                           point i of trajectory 1 and point j of trajectory 2
     * `use_full_matrix` - If true, compute and return the full DP matrix;
                            if false (default), return None for the matrix to save space
@@ -413,7 +415,7 @@ def edr_with_matrix(
     distances between trajectory points on the fly.
 
     # Arguments
-    * `distance_matrix` - A 2D numpy array where matrix[i][j] is the distance between
+    * `distance_matrix` - A 2D numpy array where `matrix[i][j]` is the distance between
                           point i of trajectory 1 and point j of trajectory 2
     * `eps` - Epsilon threshold for matching points
     * `use_full_matrix` - If true, compute and return the full DP matrix;
@@ -509,11 +511,11 @@ def erp_compat_traj_dist_with_matrix(
     instead of computing distances on the fly.
 
     # Arguments
-    * `distance_matrix` - A 2D numpy array where matrix[i][j] is the distance between
+    * `distance_matrix` - A 2D numpy array where `matrix[i][j]` is the distance between
                           point i of trajectory 1 and point j of trajectory 2
-    * `seq0_gap_dists` - A 1D numpy array where seq0_gap_dists[i] is the distance between
+    * `seq0_gap_dists` - A 1D numpy array where `seq0_gap_dists[i]` is the distance between
                          point i of trajectory 1 and the gap point g
-    * `seq1_gap_dists` - A 1D numpy array where seq1_gap_dists[j] is the distance between
+    * `seq1_gap_dists` - A 1D numpy array where `seq1_gap_dists[j]` is the distance between
                          point j of trajectory 2 and the gap point g
     * `use_full_matrix` - If true, compute and return the full DP matrix;
                            if false (default), return None for the matrix to save space
@@ -611,11 +613,11 @@ def erp_standard_with_matrix(
     instead of computing distances on the fly.
 
     # Arguments
-    * `distance_matrix` - A 2D numpy array where matrix[i][j] is the distance between
+    * `distance_matrix` - A 2D numpy array where `matrix[i][j]` is the distance between
                           point i of trajectory 1 and point j of trajectory 2
-    * `seq0_gap_dists` - A 1D numpy array where seq0_gap_dists[i] is the distance between
+    * `seq0_gap_dists` - A 1D numpy array where `seq0_gap_dists[i]` is the distance between
                          point i of trajectory 1 and the gap point g
-    * `seq1_gap_dists` - A 1D numpy array where seq1_gap_dists[j] is the distance between
+    * `seq1_gap_dists` - A 1D numpy array where `seq1_gap_dists[j]` is the distance between
                          point j of trajectory 2 and the gap point g
     * `use_full_matrix` - If true, compute and return the full DP matrix;
                            if false (default), return None for the matrix to save space
@@ -727,7 +729,7 @@ def lcss_with_matrix(
     distances between trajectory points on the fly.
 
     # Arguments
-    * `distance_matrix` - A 2D numpy array where matrix[i][j] is the distance between
+    * `distance_matrix` - A 2D numpy array where `matrix[i][j]` is the distance between
                           point i of trajectory 1 and point j of trajectory 2
     * `eps` - Epsilon threshold for matching points
     * `use_full_matrix` - If true, compute and return the full DP matrix;

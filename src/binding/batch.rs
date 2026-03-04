@@ -224,17 +224,17 @@ pub fn pdist<'py>(
 /// from two collections. The result is a full distance matrix (2D array)
 /// with shape (n_a, n_b).
 ///
-/// # When to Use `cdist` vs `pdist`
+/// When to Use `cdist` vs `pdist`
 ///
-/// - **Use `cdist`** when:
-///   - Computing distances between two different trajectory collections
-///   - Your distance metric is **asymmetric** (distance(A, B) != distance(B, A))
-///   - You need the full distance matrix for both directions
+/// - Use `cdist` when:
+/// 1. Computing distances between two different trajectory collections
+/// 2. Your distance metric is **asymmetric** (distance(A, B) != distance(B, A))
+/// 3. You need the full distance matrix for both directions
 ///
-/// - **Use `pdist`** when:
-///   - Computing distances within a single trajectory collection
-///   - Your distance metric is **symmetric** (distance(A, B) == distance(B, A))
-///   - You want to save memory by using the compressed distance matrix format
+/// - Use `pdist` when:
+/// 1. Computing distances within a single trajectory collection
+/// 2. Your distance metric is **symmetric** (distance(A, B) == distance(B, A))
+/// 3. You want to save memory by using the compressed distance matrix format
 ///
 /// # Arguments
 /// * `trajectories_a` - First collection of trajectories, where each trajectory is a

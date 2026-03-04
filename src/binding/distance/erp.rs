@@ -240,11 +240,11 @@ pub fn erp_standard(
 /// instead of computing distances on the fly.
 ///
 /// # Arguments
-/// * `distance_matrix` - A 2D numpy array where matrix[i][j] is the distance between
+/// * `distance_matrix` - A 2D numpy array where `matrix[i][j]` is the distance between
 ///                       point i of trajectory 1 and point j of trajectory 2
-/// * `seq0_gap_dists` - A 1D numpy array where seq0_gap_dists[i] is the distance between
+/// * `seq0_gap_dists` - A 1D numpy array where `seq0_gap_dists[i]` is the distance between
 ///                      point i of trajectory 1 and the gap point g
-/// * `seq1_gap_dists` - A 1D numpy array where seq1_gap_dists[j] is the distance between
+/// * `seq1_gap_dists` - A 1D numpy array where `seq1_gap_dists[j]` is the distance between
 ///                      point j of trajectory 2 and the gap point g
 /// * `use_full_matrix` - If true, compute and return the full DP matrix;
 ///                        if false (default), return None for the matrix to save space
@@ -370,11 +370,11 @@ pub fn erp_compat_traj_dist_with_matrix<'py>(
 /// instead of computing distances on the fly.
 ///
 /// # Arguments
-/// * `distance_matrix` - A 2D numpy array where matrix[i][j] is the distance between
+/// * `distance_matrix` - A 2D numpy array where `matrix[i][j]` is the distance between
 ///                       point i of trajectory 1 and point j of trajectory 2
-/// * `seq0_gap_dists` - A 1D numpy array where seq0_gap_dists[i] is the distance between
+/// * `seq0_gap_dists` - A 1D numpy array where `seq0_gap_dists[i]` is the distance between
 ///                      point i of trajectory 1 and the gap point g
-/// * `seq1_gap_dists` - A 1D numpy array where seq1_gap_dists[j] is the distance between
+/// * `seq1_gap_dists` - A 1D numpy array where `seq1_gap_dists[j]` is the distance between
 ///                      point j of trajectory 2 and the gap point g
 /// * `use_full_matrix` - If true, compute and return the full DP matrix;
 ///                        if false (default), return None for the matrix to save space

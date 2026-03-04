@@ -79,7 +79,7 @@ pub fn discret_frechet(
 /// distances between trajectory points on the fly.
 ///
 /// # Arguments
-/// * `distance_matrix` - A 2D numpy array where matrix[i][j] is the distance between
+/// * `distance_matrix` - A 2D numpy array where `matrix[i][j]` is the distance between
 ///                       point i of trajectory 1 and point j of trajectory 2
 /// * `use_full_matrix` - If true, compute and return the full DP matrix;
 ///                        if false (default), return None for the matrix to save space

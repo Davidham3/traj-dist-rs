@@ -2,15 +2,15 @@
 name = "traj-dist-rs"
 version = "1.0.0-beta.1"
 edition = "2024"
-authors = ["TrajDist-rs Contributors"]
+authors = ["Chao Song"]
 license = "MIT"
-description = "High-performance trajectory distance calculations in Rust with Python bindings"
-documentation = "https://github.com/Davidham3/traj-dist-rs/blob/main/README.md"
+description = "High-performance trajectory distance & similarity measures in Rust with Python bindings"
+documentation = "https://docs.rs/traj-dist-rs/latest/traj_dist_rs/"
 homepage = "https://github.com/Davidham3/traj-dist-rs"
 repository = "https://github.com/Davidham3/traj-dist-rs"
 readme = "README.md"
-keywords = ["trajectory", "distance", "algorithm", "python", "bindings"]
-categories = ["algorithms", "science", "api-bindings"]
+keywords = ["trajectory", "trajectory-similarity", "dtw", "frechet", "distance"]
+categories = ["algorithms", "science::geo", "api-bindings"]
 
 [lib]
 name = "traj_dist_rs"

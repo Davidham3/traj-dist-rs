@@ -1,6 +1,6 @@
 //! # traj-dist-rs
 //!
-//! `traj-dist-rs` is a high-performance trajectory distance calculation library implemented in Rust.
+//! `traj-dist-rs` is a high-performance trajectory distance and similarity measurement library implemented in Rust.
 //! It provides efficient implementations of various trajectory distance algorithms with both
 //! Rust native APIs and Python bindings.
 //!
@@ -14,17 +14,55 @@
 //! - LCSS (Longest Common Subsequence)
 //! - EDR (Edit Distance on Real sequence)
 //! - ERP (Edit distance with Real Penalty)
-//! - Discret Frechet Distance
+//! - Discrete Frechet Distance
 //! - Frechet Distance (planned)
 //! - SOWD (One-Way Distance) (planned)
+//!
+//! Trajectory similarity is often measured via trajectory distances such as DTW, LCSS, EDR, ERP, Hausdorff, (Discrete) Fréchet, and SSPD.
 //!
 //! ## Features
 //!
 //! - High-performance Rust implementations
-//! - Support for both Euclidean and Spherical distance calculations
+//! - Support for both Euclidean and Spherical(Haversine / great-circle) distance calculations
 //! - Python bindings via PyO3
 //! - Compatible with the original `traj-dist` library
 //! - Support for various trajectory distance algorithms
+//! - Batch computation functions (pdist, cdist) with parallel processing
+//! - Zero-copy NumPy array support for Python bindings
+//!
+//! ## Similarity vs Distance
+//!
+//! This library computes trajectory **distances**, which can be easily converted to **similarity scores**:
+//!
+//! - **Similarity = 1 / (1 + distance)**: Commonly used for similarity scoring
+//! - **Similarity = exp(-distance / σ)**: Gaussian kernel similarity, where σ controls the sensitivity
+//! - **Normalized LCSS/EDR**: These algorithms can return normalized scores in [0, 1] range
+//!
+//! For example, if DTW distance is 2.0:
+//! ```rust
+//! let distance = 2.0;
+//! let similarity = 1.0 / (1.0 + distance);  // similarity = 0.333
+//! ```
+//!
+//! ## Use Cases and Applications
+//!
+//! This library is useful for various trajectory analysis tasks:
+//!
+//! - **Trajectory similarity search**: Find similar trajectories from a database via kNN and pdist/cdist
+//! - **Nearest neighbor retrieval**: Query by example trajectory
+//! - **Trajectory clustering**: Group similar trajectories together
+//! - **Map-matching preprocessing**: Match GPS traces to road networks
+//! - **Anomaly detection**: Identify unusual trajectory patterns
+//! - **Route pattern mining**: Discover common movement patterns
+//! - **Mobility data analysis**: Analyze GPS traces and movement data
+//! - **Time series similarity**: Treat trajectories as 2D time series
+//!
+//! ## Glossary and Terminology
+//!
+//! - **Trajectory similarity / distance / dissimilarity**: Related concepts for measuring how alike two trajectories are
+//! - **Sequence alignment**: Matching elements between two sequences (e.g., DTW, LCSS)
+//! - **Warping / matching**: Non-linear alignment between sequences (DTW concept)
+//! - **Spatiotemporal trajectories / GPS traces**: Trajectories with both spatial (location) and temporal (time) information
 //!
 //! ## Usage
 //!
@@ -37,6 +75,10 @@
 //!
 //! let distance = sspd(&traj1, &traj2, DistanceType::Euclidean);
 //! println!("SSPD distance: {}", distance);
+//!
+//! // Convert to similarity score
+//! let similarity = 1.0 / (1.0 + distance);
+//! println!("SSPD similarity: {}", similarity);
 //! ```
 
 pub mod distance;

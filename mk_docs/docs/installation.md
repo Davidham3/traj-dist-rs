@@ -8,6 +8,12 @@ You can install `traj-dist-rs` using pip:
 pip install traj-dist-rs
 ```
 
+## From crates.io
+
+```bash
+cargo add traj-dist-rs --features parallel
+```
+
 ## From Source
 
 uv and rustup are required.
