@@ -40,7 +40,7 @@ jobs:
       - name: Install evcxr (Rust Jupyter kernel)
         run: |
           cargo install evcxr_repl
-          export PATH="$HOME/.cargo/bin:$PATH"
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
           source .venv/bin/activate
           evcxr_jupyter --install
 
