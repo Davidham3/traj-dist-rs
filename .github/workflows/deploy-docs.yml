@@ -40,7 +40,7 @@ jobs:
       - name: Install evcxr (Rust Jupyter kernel)
         run: |
           cargo install evcxr_repl
-          evcxr_jupyter --install
+          uv run evcxr_jupyter --install
 
       - name: Configure Git
         run: |
