@@ -397,8 +397,7 @@ def get_algorithm_test_data(algorithm_name, all_metainfo, data_dir):
     for metainfo in metainfo_list:
         sample_path = get_sample_path(metainfo, data_dir)
         try:
-            table = pq.read_table(sample_path)
-            df = pl.from_arrow(table)
+            df = pl.read_parquet(sample_path)
             test_data[metainfo] = df
         except Exception as e:
             raise RuntimeError(f"Failed to read {sample_path}: {e}")

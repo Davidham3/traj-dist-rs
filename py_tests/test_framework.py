@@ -769,7 +769,7 @@ def load_test_data_by_metainfo(metainfo: Metainfo, data_dir):
 
     try:
         import polars as pl
-        
+
         df = pl.read_parquet(sample_path)
         return df
     except Exception as e:
