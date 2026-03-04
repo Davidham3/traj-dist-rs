@@ -40,7 +40,9 @@ jobs:
       - name: Install evcxr (Rust Jupyter kernel)
         run: |
           cargo install evcxr_repl
-          uv run evcxr_jupyter --install
+          export PATH="$HOME/.cargo/bin:$PATH"
+          source $(uv venv --path)/bin/activate
+          evcxr_jupyter --install
 
       - name: Configure Git
         run: |
