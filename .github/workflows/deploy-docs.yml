@@ -33,14 +33,14 @@ jobs:
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
+      - name: Install Python dependencies
+        run: |
+          uv sync --dev --all-extras
+
       - name: Install evcxr (Rust Jupyter kernel)
         run: |
           cargo install evcxr_repl
           evcxr_jupyter --install
-
-      - name: Install Python dependencies
-        run: |
-          uv sync --dev --all-extras
 
       - name: Configure Git
         run: |
