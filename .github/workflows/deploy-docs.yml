@@ -41,7 +41,7 @@ jobs:
         run: |
           cargo install evcxr_repl
           export PATH="$HOME/.cargo/bin:$PATH"
-          source $(uv venv --path)/bin/activate
+          source .venv/bin/activate
           evcxr_jupyter --install
 
       - name: Configure Git
