@@ -9,7 +9,7 @@ documentation = "https://docs.rs/traj-dist-rs/latest/traj_dist_rs/"
 homepage = "https://github.com/Davidham3/traj-dist-rs"
 repository = "https://github.com/Davidham3/traj-dist-rs"
 readme = "README.md"
-keywords = ["trajectory", "trajectory-similarity", "dtw", "frechet", "distance"]
+keywords = ["trajectory", "similarity", "dtw", "frechet", "distance"]
 categories = ["algorithms", "science::geo", "api-bindings"]
 
 [lib]
