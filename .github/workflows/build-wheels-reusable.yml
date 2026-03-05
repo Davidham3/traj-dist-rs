@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-wheels-linux-x86:
-    name: Build wheels on Linux
+    name: Build wheels on Linux-x86_64
     runs-on: ubuntu-22.04
 
     steps:
@@ -32,7 +32,7 @@ jobs:
           retention-days: 7
 
   build-wheels-linux-arm64:
-    name: Build wheels on Linux
+    name: Build wheels on Linux-arm64
     runs-on: ubuntu-22.04-arm
 
     steps:
