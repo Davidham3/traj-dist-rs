@@ -31,7 +31,7 @@ To set up a development environment, uv and rustup are required:
 ```bash
 git clone https://github.com/Davidham3/traj-dist-rs.git
 cd traj-dist-rs
-uv sync --dev --extra test
+uv sync --dev --all-extras
 ```
 
 This will build the Rust extension and install the package in development mode.
