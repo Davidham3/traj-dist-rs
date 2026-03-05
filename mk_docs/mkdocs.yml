@@ -62,5 +62,9 @@ markdown_extensions:
   - pymdownx.snippets:
       base_path: [".."]
 
+extra:
+  version:
+    provider: mike
+
 exclude_docs: |
   .ipynb_checkpoints/*
