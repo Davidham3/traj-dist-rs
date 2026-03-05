@@ -22,34 +22,38 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo Binaries
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-evcxr-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-evcxr-
+
       - name: Install uv
         uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: Install Rust
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
       - name: Install Python dependencies
         run: |
           uv sync --dev --all-extras
 
-      - name: Cache Cargo Binaries
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-evcxr
-
       - name: Install evcxr (Rust Jupyter kernel)
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
+          
           if ! command -v evcxr_jupyter &> /dev/null; then
+            echo "evcxr_jupyter not found, installing..."
             cargo install evcxr_jupyter
+          else
+            echo "evcxr_jupyter found in cache, skipping install."
           fi
-          # 确保在 uv 环境中执行安装
+          
           source .venv/bin/activate
           evcxr_jupyter --install
 
@@ -57,18 +61,20 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages:gh-pages || echo "gh-pages branch does not exist yet"
 
       - name: Build and deploy documentation
         run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
           cd mk_docs
           
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
             VERSION=${VERSION#v}
             echo "Deploying Release Version: $VERSION"
-            uv run mike deploy --push --branch gh-pages --update-aliases $VERSION latest stable
-            uv run mike set-default --push latest
+            uv run mike deploy --push --rebase --branch gh-pages --update-aliases $VERSION latest stable
+            uv run mike set-default --push --rebase --branch gh-pages latest
           else
             echo "Deploying Development Version (dev)"
-            uv run mike deploy --push --branch gh-pages dev
+            uv run mike deploy --push --rebase --branch gh-pages dev
           fi
