@@ -61,7 +61,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin gh-pages:gh-pages || echo "gh-pages branch does not exist yet"
+          git fetch origin gh-pages:gh-pages --force || echo "gh-pages branch does not exist yet"
 
       - name: Build and deploy documentation
         run: |
@@ -72,9 +72,9 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/}
             VERSION=${VERSION#v}
             echo "Deploying Release Version: $VERSION"
-            uv run mike deploy --push --rebase --branch gh-pages --update-aliases $VERSION latest stable
-            uv run mike set-default --push --rebase --branch gh-pages latest
+            uv run mike deploy --push --branch gh-pages --update-aliases $VERSION latest stable
+            uv run mike set-default --push --branch gh-pages latest
           else
             echo "Deploying Development Version (dev)"
-            uv run mike deploy --push --rebase --branch gh-pages dev
+            uv run mike deploy --push --branch gh-pages dev
           fi
