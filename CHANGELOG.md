@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-beta.3] - 2026-03-05
+
+### Fixed
+
+#### Release Issues
+- Fixed download wheels issue in create-prerelease.yml GitHub Action workflow
+  - Corrected wheel download path and artifact handling
+  - Ensures pre-release packages are correctly built and distributed
+
+#### Version Number Standardization
+- Standardized version number format across the codebase
+  - `Cargo.toml`: Uses semantic versioning format `1.0.0-beta.3` (Rust convention)
+  - `pyproject.toml`: Uses PEP 440 format `1.0.0b3` (Python convention)
+  - `python/traj_dist_rs/__init__.py`: Uses PEP 440 format `1.0.0b3` (Python convention)
+  - `CHANGELOG.md`: Uses semantic versioning format `1.0.0-beta.3` (documentation convention)
+  - Ensures proper version recognition by pip and other Python tools
+
+---
+
 ## [1.0.0-beta.2] - 2026-03-05
 
 ### Fixed
@@ -480,8 +499,9 @@ print(f"DTW distance: {result.distance}")
 
 ---
 
-[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-beta.2...HEAD
+[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-beta.3...HEAD
 [1.0.0]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0
+[1.0.0-beta.3]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.3
 [1.0.0-beta.2]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.2
 [1.0.0-beta.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.1
 [1.0.0-alpha.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-alpha.1
