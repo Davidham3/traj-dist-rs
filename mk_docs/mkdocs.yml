@@ -1,4 +1,5 @@
 site_name: traj-dist-rs
+site_url: https://davidham3.github.io/traj-dist-rs/
 
 nav:
   - Home: index.md
