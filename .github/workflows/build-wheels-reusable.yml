@@ -27,7 +27,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-linux-x86
           path: ./wheelhouse/*.whl
           retention-days: 7
 
@@ -47,7 +47,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-linux-arm64
           path: ./wheelhouse/*.whl
           retention-days: 7
 
@@ -67,7 +67,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-macos
           path: ./wheelhouse/*.whl
           retention-days: 7
 
@@ -87,7 +87,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-windows
           path: ./wheelhouse/*.whl
           retention-days: 7
 
