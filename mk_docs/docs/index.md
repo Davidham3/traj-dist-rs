@@ -1,36 +1,40 @@
 # traj-dist-rs
 
+**High-performance trajectory distance & similarity measures in Rust and Python.**
+
 A high-performance Rust implementation of trajectory distance algorithms with Python bindings, offering significant speed improvements over the original [traj-dist](https://github.com/bguillouet/traj-dist) library.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
-[![Rust Version](https://img.shields.io/badge/rust-1.70%2B-orange)](https://www.rust-lang.org/)
+[![Rust Version](https://img.shields.io/badge/rust-1.85%2B-orange)](https://www.rust-lang.org/)
 
-## 📖 About
+## About
 
 **traj-dist-rs** is a high-performance trajectory distance calculation library written in Rust, providing both native Rust APIs and Python bindings via PyO3. It is a complete rewrite of the original [traj-dist](https://github.com/bguillouet/traj-dist) library, focusing on performance optimization and modern language features.
 
 ### Why traj-dist-rs?
 
-- **🚀 Performance**: **~82x faster** than Python implementation and **~3x faster** than Cython implementation on average
-- **⚡ Batch Computation**: Native `pdist` and `cdist` functions with parallel support up to **130x** faster than `traj-dist`
-- **📦 Zero Dependencies**: Only requires **numpy >= 1.21** - no heavy dependencies like polars, pyarrow, pandas, or shapely
-- **🔒 Safety**: Rust's memory safety guarantees eliminate common runtime errors
-- **📦 Cross-platform**: Supports Linux, macOS, and Windows with native binaries
-- **🔗 Dual API**: Use it from Python or Rust with minimal overhead
-- **🎯 Accuracy**: All algorithms verified against original implementation with < 1e-8 error margin
+- **Performance**: **~82x faster** than Python implementation and **~3x faster** than Cython implementation on average
+- **Batch Computation**: Native `pdist` and `cdist` functions with parallel support up to **130x** faster than `traj-dist`
+- **Zero Dependencies**: Only requires **numpy >= 1.21** - no heavy dependencies like polars, pyarrow, pandas, or shapely
+- **Safety**: Rust's memory safety guarantees eliminate common runtime errors
+- **Cross-platform**: Supports Linux, macOS, and Windows with native binaries
+- **Dual API**: Use it from Python or Rust with minimal overhead
+- **Accuracy**: All algorithms verified against original implementation with < 1e-8 error margin
 
-## ✨ Features
+## Features
 
 ### Supported Distance Algorithms
 
-- **SSPD** - Symmetric Segment-Path Distance
-- **DTW** - Dynamic Time Warping (with optional matrix return)
-- **Discret Frechet** - Discrete Fréchet Distance
-- **Hausdorff** - Hausdorff Distance
-- **LCSS** - Longest Common Subsequence
-- **EDR** - Edit Distance on Real sequence
-- **ERP** - Edit distance with Real Penalty (standard & traj-dist compatible)
+| Algorithm | Full Name | Best For |
+|-----------|-----------|----------|
+| **SSPD** | Symmetric Segment-Path Distance | General similarity, noise tolerance |
+| **DTW** | Dynamic Time Warping | Similarity with time warping, flexible alignment |
+| **Discret Frechet** | Discrete Fréchet Distance | Geometric similarity, path-based matching |
+| **Hausdorff** | Hausdorff Distance | Maximum distance, outlier-sensitive similarity |
+| **LCSS** | Longest Common Subsequence | Robust similarity with noise tolerance |
+| **EDR** | Edit Distance on Real sequence | Similarity with noise and outlier tolerance |
+| **ERP** | Edit distance with Real Penalty | Robust similarity with gap handling |
 
 ### Distance Types
 
@@ -52,3 +56,19 @@ A high-performance Rust implementation of trajectory distance algorithms with Py
 - Pickle serialization for `DpResult` objects (compatible with joblib)
 - Comprehensive error handling for invalid inputs
 - Full Python type hints for better IDE support
+
+### Keywords / Search Terms
+
+Common search terms related to this library:
+
+- **Core concepts**: trajectory similarity, trajectory distance, similarity measures, trajectory analysis
+- **Algorithms**: DTW, LCSS, EDR, ERP, Fréchet distance, Hausdorff distance, SSPD
+- **Applications**: trajectory clustering, trajectory similarity search, nearest neighbor retrieval, mobility data analysis, GPS trace analysis
+- **Domains**: time series similarity, spatiotemporal data, movement pattern mining, anomaly detection
+
+### Migration from traj-dist
+
+If you used the original `traj-dist` library for trajectory similarity measurement, this library is compatible and offers significant performance improvements:
+
+- **Algorithm compatibility**: Core algorithms (SSPD, DTW, Hausdorff, LCSS, EDR, ERP) supported
+- **Performance**: 3-10x faster than Cython implementation
