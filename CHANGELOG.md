@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-beta.2] - 2026-03-05
+
+### Fixed
+
+#### Release Issues
+- Fixed crates.io publication failure caused by keyword length exceeding 20 characters limit
+  - Changed keyword from "trajectory-similarity" (22 characters) to "similarity" (11 characters)
+  - Ensures compliance with crates.io keyword length constraints
+
+---
+
 ## [1.0.0-beta.1] - 2026-02-25
 
 ### Added
@@ -469,8 +480,9 @@ print(f"DTW distance: {result.distance}")
 
 ---
 
-[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-beta.1...HEAD
+[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-beta.2...HEAD
 [1.0.0]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0
+[1.0.0-beta.2]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.2
 [1.0.0-beta.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.1
 [1.0.0-alpha.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-alpha.1
 [0.1.0-alpha.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v0.1.0-alpha.1
