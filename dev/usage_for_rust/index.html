@@ -8,6 +8,8 @@
       
       
       
+        <link rel="canonical" href="https://davidham3.github.io/traj-dist-rs/dev/usage_for_rust/">
+      
       
         <link rel="prev" href="../usage_for_python/">
       
@@ -3196,21 +3198,21 @@ println!("Results match: {}", distances_seq.len() == distances_par.len());</f64>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Sequential time: 4.117s
+<pre>Sequential time: 3.525s
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Parallel time: 1.514s
+<pre>Parallel time: 1.411s
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Speedup: 2.72x
+<pre>Speedup: 2.50x
 </pre>
 </div>
 </div>
@@ -3468,7 +3470,7 @@ println!("Hausdorff: {:.6}s, distance: {:.6}", hausdorff_time.as_secs_f64(), res
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>SSPD: 0.000009s, distance: 0.000000
+<pre>SSPD: 0.000008s, distance: 0.000000
 </pre>
 </div>
 </div>
@@ -3482,14 +3484,14 @@ println!("Hausdorff: {:.6}s, distance: {:.6}", hausdorff_time.as_secs_f64(), res
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Hausdorff: 0.000012s, distance: 0.000000
+<pre>Hausdorff: 0.000007s, distance: 0.000000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Discret Frechet: 0.000003s, distance: 0
+<pre>Discret Frechet: 0.000001s, distance: 0
 </pre>
 </div>
 </div>
@@ -3578,14 +3580,14 @@ println!("GPS Trajectory 2 (first 3 points): {:?}", &amp;gps_traj2[..3]);</f64><
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>GPS Trajectory 1 (first 3 points): [[40.72093308962437, -74.00467996710451], [40.71537586731878, -74.00374721812648], [40.71000915745568, -73.99819664986332]]
+<pre>GPS Trajectory 1 (first 3 points): [[40.717439653922455, -73.99970831889553], [40.723061422827, -74.01259922560635], [40.70645311038814, -74.00094867775883]]
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>GPS Trajectory 2 (first 3 points): [[40.72125611301896, -74.00552943634717], [40.723903275043696, -73.99826650194277], [40.71706575559325, -74.00971684341938]]
+<pre>GPS Trajectory 2 (first 3 points): [[40.708820599030965, -74.00275170826481], [40.70968732370445, -74.01345867072017], [40.7097940104636, -73.99909032155098]]
 </pre>
 </div>
 </div>
@@ -3647,21 +3649,21 @@ println!("Hausdorff spherical distance: {:.2} meters", hausdorff_dist);</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>SSPD spherical distance: 191.81 meters
+<pre>SSPD spherical distance: 275.79 meters
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>DTW spherical distance: 8797.049585252109 meters
+<pre>DTW spherical distance: 10951.74653937213 meters
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Hausdorff spherical distance: 573.11 meters
+<pre>Hausdorff spherical distance: 577.93 meters
 </pre>
 </div>
 </div>
