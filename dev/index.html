@@ -83,6 +83,10 @@
       
     </div>
     
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
     
       
 
@@ -277,11 +281,11 @@
         <li class="md-nav__item">
   <a href="#about" class="md-nav__link">
     <span class="md-ellipsis">
-      📖 About
+      About
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="📖 About">
+    <nav class="md-nav" aria-label="About">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -301,11 +305,11 @@
         <li class="md-nav__item">
   <a href="#features" class="md-nav__link">
     <span class="md-ellipsis">
-      ✨ Features
+      Features
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="✨ Features">
+    <nav class="md-nav" aria-label="Features">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -339,6 +343,24 @@
   <a href="#additional-features" class="md-nav__link">
     <span class="md-ellipsis">
       Additional Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keywords-search-terms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Keywords / Search Terms
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration-from-traj-dist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration from traj-dist
     </span>
   </a>
   
@@ -506,11 +528,11 @@
         <li class="md-nav__item">
   <a href="#about" class="md-nav__link">
     <span class="md-ellipsis">
-      📖 About
+      About
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="📖 About">
+    <nav class="md-nav" aria-label="About">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -530,11 +552,11 @@
         <li class="md-nav__item">
   <a href="#features" class="md-nav__link">
     <span class="md-ellipsis">
-      ✨ Features
+      Features
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="✨ Features">
+    <nav class="md-nav" aria-label="Features">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -573,6 +595,24 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#keywords-search-terms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Keywords / Search Terms
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration-from-traj-dist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration from traj-dist
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -594,33 +634,71 @@
 
 
 <h1 id="traj-dist-rs">traj-dist-rs</h1>
+<p><strong>High-performance trajectory distance &amp; similarity measures in Rust and Python.</strong></p>
 <p>A high-performance Rust implementation of trajectory distance algorithms with Python bindings, offering significant speed improvements over the original <a href="https://github.com/bguillouet/traj-dist">traj-dist</a> library.</p>
 <p><a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a>
 <a href="https://www.python.org/downloads/"><img alt="Python Version" src="https://img.shields.io/badge/python-3.10%2B-blue" /></a>
-<a href="https://www.rust-lang.org/"><img alt="Rust Version" src="https://img.shields.io/badge/rust-1.70%2B-orange" /></a></p>
-<h2 id="about">📖 About</h2>
+<a href="https://www.rust-lang.org/"><img alt="Rust Version" src="https://img.shields.io/badge/rust-1.85%2B-orange" /></a></p>
+<h2 id="about">About</h2>
 <p><strong>traj-dist-rs</strong> is a high-performance trajectory distance calculation library written in Rust, providing both native Rust APIs and Python bindings via PyO3. It is a complete rewrite of the original <a href="https://github.com/bguillouet/traj-dist">traj-dist</a> library, focusing on performance optimization and modern language features.</p>
 <h3 id="why-traj-dist-rs">Why traj-dist-rs?</h3>
 <ul>
-<li><strong>🚀 Performance</strong>: <strong>~82x faster</strong> than Python implementation and <strong>~3x faster</strong> than Cython implementation on average</li>
-<li><strong>⚡ Batch Computation</strong>: Native <code>pdist</code> and <code>cdist</code> functions with parallel support up to <strong>130x</strong> faster than <code>traj-dist</code></li>
-<li><strong>📦 Zero Dependencies</strong>: Only requires <strong>numpy &gt;= 1.21</strong> - no heavy dependencies like polars, pyarrow, pandas, or shapely</li>
-<li><strong>🔒 Safety</strong>: Rust's memory safety guarantees eliminate common runtime errors</li>
-<li><strong>📦 Cross-platform</strong>: Supports Linux, macOS, and Windows with native binaries</li>
-<li><strong>🔗 Dual API</strong>: Use it from Python or Rust with minimal overhead</li>
-<li><strong>🎯 Accuracy</strong>: All algorithms verified against original implementation with &lt; 1e-8 error margin</li>
+<li><strong>Performance</strong>: <strong>~82x faster</strong> than Python implementation and <strong>~3x faster</strong> than Cython implementation on average</li>
+<li><strong>Batch Computation</strong>: Native <code>pdist</code> and <code>cdist</code> functions with parallel support up to <strong>130x</strong> faster than <code>traj-dist</code></li>
+<li><strong>Zero Dependencies</strong>: Only requires <strong>numpy &gt;= 1.21</strong> - no heavy dependencies like polars, pyarrow, pandas, or shapely</li>
+<li><strong>Safety</strong>: Rust's memory safety guarantees eliminate common runtime errors</li>
+<li><strong>Cross-platform</strong>: Supports Linux, macOS, and Windows with native binaries</li>
+<li><strong>Dual API</strong>: Use it from Python or Rust with minimal overhead</li>
+<li><strong>Accuracy</strong>: All algorithms verified against original implementation with &lt; 1e-8 error margin</li>
 </ul>
-<h2 id="features">✨ Features</h2>
+<h2 id="features">Features</h2>
 <h3 id="supported-distance-algorithms">Supported Distance Algorithms</h3>
-<ul>
-<li><strong>SSPD</strong> - Symmetric Segment-Path Distance</li>
-<li><strong>DTW</strong> - Dynamic Time Warping (with optional matrix return)</li>
-<li><strong>Discret Frechet</strong> - Discrete Fréchet Distance</li>
-<li><strong>Hausdorff</strong> - Hausdorff Distance</li>
-<li><strong>LCSS</strong> - Longest Common Subsequence</li>
-<li><strong>EDR</strong> - Edit Distance on Real sequence</li>
-<li><strong>ERP</strong> - Edit distance with Real Penalty (standard &amp; traj-dist compatible)</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Full Name</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SSPD</strong></td>
+<td>Symmetric Segment-Path Distance</td>
+<td>General similarity, noise tolerance</td>
+</tr>
+<tr>
+<td><strong>DTW</strong></td>
+<td>Dynamic Time Warping</td>
+<td>Similarity with time warping, flexible alignment</td>
+</tr>
+<tr>
+<td><strong>Discret Frechet</strong></td>
+<td>Discrete Fréchet Distance</td>
+<td>Geometric similarity, path-based matching</td>
+</tr>
+<tr>
+<td><strong>Hausdorff</strong></td>
+<td>Hausdorff Distance</td>
+<td>Maximum distance, outlier-sensitive similarity</td>
+</tr>
+<tr>
+<td><strong>LCSS</strong></td>
+<td>Longest Common Subsequence</td>
+<td>Robust similarity with noise tolerance</td>
+</tr>
+<tr>
+<td><strong>EDR</strong></td>
+<td>Edit Distance on Real sequence</td>
+<td>Similarity with noise and outlier tolerance</td>
+</tr>
+<tr>
+<td><strong>ERP</strong></td>
+<td>Edit distance with Real Penalty</td>
+<td>Robust similarity with gap handling</td>
+</tr>
+</tbody>
+</table>
 <h3 id="distance-types">Distance Types</h3>
 <ul>
 <li><strong>Euclidean</strong> - 2D Euclidean distance</li>
@@ -641,6 +719,20 @@
 <li>Pickle serialization for <code>DpResult</code> objects (compatible with joblib)</li>
 <li>Comprehensive error handling for invalid inputs</li>
 <li>Full Python type hints for better IDE support</li>
+</ul>
+<h3 id="keywords-search-terms">Keywords / Search Terms</h3>
+<p>Common search terms related to this library:</p>
+<ul>
+<li><strong>Core concepts</strong>: trajectory similarity, trajectory distance, similarity measures, trajectory analysis</li>
+<li><strong>Algorithms</strong>: DTW, LCSS, EDR, ERP, Fréchet distance, Hausdorff distance, SSPD</li>
+<li><strong>Applications</strong>: trajectory clustering, trajectory similarity search, nearest neighbor retrieval, mobility data analysis, GPS trace analysis</li>
+<li><strong>Domains</strong>: time series similarity, spatiotemporal data, movement pattern mining, anomaly detection</li>
+</ul>
+<h3 id="migration-from-traj-dist">Migration from traj-dist</h3>
+<p>If you used the original <code>traj-dist</code> library for trajectory similarity measurement, this library is compatible and offers significant performance improvements:</p>
+<ul>
+<li><strong>Algorithm compatibility</strong>: Core algorithms (SSPD, DTW, Hausdorff, LCSS, EDR, ERP) supported</li>
+<li><strong>Performance</strong>: 3-10x faster than Cython implementation</li>
 </ul>
 
 
@@ -688,7 +780,7 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.copy", "navigation.sections"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.copy", "navigation.sections"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="assets/javascripts/bundle.3220b9d7.min.js"></script>

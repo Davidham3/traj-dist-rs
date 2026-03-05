@@ -85,6 +85,10 @@
       
     </div>
     
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
     
       
 
@@ -3198,21 +3202,21 @@ println!("Results match: {}", distances_seq.len() == distances_par.len());</f64>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Sequential time: 3.525s
+<pre>Sequential time: 2.055s
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Parallel time: 1.411s
+<pre>Parallel time: 0.706s
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Speedup: 2.50x
+<pre>Speedup: 2.91x
 </pre>
 </div>
 </div>
@@ -3470,21 +3474,21 @@ println!("Hausdorff: {:.6}s, distance: {:.6}", hausdorff_time.as_secs_f64(), res
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>SSPD: 0.000008s, distance: 0.000000
+<pre>SSPD: 0.000005s, distance: 0.000000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>DTW: 0.000002s, distance: 0
+<pre>DTW: 0.000001s, distance: 0
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Hausdorff: 0.000007s, distance: 0.000000
+<pre>Hausdorff: 0.000005s, distance: 0.000000
 </pre>
 </div>
 </div>
@@ -3580,14 +3584,14 @@ println!("GPS Trajectory 2 (first 3 points): {:?}", &amp;gps_traj2[..3]);</f64><
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>GPS Trajectory 1 (first 3 points): [[40.717439653922455, -73.99970831889553], [40.723061422827, -74.01259922560635], [40.70645311038814, -74.00094867775883]]
+<pre>GPS Trajectory 1 (first 3 points): [[40.72025973408727, -74.00007186628552], [40.72082479514662, -74.00596767402084], [40.71079581470737, -73.99776547720822]]
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>GPS Trajectory 2 (first 3 points): [[40.708820599030965, -74.00275170826481], [40.70968732370445, -74.01345867072017], [40.7097940104636, -73.99909032155098]]
+<pre>GPS Trajectory 2 (first 3 points): [[40.70894131329227, -73.99847063854938], [40.70962215209615, -74.0060491012602], [40.70535478102565, -74.00537253146214]]
 </pre>
 </div>
 </div>
@@ -3649,21 +3653,21 @@ println!("Hausdorff spherical distance: {:.2} meters", hausdorff_dist);</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>SSPD spherical distance: 275.79 meters
+<pre>SSPD spherical distance: 181.26 meters
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>DTW spherical distance: 10951.74653937213 meters
+<pre>DTW spherical distance: 9889.389315918565 meters
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Hausdorff spherical distance: 577.93 meters
+<pre>Hausdorff spherical distance: 368.08 meters
 </pre>
 </div>
 </div>
@@ -3744,7 +3748,7 @@ println!("Hausdorff spherical distance: {:.2} meters", hausdorff_dist);</div>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.3220b9d7.min.js"></script>

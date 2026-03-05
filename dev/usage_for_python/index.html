@@ -85,6 +85,10 @@
       
     </div>
     
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
     
       
 
@@ -2974,9 +2978,9 @@ print(f"Results match: {distances_seq.shape == distances_par.shape}")</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Sequential time: 0.354s
-Parallel time: 0.128s
-Speedup: 2.75x
+<pre>Sequential time: 0.467s
+Parallel time: 0.160s
+Speedup: 2.93x
 Results match: True
 </pre>
 </div>
@@ -3086,15 +3090,9 @@ print(f"Matrix shape: {matrix_par.shape}")</div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Collection A: 30 trajectories
 Collection B: 30 trajectories
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Sequential time: 0.047s
-Parallel time: 0.023s
-Speedup: 2.08x
+Sequential time: 0.044s
+Parallel time: 0.020s
+Speedup: 2.16x
 Results match: True
 Matrix shape: (30, 30)
 </pre>
@@ -3302,7 +3300,7 @@ print(f"Sample distances: {results[:5]}")</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Computed 190 pairwise distances
-Sample distances: [19.504584125554953, 21.62921748630818, 20.326804048296303, 21.74052338042037, 21.31358596270567]
+Sample distances: [19.651363297366707, 18.76751775900941, 20.06261061912685, 21.266325103598163, 19.928329963606814]
 </pre>
 </div>
 </div>
@@ -3400,10 +3398,10 @@ for name, func in algorithms:
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Performance Comparison (short trajectory - 10 points):
-SSPD: 0.000013s, distance: 0.000000
-DTW: 0.000004s, distance: 0.000000
-Hausdorff: 0.000018s, distance: 0.000000
-Discret Frechet: 0.000004s, distance: 0.000000
+SSPD: 0.000019s, distance: 0.000000
+DTW: 0.000005s, distance: 0.000000
+Hausdorff: 0.000009s, distance: 0.000000
+Discret Frechet: 0.000010s, distance: 0.000000
 </pre>
 </div>
 </div>
@@ -3484,8 +3482,8 @@ print(f"GPS Trajectory 2 (first 3 points): {gps_traj2[:3]}")</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>GPS Trajectory 1 (first 3 points): [[40.710175460148754, -73.99806607505899], [40.71031494422338, -74.00454220951815], [40.72323232834067, -73.99753337407158]]
-GPS Trajectory 2 (first 3 points): [[40.70450656401068, -74.00086671183968], [40.722335307581844, -74.00692581541593], [40.7197129005498, -74.00562729077873]]
+<pre>GPS Trajectory 1 (first 3 points): [[40.720308998936055, -73.99826702223186], [40.71071639426821, -74.01455615407161], [40.72240367661549, -74.00462873789796]]
+GPS Trajectory 2 (first 3 points): [[40.71708451786629, -74.01217090878637], [40.71468690226706, -74.0051165785782], [40.71158618411224, -74.00108436327719]]
 </pre>
 </div>
 </div>
@@ -3539,9 +3537,9 @@ print(f"Hausdorff spherical distance: {hausdorff_dist:.2f} meters")</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>SSPD spherical distance: 238.68 meters
-DTW spherical distance: 9692.52 meters
-Hausdorff spherical distance: 1025.82 meters
+<pre>SSPD spherical distance: 202.98 meters
+DTW spherical distance: 9874.40 meters
+Hausdorff spherical distance: 414.28 meters
 </pre>
 </div>
 </div>
@@ -3697,7 +3695,7 @@ Caught expected error: DataConvertionError: Failed to extract List[List[float]] 
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.3220b9d7.min.js"></script>
