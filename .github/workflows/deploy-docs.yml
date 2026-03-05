@@ -37,10 +37,19 @@ jobs:
         run: |
           uv sync --dev --all-extras
 
+      - name: Cache Cargo Binaries
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-evcxr
+
       - name: Install evcxr (Rust Jupyter kernel)
         run: |
-          cargo install evcxr_repl
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.cargo/bin:$PATH"
+          if ! command -v evcxr_jupyter &> /dev/null; then
+            cargo install evcxr_jupyter
+          fi
+          # 确保在 uv 环境中执行安装
           source .venv/bin/activate
           evcxr_jupyter --install
 
