@@ -11,7 +11,7 @@ on:
         value: sdist
 
 jobs:
-  build-wheels-linux:
+  build-wheels-linux-x86:
     name: Build wheels on Linux
     runs-on: ubuntu-22.04
 
@@ -19,18 +19,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: all
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.1
+        env:
+          CIBW_ARCHS_LINUX: x86_64 
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-linux
+          name: wheels-linux-x86
+          path: ./wheelhouse/*.whl
+          retention-days: 7
+
+  build-wheels-linux-arm64:
+    name: Build wheels on Linux
+    runs-on: ubuntu-22.04-arm
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.3.1
+        env:
+          CIBW_ARCHS_LINUX: aarch64 
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-arm64
           path: ./wheelhouse/*.whl
           retention-days: 7
 
