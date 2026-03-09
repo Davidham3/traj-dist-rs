@@ -1921,7 +1921,7 @@ print(f"traj_dist_rs version: {traj_dist_rs.__version__}")</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>traj_dist_rs version: 1.0.0b3
+<pre>traj_dist_rs version: 1.0.0b4
 </pre>
 </div>
 </div>
@@ -2978,9 +2978,15 @@ print(f"Results match: {distances_seq.shape == distances_par.shape}")</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Sequential time: 0.454s
+<pre>Sequential time: 0.458s</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>
 Parallel time: 0.159s
-Speedup: 2.86x
+Speedup: 2.87x
 Results match: True
 </pre>
 </div>
@@ -3096,9 +3102,9 @@ Collection B: 30 trajectories
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Sequential time: 0.047s
-Parallel time: 0.023s
-Speedup: 2.02x
+<pre>Sequential time: 0.046s
+Parallel time: 0.025s
+Speedup: 1.85x
 Results match: True
 Matrix shape: (30, 30)
 </pre>
@@ -3306,7 +3312,7 @@ print(f"Sample distances: {results[:5]}")</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Computed 190 pairwise distances
-Sample distances: [20.982242311169024, 18.873555282477266, 22.198698791012244, 19.618097666436004, 20.745552304544514]
+Sample distances: [19.225438188595625, 19.73740878496629, 19.617514526399233, 18.21904175824524, 19.67327772917339]
 </pre>
 </div>
 </div>
@@ -3404,10 +3410,10 @@ for name, func in algorithms:
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Performance Comparison (short trajectory - 10 points):
-SSPD: 0.000015s, distance: 0.000000
+SSPD: 0.000019s, distance: 0.000000
 DTW: 0.000005s, distance: 0.000000
-Hausdorff: 0.000008s, distance: 0.000000
-Discret Frechet: 0.000008s, distance: 0.000000
+Hausdorff: 0.000013s, distance: 0.000000
+Discret Frechet: 0.000004s, distance: 0.000000
 </pre>
 </div>
 </div>
@@ -3488,8 +3494,8 @@ print(f"GPS Trajectory 2 (first 3 points): {gps_traj2[:3]}")</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>GPS Trajectory 1 (first 3 points): [[40.706250957501325, -74.01239705613453], [40.70999603247084, -74.00905440203617], [40.70776368925178, -73.99712011919544]]
-GPS Trajectory 2 (first 3 points): [[40.71369316947476, -73.99725311044281], [40.721445468716155, -74.00181781872246], [40.712576365995645, -74.01268115222838]]
+<pre>GPS Trajectory 1 (first 3 points): [[40.72010202324657, -74.009901412937], [40.71422175104122, -74.0060320978579], [40.70878348811134, -74.01276016948165]]
+GPS Trajectory 2 (first 3 points): [[40.710913295078086, -74.01415173357147], [40.71125015103902, -74.01328565105838], [40.70505280364728, -74.00554591329598]]
 </pre>
 </div>
 </div>
@@ -3543,9 +3549,9 @@ print(f"Hausdorff spherical distance: {hausdorff_dist:.2f} meters")</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>SSPD spherical distance: 209.80 meters
-DTW spherical distance: 13706.77 meters
-Hausdorff spherical distance: 687.63 meters
+<pre>SSPD spherical distance: 261.43 meters
+DTW spherical distance: 10692.17 meters
+Hausdorff spherical distance: 431.85 meters
 </pre>
 </div>
 </div>
