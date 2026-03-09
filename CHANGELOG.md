@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-beta.4] - 2026-03-09
+
+### Fixed
+
+#### Documentation
+- Fixed incorrect rust version in README.md Quick Start section
+
+#### Release Workflow
+- Renamed GitHub Actions workflow file from `create-prerelease.yml` to `create-release.yml`
+  - Updated workflow to support both pre-release and official release automation
+  - Workflow automatically detects version type (alpha, beta, rc, or stable)
+  - Creates appropriate GitHub Release with correct pre-release flag
+
+---
+
 ## [1.0.0-beta.3] - 2026-03-05
 
 ### Fixed
