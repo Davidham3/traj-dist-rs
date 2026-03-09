@@ -47,7 +47,7 @@ from ._lib import (DpResult, Metric, cdist, discret_frechet,
                    erp_standard_with_matrix, hausdorff, lcss, lcss_with_matrix,
                    pdist, sspd)
 
-__version__ = "1.0.0b4"
+__version__ = "1.0.0b5"
 __author__ = "traj-dist-rs contributors"
 __all__ = [
     "sspd",

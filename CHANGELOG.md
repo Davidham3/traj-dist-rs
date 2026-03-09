@@ -9,12 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-beta.5] - 2026-03-09
+
+### Fixed
+
+#### Documentation
+- Fixed incorrect section reference in CHANGELOG.md 1.0.0-beta.4 entry
+  - Changed "Quick Start section" to "Installation section" to accurately reflect the documentation section where the fix was applied
+
+---
+
 ## [1.0.0-beta.4] - 2026-03-09
 
 ### Fixed
 
 #### Documentation
-- Fixed incorrect rust version in README.md Quick Start section
+- Fixed incorrect rust version in README.md Installation section
 
 #### Release Workflow
 - Renamed GitHub Actions workflow file from `create-prerelease.yml` to `create-release.yml`
@@ -514,8 +524,10 @@ print(f"DTW distance: {result.distance}")
 
 ---
 
-[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-beta.3...HEAD
+[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-beta.5...HEAD
 [1.0.0]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0
+[1.0.0-beta.5]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.5
+[1.0.0-beta.4]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.4
 [1.0.0-beta.3]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.3
 [1.0.0-beta.2]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.2
 [1.0.0-beta.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.1
