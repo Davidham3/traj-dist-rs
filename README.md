@@ -179,9 +179,8 @@ pip install traj-dist-rs[test]
 **From Source** (requires Rust toolchain):
 
 **Prerequisites:**
-- Rust 1.70 or later
-- Python 3.10, 3.11, 3.12, or 3.13
-- maturin
+- Rust 1.85 or later
+- uv
 
 **Build and install:**
 ```bash
