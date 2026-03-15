@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-rc.1] - 2026-03-15
+
+### Changed
+
+#### Version Update
+- Updated version from 1.0.0-beta.5 to 1.0.0-rc.1 for release candidate
+- Python package version updated from 1.0.0b5 to 1.0.0rc1
+- Ready for RC release with all features tested and verified
+
+---
+
 ## [1.0.0-beta.5] - 2026-03-09
 
 ### Fixed
@@ -524,8 +535,9 @@ print(f"DTW distance: {result.distance}")
 
 ---
 
-[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-beta.5...HEAD
+[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-rc.1...HEAD
 [1.0.0]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0
+[1.0.0-rc.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-rc.1
 [1.0.0-beta.5]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.5
 [1.0.0-beta.4]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.4
 [1.0.0-beta.3]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.3
