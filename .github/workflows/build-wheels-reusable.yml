@@ -22,7 +22,8 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.1
         env:
-          CIBW_ARCHS_LINUX: x86_64 
+          CIBW_ARCHS_LINUX: x86_64
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -42,7 +43,8 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.1
         env:
-          CIBW_ARCHS_LINUX: aarch64 
+          CIBW_ARCHS_LINUX: aarch64
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
