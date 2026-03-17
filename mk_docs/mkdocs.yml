@@ -31,8 +31,6 @@ theme:
 
 plugins:
   - search
-  - sitemap:
-      filename: sitemap.xml
   - mkdocstrings:
       handlers:
         python:
