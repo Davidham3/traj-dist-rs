@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-rc.2] - 2026-03-17
+
+### Added
+
+#### Development Environment
+- Added `.devcontainer` configuration for GitHub Codespaces and VS Code Remote - Containers
+  - Dockerfile based on Ubuntu with pre-installed development tools
+  - Rust toolchain (stable) with rustup
+  - uv package manager for Python dependency management
+  - Pre-configured VS Code extensions (rust-analyzer, Python, Ruff, Even Better TOML)
+  - Automated environment setup with postCreateCommand
+
+#### Documentation
+- Added Google Search Console verification meta tag for SEO
+  - Meta tag added to MkDocs main.html override template
+  - Enables Google Search Console ownership verification
+
+### Changed
+
+#### Linux Wheel Compatibility
+- Updated `build-wheels-reusable.yml` to use manylinux2014 image for Linux builds
+  - Added `CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014` for x86_64 builds
+  - Added `CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014` for arm64 builds
+  - Wheel packages downgraded from manylinux_2_28 to manylinux_2_17
+  - Ensures compatibility with older Linux distributions (glibc 2.17+)
+  - Supported distributions now include CentOS 7, RHEL 7, Ubuntu 14.04, and other older systems
+
+---
+
 ## [1.0.0-rc.1] - 2026-03-15
 
 ### Changed
@@ -535,8 +564,9 @@ print(f"DTW distance: {result.distance}")
 
 ---
 
-[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-rc.1...HEAD
+[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-rc.2...HEAD
 [1.0.0]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0
+[1.0.0-rc.2]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-rc.2
 [1.0.0-rc.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-rc.1
 [1.0.0-beta.5]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.5
 [1.0.0-beta.4]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.4

@@ -3874,7 +3874,7 @@ wheels = [
 
 [[package]]
 name = "traj-dist-rs"
-version = "1.0.0b5"
+version = "1.0.0rc2"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
