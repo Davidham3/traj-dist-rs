@@ -1,0 +1,1099 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://davidham3.github.io/traj-dist-rs/1.0.0-rc.2/benchmark_guide/">
+      
+      
+        <link rel="prev" href="../performance/">
+      
+      
+        <link rel="next" href="../api_reference/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.18">
+    
+    
+      
+        <title>Benchmark Reproduction Guide - traj-dist-rs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.66ac8b77.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  <meta name="google-site-verification" content="N7UCH_IISEJrpFFZ_3sC2SEUZAjKGvwWEJtZ3y9tbFI" />
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#benchmark-reproduction-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="traj-dist-rs" class="md-header__button md-logo" aria-label="traj-dist-rs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            traj-dist-rs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Benchmark Reproduction Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="traj-dist-rs" class="md-nav__button md-logo" aria-label="traj-dist-rs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    traj-dist-rs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage_for_python/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Python User Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage_for_rust/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rust User Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../performance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Performance
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Benchmark Reproduction Guide
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Benchmark Reproduction Guide
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      0. Prerequisites
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0. Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#01-install-uv-python-package-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      0.1. Install uv (Python Package Manager)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#02-install-rust-optional-for-traj-dist-required-for-traj-dist-rs" class="md-nav__link">
+    <span class="md-ellipsis">
+      0.2. Install Rust (Optional for traj-dist, Required for traj-dist-rs)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Directory Structure
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Directory Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-clone-traj-dist-precision-improved-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.1. Clone traj-dist (Precision-Improved Version)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-clone-traj-dist-rs" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.2. Clone traj-dist-rs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-environment-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Environment Installation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Environment Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-install-traj-dist-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.1. Install traj-dist Environment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-install-traj-dist-rs-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2. Install traj-dist-rs Environment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-running-benchmark" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Running Benchmark
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Running Benchmark">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-basic-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1. Basic Command
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-custom-parameters-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2. Custom Parameters (Optional)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-benchmark-execution-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.3. Benchmark Execution Flow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-viewing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Viewing Results
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Viewing Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-performance-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.1. Performance Report
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-raw-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.2. Raw Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-supported-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Supported Algorithms
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. References
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-feedback-and-contributions" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Feedback and Contributions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      0. Prerequisites
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0. Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#01-install-uv-python-package-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      0.1. Install uv (Python Package Manager)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#02-install-rust-optional-for-traj-dist-required-for-traj-dist-rs" class="md-nav__link">
+    <span class="md-ellipsis">
+      0.2. Install Rust (Optional for traj-dist, Required for traj-dist-rs)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Directory Structure
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Directory Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-clone-traj-dist-precision-improved-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.1. Clone traj-dist (Precision-Improved Version)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-clone-traj-dist-rs" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.2. Clone traj-dist-rs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-environment-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Environment Installation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Environment Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-install-traj-dist-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.1. Install traj-dist Environment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-install-traj-dist-rs-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2. Install traj-dist-rs Environment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-running-benchmark" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Running Benchmark
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Running Benchmark">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-basic-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1. Basic Command
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-custom-parameters-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2. Custom Parameters (Optional)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-benchmark-execution-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.3. Benchmark Execution Flow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-viewing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Viewing Results
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Viewing Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-performance-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.1. Performance Report
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-raw-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.2. Raw Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-supported-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Supported Algorithms
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. References
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-feedback-and-contributions" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Feedback and Contributions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="benchmark-reproduction-guide">Benchmark Reproduction Guide</h1>
+<p>This document provides complete steps for reproducing benchmark experiments. Anyone can follow this guide to easily run performance tests.</p>
+<h2 id="0-prerequisites">0. Prerequisites</h2>
+<p>Before starting, ensure you have the following tools installed:</p>
+<h3 id="01-install-uv-python-package-manager">0.1. Install uv (Python Package Manager)</h3>
+<p><code>uv</code> is a fast Python package manager used in this project for dependency management.</p>
+<p><strong>Install on Linux/macOS</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</span></code></pre></div></p>
+<p><strong>Install on Windows</strong>:
+<div class="language-powershell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">powershell</span> <span class="n">-c</span> <span class="s2">&quot;irm https://astral.sh/uv/install.ps1 | iex&quot;</span>
+</span></code></pre></div></p>
+<p>Verify installation:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv<span class="w"> </span>--version
+</span></code></pre></div></p>
+<h3 id="02-install-rust-optional-for-traj-dist-required-for-traj-dist-rs">0.2. Install Rust (Optional for traj-dist, Required for traj-dist-rs)</h3>
+<p>If you only want to run the original traj-dist benchmark, Rust is not required. However, to build and test traj-dist-rs, you need to install Rust.</p>
+<p><strong>Install Rust</strong>:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>--proto<span class="w"> </span><span class="s1">&#39;=https&#39;</span><span class="w"> </span>--tlsv1.2<span class="w"> </span>-sSf<span class="w"> </span>https://sh.rustup.rs<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/.cargo/env
+</span></code></pre></div></p>
+<p>Verify installation:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>rustc<span class="w"> </span>--version
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>cargo<span class="w"> </span>--version
+</span></code></pre></div></p>
+<h2 id="1-directory-structure">1. Directory Structure</h2>
+<p>First, the benchmark workspace structure is as follows:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>traj-dist-dev/
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├── traj-dist/     # Python/Cython original implementation (with precision improvements)
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>└── traj-dist-rs/  # Rust reimplementation
+</span></code></pre></div>
+<p>Both projects must be in the same level directory because the benchmark script needs to access traj-dist's Python environment.</p>
+<h3 id="11-clone-traj-dist-precision-improved-version">1.1. Clone traj-dist (Precision-Improved Version)</h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">cd</span><span class="w"> </span>/path/to/traj-dist-dev
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Davidham3/traj-dist.git
+</span></code></pre></div>
+<p><strong>Note</strong>: This version of traj-dist has upgraded the precision of spherical distance calculations from float to double, making it a more reasonable baseline implementation.</p>
+<h3 id="12-clone-traj-dist-rs">1.2. Clone traj-dist-rs</h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nb">cd</span><span class="w"> </span>/path/to/traj-dist-dev
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Davidham3/traj-dist-rs.git
+</span></code></pre></div>
+<p>Ensure both repositories are in the same level directory:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>ls<span class="w"> </span>-la
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># You should see:</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1"># traj-dist/</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># traj-dist-rs/</span>
+</span></code></pre></div>
+<h2 id="2-environment-installation">2. Environment Installation</h2>
+<h3 id="21-install-traj-dist-environment">2.1. Install traj-dist Environment</h3>
+<p>Navigate to the traj-dist directory and use the provided script to quickly build the environment:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">cd</span><span class="w"> </span>traj-dist
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>bash<span class="w"> </span>scripts/setup_traj_dist_env.sh
+</span></code></pre></div>
+<p>This script will automatically complete the following operations:
+1. Use uv to create a Python 3.8 virtual environment
+2. Install all dependencies (numpy, Cython, Shapely, etc.)
+3. Clean up old build files
+4. Build and install traj-dist</p>
+<p><strong>Expected time</strong>: 3-5 minutes (depending on network speed)</p>
+<p><strong>Verify installation</strong>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nb">cd</span><span class="w"> </span>/tmp
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import traj_dist; print(&#39;traj-dist installed successfully&#39;)&quot;</span>
+</span></code></pre></div>
+<h3 id="22-install-traj-dist-rs-environment">2.2. Install traj-dist-rs Environment</h3>
+<p>Navigate to the traj-dist-rs directory and install the Rust development environment and Python bindings:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">cd</span><span class="w"> </span>traj-dist-rs
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>uv<span class="w"> </span>sync<span class="w"> </span>--dev<span class="w"> </span>--all-extras
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>maturin<span class="w"> </span>develop<span class="w"> </span>--release
+</span></code></pre></div>
+<p><strong>Explanation</strong>:</p>
+<ul>
+<li><code>uv sync --dev --all-extras</code>: Install all development dependencies</li>
+<li><code>maturin develop --release</code>: Build and install Python bindings in release mode (for best performance)</li>
+</ul>
+<p><strong>Expected time</strong>: 3-5 minutes (first run requires compiling Rust code)</p>
+<p><strong>Verify installation</strong>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import traj_dist_rs; print(&#39;traj-dist-rs installed successfully&#39;)&quot;</span>
+</span></code></pre></div>
+<h2 id="3-running-benchmark">3. Running Benchmark</h2>
+<h3 id="31-basic-command">3.1. Basic Command</h3>
+<p>Run performance tests in the traj-dist-rs directory:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nb">cd</span><span class="w"> </span>traj-dist-rs
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nv">K</span><span class="o">=</span><span class="m">1000</span><span class="w"> </span><span class="nv">WARMUP_RUNS</span><span class="o">=</span><span class="m">10</span><span class="w"> </span><span class="nv">NUM_RUNS</span><span class="o">=</span><span class="m">50</span><span class="w"> </span>bash<span class="w"> </span>scripts/benchmark/run_benchmark.sh
+</span></code></pre></div>
+<p><strong>Parameter explanation</strong>:
+- <code>K=1000</code>: Number of trajectory pairs to test (randomly extract 1000 pairs from baseline data)
+- <code>WARMUP_RUNS=10</code>: Number of warmup runs (10 warmups to avoid cold start effects)
+- <code>NUM_RUNS=50</code>: Number of measurement runs (50 measurements to calculate statistical metrics)</p>
+<h3 id="32-custom-parameters-optional">3.2. Custom Parameters (Optional)</h3>
+<p>If you need to use different test scales, you can adjust the parameters:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Quick test (suitable for debugging)</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nv">K</span><span class="o">=</span><span class="m">50</span><span class="w"> </span><span class="nv">WARMUP_RUNS</span><span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="nv">NUM_RUNS</span><span class="o">=</span><span class="m">10</span><span class="w"> </span>bash<span class="w"> </span>scripts/benchmark/run_benchmark.sh
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Large-scale test (suitable for production environment performance evaluation)</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="nv">K</span><span class="o">=</span><span class="m">5000</span><span class="w"> </span><span class="nv">WARMUP_RUNS</span><span class="o">=</span><span class="m">20</span><span class="w"> </span><span class="nv">NUM_RUNS</span><span class="o">=</span><span class="m">100</span><span class="w"> </span>bash<span class="w"> </span>scripts/benchmark/run_benchmark.sh
+</span></code></pre></div>
+<h3 id="33-benchmark-execution-flow">3.3. Benchmark Execution Flow</h3>
+<p>The script will automatically complete the following steps:</p>
+<ol>
+<li><strong>Generate baseline trajectory data</strong></li>
+<li>Randomly extract K trajectory pairs from traj-dist/data/benchmark_trajectories.pkl</li>
+<li>
+<p>Save to benchmark_output/baseline_trajectories.parquet</p>
+</li>
+<li>
+<p><strong>Test traj-dist (Cython implementation)</strong></p>
+</li>
+<li>Single trajectory pair distance calculation performance</li>
+<li>
+<p>Batch computation performance (pdist/cdist)</p>
+</li>
+<li>
+<p><strong>Test traj-dist (Python implementation)</strong></p>
+</li>
+<li>
+<p>Single trajectory pair distance calculation performance</p>
+</li>
+<li>
+<p><strong>Test traj-dist-rs (Rust implementation)</strong></p>
+</li>
+<li>Single trajectory pair distance calculation performance</li>
+<li>
+<p>Batch computation performance (pdist/cdist, including sequential and parallel)</p>
+</li>
+<li>
+<p><strong>Generate performance comparison report</strong></p>
+</li>
+<li>Analyze all test results</li>
+<li>Generate Markdown format report to mk_docs/docs/performance.md</li>
+</ol>
+<p><strong>Expected time</strong>:
+- K=1000, WARMUP_RUNS=10, NUM_RUNS=50: Approximately 10-15 minutes
+- K=50, WARMUP_RUNS=3, NUM_RUNS=10: Approximately 1-2 minutes</p>
+<h2 id="4-viewing-results">4. Viewing Results</h2>
+<h3 id="41-performance-report">4.1. Performance Report</h3>
+<p>After the test is completed, view the generated performance report:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>cat<span class="w"> </span>traj-dist-rs/mk_docs/docs/performance.md
+</span></code></pre></div>
+<p>The report includes:
+- Single trajectory pair performance comparison (Rust vs Python vs Cython)
+- Batch computation performance comparison (pdist/cdist)
+- Performance analysis by distance type (Euclidean vs Spherical)
+- Parallel efficiency analysis
+- Statistical metrics (median, standard deviation, coefficient of variation)</p>
+<h3 id="42-raw-data">4.2. Raw Data</h3>
+<p>All raw test data is saved in the <code>traj-dist-rs/benchmark_output/</code> directory:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>benchmark_output/
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>├── baseline_trajectories.parquet              # Baseline trajectory data
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>├── traj_dist_cython_benchmark.parquet         # Cython single trajectory pair performance
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>├── traj_dist_python_benchmark.parquet         # Python single trajectory pair performance
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>├── traj_dist_rs_rust_benchmark.parquet        # Rust single trajectory pair performance
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>├── traj_dist_cython_batch_benchmark.parquet   # Cython batch computation performance
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>└── traj_dist_rs_rust_batch_benchmark.parquet  # Rust batch computation performance
+</span></code></pre></div>
+<p>You can use Python to read these data for custom analysis:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="c1"># Read Rust performance data</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="n">rust_data</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">&quot;traj-dist-rs/benchmark_output/traj_dist_rs_rust_benchmark.parquet&quot;</span><span class="p">)</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">rust_data</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</span></code></pre></div>
+<h2 id="5-supported-algorithms">5. Supported Algorithms</h2>
+<p>The benchmark script tests the following distance algorithms:</p>
+<ol>
+<li><strong>SSPD</strong> (Symmetric Segment-Path Distance)</li>
+<li><strong>DTW</strong> (Dynamic Time Warping)</li>
+<li><strong>Hausdorff Distance</strong></li>
+<li><strong>LCSS</strong> (Longest Common Subsequence)</li>
+<li><strong>EDR</strong> (Edit Distance on Real sequence)</li>
+<li><strong>ERP</strong> (Edit distance with Real Penalty)</li>
+<li><strong>Discret Frechet Distance</strong></li>
+</ol>
+<p>All algorithms support two distance types:
+- <strong>Euclidean</strong>: Euclidean distance based on 2D coordinates
+- <strong>Spherical</strong>: Haversine distance based on 2D coordinates (spherical distance)</p>
+<h2 id="6-references">6. References</h2>
+<ul>
+<li><strong>traj-dist</strong>: Original Python/Cython implementation, with improved spherical distance precision</li>
+<li>GitHub: https://github.com/Davidham3/traj-dist</li>
+<li><strong>traj-dist-rs</strong>: Rust high-performance reimplementation</li>
+<li>GitHub: https://github.com/Davidham3/traj-dist-rs</li>
+</ul>
+<h2 id="7-feedback-and-contributions">7. Feedback and Contributions</h2>
+<p>If you encounter issues during the benchmark reproduction process, or have suggestions for improvements, please:
+- Submit an Issue to the traj-dist-rs repository
+- Submit a Pull Request to improve documentation or scripts</p>
+<hr />
+<p><strong>Last Updated</strong>: 2026-03-03</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.3220b9d7.min.js"></script>
+      
+    
+  </body>
+</html>
