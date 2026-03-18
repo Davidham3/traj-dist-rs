@@ -1829,7 +1829,7 @@ Licensed under the Apache License, Version 2.0.
 <p>Now let's add the required dependencies. In this Jupyter notebook, we're using the local version of the project for demonstration purposes.</p>
 <p>In a normal Rust project, you would add <code>traj-dist-rs</code> to your <code>Cargo.toml</code> file:</p>
 <div class="highlight"><pre><span></span><span class="k">[dependencies]</span>
-<span class="n">traj-dist-rs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"1.0.0-rc.1"</span><span class="p">,</span><span class="w"> </span><span class="n">features</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"parallel"</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="n">traj-dist-rs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"1.0.0-rc.2"</span><span class="p">,</span><span class="w"> </span><span class="n">features</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"parallel"</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
 </pre></div>
 <p>The <code>parallel</code> feature enables Rayon parallel processing for batch computation (<code>pdist</code> and <code>cdist</code>), which can significantly speed up calculations (typically 1.5x-3x faster).</p>
 </div>
@@ -3204,21 +3204,21 @@ println!("Results match: {}", distances_seq.len() == distances_par.len());</f64>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Sequential time: 1.861s
+<pre>Sequential time: 1.869s
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Parallel time: 0.627s
+<pre>Parallel time: 0.624s
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Speedup: 2.97x
+<pre>Speedup: 3.00x
 </pre>
 </div>
 </div>
@@ -3497,7 +3497,7 @@ println!("Hausdorff: {:.6}s, distance: {:.6}", hausdorff_time.as_secs_f64(), res
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Discret Frechet: 0.000001s, distance: 0
+<pre>Discret Frechet: 0.000002s, distance: 0
 </pre>
 </div>
 </div>
@@ -3586,14 +3586,14 @@ println!("GPS Trajectory 2 (first 3 points): {:?}", &amp;gps_traj2[..3]);</f64><
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>GPS Trajectory 1 (first 3 points): [[40.722172239700335, -74.01556629753915], [40.720502406321195, -74.01323381669776], [40.718670877965664, -73.99944129464936]]
+<pre>GPS Trajectory 1 (first 3 points): [[40.70310591573381, -74.00377391091789], [40.71024944472272, -74.01385246311817], [40.70510458433275, -73.99425455097084]]
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>GPS Trajectory 2 (first 3 points): [[40.70986366462863, -74.00575023235818], [40.72334743289637, -74.00497148122058], [40.70515920402836, -74.00386090057327]]
+<pre>GPS Trajectory 2 (first 3 points): [[40.70697956137925, -74.00177923192554], [40.72313672058232, -74.00041445645088], [40.71705947383807, -73.99738815913743]]
 </pre>
 </div>
 </div>
@@ -3655,21 +3655,21 @@ println!("Hausdorff spherical distance: {:.2} meters", hausdorff_dist);</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>SSPD spherical distance: 202.13 meters
+<pre>SSPD spherical distance: 263.98 meters
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>DTW spherical distance: 11556.613978904397 meters
+<pre>DTW spherical distance: 12522.062587537195 meters
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Hausdorff spherical distance: 593.02 meters
+<pre>Hausdorff spherical distance: 791.67 meters
 </pre>
 </div>
 </div>
