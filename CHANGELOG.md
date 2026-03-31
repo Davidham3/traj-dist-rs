@@ -9,6 +9,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-rc.3] - 2026-03-30
+
+### Added
+
+#### Performance
+- Added `SphericalTrajectoryCache` struct in `distance::spherical` module for precomputing per-trajectory spherical distance data
+  - Precomputes longitude in radians (`lng_rad`), latitude in radians (`lat_rad`), and cosine of latitude (`cos_lat`) for each trajectory point
+  - Eliminates redundant trigonometric calculations when computing many distances between the same trajectory pair
+  - Reduces computation per distance call from 6 trig ops to 2 (only `sin(Δlat/2)` and `sin(Δlon/2)`)
+- Added `great_circle_distance_cached()` inline function for cache-accelerated Haversine distance computation
+- Added `point_to_path_cached()` for cache-accelerated point-to-segment distance used by SSPD and Hausdorff
+
+#### Optimization
+- `TrajectoryCalculator` now automatically creates `SphericalTrajectoryCache` for both trajectories when `DistanceType::Spherical` is selected
+  - All 5 DP-based algorithms (DTW, LCSS, EDR, ERP, Discret Frechet) benefit automatically with no API changes
+- SSPD and Hausdorff algorithms now use `SphericalTrajectoryCache` internally for spherical distance computation
+- `precompute_distance_matrix()` in `distance::utils` now uses cache for spherical distance computation
+- Optimized `great_circle_distance()` to use `x * x` multiplication instead of `powi(2)` for minor additional gains
+
+#### API
+- Re-exported `DistanceCalculator` trait from `traj_dist_rs::traits` module for convenient access
+  - Trait definition remains in `traj_dist_rs::distance::base` (no breaking change)
+  - Users can now import via `use traj_dist_rs::traits::DistanceCalculator`
+
+#### Documentation
+- Added "Performance Optimization: SphericalTrajectoryCache" section to `usage_for_rust.ipynb`
+- Added "Core Traits and Types" section to `usage_for_rust.ipynb` covering all 5 key types:
+  - `AsCoord` — coordinate representation trait with usage demo
+  - `CoordSequence` — trajectory sequence trait with iteration demo
+  - `DistanceCalculator` — DP algorithm interface, demonstrated via `TrajectoryCalculator` and `PrecomputedDistanceCalculator`
+  - `TrajectoryCalculator` — on-the-fly distance computation with Euclidean/Spherical support
+  - `PrecomputedDistanceCalculator` — zero-copy precomputed matrix lookup
+- Added module-level documentation (`//!`) to previously undocumented modules:
+  - `traj_dist_rs::err` — error types and categories
+  - `traj_dist_rs::traits` — core traits overview with cross-references
+  - `traj_dist_rs::distance::base` — DP algorithm architecture and usage example
+  - `traj_dist_rs::distance::euclidean` — formula and function list
+  - `traj_dist_rs::distance::spherical` — Haversine formula and coordinate format
+
+### Changed
+
+#### Performance Results
+- Spherical distance average speedup vs Cython improved from ~3.1x to **~3.6x** (+16%)
+- Individual algorithm improvements vs previous benchmark:
+  - DTW (spherical): 2.97x → 3.40x (+14%)
+  - SSPD (spherical): 1.72x → 2.25x (+31%)
+  - Hausdorff (spherical): 2.41x → 2.91x (+21%)
+  - LCSS (spherical): 2.68x → 3.00x (+12%)
+  - EDR (spherical): 2.58x → 3.32x (+29%)
+  - ERP (spherical): 6.30x → 6.77x (+7%)
+- Batch `cdist` spherical (length=1000): 7.73x → **12.01x** (+55%) parallel speedup vs Cython
+- Batch `pdist` spherical (length=1000): 10.38x → **17.81x** (+72%) parallel speedup vs Cython
+
+#### Documentation
+- Updated `README.md` Performance section with new benchmark numbers
+- Fixed incorrect link in `README.md`
+- Added visualization charts to `performance.md` and `README.md`
+- Removed overly detailed benchmark data from `performance.md` to improve readability
+- Streamlined performance documentation to focus on key results and visual summaries
+
+---
+
 ## [1.0.0-rc.2] - 2026-03-17
 
 ### Added
@@ -564,8 +626,8 @@ print(f"DTW distance: {result.distance}")
 
 ---
 
-[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-rc.2...HEAD
-[1.0.0]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0
+[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-rc.3...HEAD
+[1.0.0-rc.3]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-rc.3
 [1.0.0-rc.2]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-rc.2
 [1.0.0-rc.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-rc.1
 [1.0.0-beta.5]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-beta.5

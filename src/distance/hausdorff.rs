@@ -16,7 +16,9 @@
 
 use crate::distance::distance_type::DistanceType;
 use crate::distance::euclidean::{euclidean_distance, point_to_trajectory};
-use crate::distance::spherical::{great_circle_distance, point_to_path};
+use crate::distance::spherical::{
+    SphericalTrajectoryCache, great_circle_distance_cached, point_to_path_cached,
+};
 use crate::traits::{AsCoord, CoordSequence};
 
 /// Directed Hausdorff distance from trajectory t1 to trajectory t2 using specified distance type
@@ -61,18 +63,7 @@ where
         let dist = match dist_type {
             DistanceType::Euclidean => point_to_trajectory(&point, t2, mdist_i1, t2_dist, l_t2),
             DistanceType::Spherical => {
-                // For spherical, we calculate point-to-path distances for each point in t1 to segments in t2
-                let mut min_dist = f64::MAX;
-                for j in 0..(l_t2 - 1) {
-                    let p0 = t2.get(j);
-                    let p1 = t2.get(j + 1);
-                    let d_ij = mdist_i1[j];
-                    let d_i1j = mdist_i1[j + 1];
-                    let seg_len = t2_dist[j];
-                    let dist = point_to_path(&p0, &p1, &point, d_ij, d_i1j, seg_len);
-                    min_dist = min_dist.min(dist);
-                }
-                min_dist
+                unreachable!("Spherical distance should use directed_hausdorff_spherical_cached")
             }
         };
         dh = dh.max(dist);
@@ -80,51 +71,29 @@ where
     dh
 }
 
-/// Directed Hausdorff distance for spherical geometry from t1 to t2
+/// Directed Hausdorff distance for spherical geometry using cached values
 ///
-/// This is a specialized helper function for computing the directed Hausdorff distance
-/// when using spherical distance calculations.
-///
-/// # Arguments
-///
-/// * `t1` - The source trajectory
-/// * `t2` - The target trajectory
-/// * `mdist` - Precomputed pairwise distances between points in t1 and t2
-/// * `t1_dist` - Precomputed distances between consecutive points in t1
-///
-/// # Type Parameters
-///
-/// * `T` - A type that implements the `CoordSequence` trait
-///
-/// # Returns
-///
-/// Returns the directed Hausdorff distance from t1 to t2 for spherical geometry
-fn directed_hausdorff_spherical<T: CoordSequence>(
-    t1: &T,
-    t2: &T,
+/// Uses precomputed caches for optimal spherical distance performance.
+fn directed_hausdorff_spherical_cached(
+    cache1: &SphericalTrajectoryCache,
+    cache2: &SphericalTrajectoryCache,
     mdist: &[f64],
     t1_dist: &[f64],
-) -> f64
-where
-    T::Coord: AsCoord,
-{
-    let n0 = t1.len();
-    let n1 = t2.len();
+) -> f64 {
+    let n0 = cache1.len();
+    let n1 = cache2.len();
 
     let mut dh: f64 = 0.0;
     for j in 0..n1 {
         let mut dist_j0 = f64::MAX;
-        let point_j = t2.get(j);
 
         for i in 0..(n0 - 1) {
-            let point_i = t1.get(i);
-            let point_i1 = t1.get(i + 1);
-
             let d_ij = mdist[i * n1 + j];
             let d_i1j = mdist[(i + 1) * n1 + j];
             let seg_len = t1_dist[i];
 
-            let dist = point_to_path(&point_i, &point_i1, &point_j, d_ij, d_i1j, seg_len);
+            let dist =
+                point_to_path_cached(cache1, i, cache1, i + 1, cache2, j, d_ij, d_i1j, seg_len);
             dist_j0 = dist_j0.min(dist);
         }
         dh = dh.max(dist_j0);
@@ -175,74 +144,108 @@ where
         return f64::MAX;
     }
 
-    // Compute pairwise distances
-    let mdist = {
-        let mut distances = vec![0.0; l_t1 * l_t2];
-        for i in 0..l_t1 {
-            let coord1 = t1.get(i);
-            for j in 0..l_t2 {
-                let coord2 = t2.get(j);
-                let dist = match dist_type {
-                    DistanceType::Euclidean => euclidean_distance(&coord1, &coord2),
-                    DistanceType::Spherical => great_circle_distance(&coord1, &coord2),
-                };
-                distances[i * l_t2 + j] = dist;
-            }
-        }
-        distances
-    };
-
-    // Compute distances between consecutive points
-    let t1_dist = {
-        let mut distances = Vec::with_capacity(l_t1.saturating_sub(1));
-        for i in 0..(l_t1 - 1) {
-            let dist = match dist_type {
-                DistanceType::Euclidean => euclidean_distance(&t1.get(i), &t1.get(i + 1)),
-                DistanceType::Spherical => great_circle_distance(&t1.get(i), &t1.get(i + 1)),
-            };
-            distances.push(dist);
-        }
-        distances
-    };
-
-    let t2_dist = {
-        let mut distances = Vec::with_capacity(l_t2.saturating_sub(1));
-        for i in 0..(l_t2 - 1) {
-            let dist = match dist_type {
-                DistanceType::Euclidean => euclidean_distance(&t2.get(i), &t2.get(i + 1)),
-                DistanceType::Spherical => great_circle_distance(&t2.get(i), &t2.get(i + 1)),
-            };
-            distances.push(dist);
-        }
-        distances
-    };
-
-    let dh1 = match dist_type {
-        DistanceType::Euclidean => directed_hausdorff(t1, t2, &mdist, &t2_dist, dist_type),
-        DistanceType::Spherical => directed_hausdorff_spherical(t1, t2, &mdist, &t1_dist),
-    };
-
-    // Transpose the distance matrix for the second direction
-    let mdist_transposed = {
-        let mut transposed = vec![0.0; l_t1 * l_t2];
-        for i in 0..l_t1 {
-            for j in 0..l_t2 {
-                transposed[j * l_t1 + i] = mdist[i * l_t2 + j];
-            }
-        }
-        transposed
-    };
-
-    let dh2 = match dist_type {
+    match dist_type {
         DistanceType::Euclidean => {
-            directed_hausdorff(t2, t1, &mdist_transposed, &t1_dist, dist_type)
+            // Compute pairwise distances
+            let mdist = {
+                let mut distances = vec![0.0; l_t1 * l_t2];
+                for i in 0..l_t1 {
+                    let coord1 = t1.get(i);
+                    for j in 0..l_t2 {
+                        let coord2 = t2.get(j);
+                        distances[i * l_t2 + j] = euclidean_distance(&coord1, &coord2);
+                    }
+                }
+                distances
+            };
+
+            // Compute distances between consecutive points
+            let t1_dist = {
+                let mut distances = Vec::with_capacity(l_t1.saturating_sub(1));
+                for i in 0..(l_t1 - 1) {
+                    distances.push(euclidean_distance(&t1.get(i), &t1.get(i + 1)));
+                }
+                distances
+            };
+
+            let t2_dist = {
+                let mut distances = Vec::with_capacity(l_t2.saturating_sub(1));
+                for i in 0..(l_t2 - 1) {
+                    distances.push(euclidean_distance(&t2.get(i), &t2.get(i + 1)));
+                }
+                distances
+            };
+
+            let dh1 = directed_hausdorff(t1, t2, &mdist, &t2_dist, dist_type);
+
+            // Transpose the distance matrix for the second direction
+            let mdist_transposed = {
+                let mut transposed = vec![0.0; l_t1 * l_t2];
+                for i in 0..l_t1 {
+                    for j in 0..l_t2 {
+                        transposed[j * l_t1 + i] = mdist[i * l_t2 + j];
+                    }
+                }
+                transposed
+            };
+
+            let dh2 = directed_hausdorff(t2, t1, &mdist_transposed, &t1_dist, dist_type);
+
+            dh1.max(dh2)
         }
         DistanceType::Spherical => {
-            directed_hausdorff_spherical(t2, t1, &mdist_transposed, &t2_dist)
-        }
-    };
+            // Use cached spherical distance for better performance
+            let cache1 = SphericalTrajectoryCache::from_trajectory(t1);
+            let cache2 = SphericalTrajectoryCache::from_trajectory(t2);
 
-    dh1.max(dh2)
+            // Compute pairwise distances using cache
+            let mdist = {
+                let mut distances = vec![0.0; l_t1 * l_t2];
+                for i in 0..l_t1 {
+                    for j in 0..l_t2 {
+                        distances[i * l_t2 + j] =
+                            great_circle_distance_cached(&cache1, i, &cache2, j);
+                    }
+                }
+                distances
+            };
+
+            // Compute distances between consecutive points using cache
+            let t1_dist = {
+                let mut distances = Vec::with_capacity(l_t1.saturating_sub(1));
+                for i in 0..(l_t1 - 1) {
+                    distances.push(great_circle_distance_cached(&cache1, i, &cache1, i + 1));
+                }
+                distances
+            };
+
+            let t2_dist = {
+                let mut distances = Vec::with_capacity(l_t2.saturating_sub(1));
+                for i in 0..(l_t2 - 1) {
+                    distances.push(great_circle_distance_cached(&cache2, i, &cache2, i + 1));
+                }
+                distances
+            };
+
+            let dh1 = directed_hausdorff_spherical_cached(&cache1, &cache2, &mdist, &t1_dist);
+
+            // Transpose the distance matrix for the second direction
+            let mdist_transposed = {
+                let mut transposed = vec![0.0; l_t1 * l_t2];
+                for i in 0..l_t1 {
+                    for j in 0..l_t2 {
+                        transposed[j * l_t1 + i] = mdist[i * l_t2 + j];
+                    }
+                }
+                transposed
+            };
+
+            let dh2 =
+                directed_hausdorff_spherical_cached(&cache2, &cache1, &mdist_transposed, &t2_dist);
+
+            dh1.max(dh2)
+        }
+    }
 }
 
 #[cfg(test)]

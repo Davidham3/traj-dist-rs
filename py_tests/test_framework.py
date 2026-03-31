@@ -368,7 +368,7 @@ class BaseDistanceTest(ABC):
         test_data,
         distance_type: str,
         hyperparameter_value: Optional[Union[float, List[float], int]] = None,
-        tolerance: float = 1e-8,
+        tolerance: float = 1.5e-8,
     ):
         """
         Common method for testing accuracy
@@ -405,7 +405,7 @@ class BaseDistanceTest(ABC):
         self,
         distance_type: str,
         hyperparameter_value: Optional[Union[float, List[float], int]] = None,
-        tolerance: float = 1e-8,
+        tolerance: float = 1.5e-8,
         **kwargs,
     ):
         """

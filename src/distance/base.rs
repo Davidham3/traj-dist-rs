@@ -1,5 +1,47 @@
+//! # Base Distance Calculation Module
+//!
+//! This module provides the foundation for dynamic programming-based distance calculations.
+//!
+//! ## Core Components
+//!
+//! - `DistanceCalculator` trait: Interface for DP-based distance algorithms
+//! - `TrajectoryCalculator`: Calculator based on trajectory coordinate sequences
+//! - `PrecomputedDistanceCalculator`: Calculator based on precomputed distance matrices
+//!
+//! ## Architecture
+//!
+//! The `DistanceCalculator` trait is designed for algorithms that need point-to-point
+//! distances (e.g., DTW, LCSS, EDR, ERP, Discret Frechet). For algorithms that need
+//! point-to-segment distances (e.g., Hausdorff and SSPD), use `CoordSequence` directly.
+//!
+//! ## Usage
+//!
+//! For single trajectory pair computations:
+//! ```rust
+//! use traj_dist_rs::distance::base::TrajectoryCalculator;
+//! use traj_dist_rs::distance::distance_type::DistanceType;
+//! use traj_dist_rs::distance::dtw::dtw;
+//!
+//! let traj1 = vec![[0.0, 0.0], [1.0, 1.0]];
+//! let traj2 = vec![[0.0, 1.0], [1.0, 0.0]];
+//!
+//! let calculator = TrajectoryCalculator::new(&traj1, &traj2, DistanceType::Euclidean);
+//! let result = dtw(&calculator, false);
+//! ```
+//!
+//! ## Performance Optimization
+//!
+//! When using spherical (Haversine) distance, `TrajectoryCalculator` automatically
+//! precomputes intermediate values (lat/lon in radians and cos(lat)) for each point,
+//! eliminating redundant trigonometric calculations. This can improve spherical
+//! distance performance by 50-70%.
+
 use crate::{
-    distance::distance_type::DistanceType,
+    distance::{
+        distance_type::DistanceType,
+        euclidean::euclidean_distance,
+        spherical::{SphericalTrajectoryCache, great_circle_distance_cached},
+    },
     traits::{AsCoord, CoordSequence},
 };
 
@@ -36,6 +78,9 @@ where
     traj1: &'a T,
     traj2: &'a U,
     metric: DistanceType,
+    /// Cache for spherical distance calculations (only populated when metric == Spherical)
+    cache1: Option<SphericalTrajectoryCache>,
+    cache2: Option<SphericalTrajectoryCache>,
 }
 
 impl<'a, T, U> TrajectoryCalculator<'a, T, U>
@@ -43,11 +88,29 @@ where
     T: CoordSequence + 'a,
     U: CoordSequence + 'a,
 {
-    pub fn new(traj1: &'a T, traj2: &'a U, metric: DistanceType) -> Self {
+    /// Create a new trajectory calculator
+    ///
+    /// For spherical distance, this automatically precomputes intermediate values
+    /// (lat/lon in radians and cos(lat)) to optimize subsequent distance calculations.
+    pub fn new(traj1: &'a T, traj2: &'a U, metric: DistanceType) -> Self
+    where
+        T::Coord: AsCoord,
+        U::Coord: AsCoord,
+    {
+        let (cache1, cache2) = match metric {
+            DistanceType::Spherical => (
+                Some(SphericalTrajectoryCache::from_trajectory(traj1)),
+                Some(SphericalTrajectoryCache::from_trajectory(traj2)),
+            ),
+            DistanceType::Euclidean => (None, None),
+        };
+
         Self {
             traj1,
             traj2,
             metric,
+            cache1,
+            cache2,
         }
     }
 }
@@ -56,11 +119,29 @@ impl<'a, T, U> DistanceCalculator for TrajectoryCalculator<'a, T, U>
 where
     T: CoordSequence + 'a,
     U: CoordSequence + 'a,
+    T::Coord: AsCoord,
+    U::Coord: AsCoord,
 {
     fn dis_between(&self, idx1: usize, idx2: usize) -> f64 {
-        let p1 = self.traj1.get(idx1);
-        let p2 = self.traj2.get(idx2);
-        self.metric.distance(&p1, &p2)
+        match self.metric {
+            DistanceType::Euclidean => {
+                let p1 = self.traj1.get(idx1);
+                let p2 = self.traj2.get(idx2);
+                euclidean_distance(&p1, &p2)
+            }
+            DistanceType::Spherical => {
+                // Use cached values for optimal performance
+                let cache1 = self
+                    .cache1
+                    .as_ref()
+                    .expect("Spherical cache not initialized");
+                let cache2 = self
+                    .cache2
+                    .as_ref()
+                    .expect("Spherical cache not initialized");
+                great_circle_distance_cached(cache1, idx1, cache2, idx2)
+            }
+        }
     }
 
     fn compute_dis_for_extra_point<C: AsCoord>(

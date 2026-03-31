@@ -177,9 +177,7 @@ cd "$TRAJ_DIST_RS_ROOT"
 source .venv/bin/activate
 
 cd "$SCRIPT_DIR"
-python analyze_benchmark_results.py \
-    --output-dir "$OUTPUT_DIR" \
-    --output-file "../mk_docs/docs/performance.md"
+python analyze_benchmark_results.py --output-dir "$OUTPUT_DIR"
 
 deactivate
 

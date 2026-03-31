@@ -14,13 +14,24 @@ A high-performance Rust implementation of trajectory distance algorithms with Py
 
 ### Why traj-dist-rs?
 
-- **Performance**: **~82x faster** than Python implementation and **~3x faster** than Cython implementation on average
+- **Performance**: **~220x faster** than `traj-dist`'s Python implementation and **~6.5x faster** than Cython implementation on average
 - **Batch Computation**: Native `pdist` and `cdist` functions with parallel support up to **130x** faster than `traj-dist`
 - **Zero Dependencies**: Only requires **numpy >= 1.21** - no heavy dependencies like polars, pyarrow, pandas, or shapely
 - **Safety**: Rust's memory safety guarantees eliminate common runtime errors
 - **Cross-platform**: Supports Linux, macOS, and Windows with native binaries
 - **Dual API**: Use it from Python or Rust with minimal overhead
-- **Accuracy**: All algorithms verified against original implementation with < 1e-8 error margin
+- **Accuracy**: All algorithms verified against original implementation with < 1.5e-8 error margin
+
+## Performance Overview
+
+![traj-dist-rs benchmark speedup](mk_docs/docs/assets/benchmark_speedup_readme.svg)
+
+**Median benchmark summary**:
+- **~230x faster than `traj-dist (Python)`** on average
+- **~6.3x faster than `traj-dist (Cython)`** on average
+- Parallel batch `pdist` / `cdist` reaches up to **~62.3x speedup** on large inputs
+
+See [performance.md](mk_docs/docs/performance.md) for the full benchmark report and additional plots.
 
 ## Features
 
@@ -205,18 +216,18 @@ Compared to the original traj-dist implementation (based on median values from K
 
 | Implementation | Average Speedup |
 |---------------|-----------------|
-| Rust vs Python | **~82x** faster |
-| Rust vs Cython | **~3x** faster |
+| Rust vs Python | **~220x** faster |
+| Rust vs Cython | **~6.5x** faster |
 
 ### By Distance Type
 
 **Euclidean Distance:**
-- Rust vs Python: **~388x** faster (range: 169x - 612x)
-- Rust vs Cython: **~9.7x** faster (range: 6.2x - 13.7x)
+- Rust vs Python: **~329x** faster (range: 169x - 517x)
+- Rust vs Cython: **~8.9x** faster (range: 6.3x - 12.9x)
 
 **Spherical Distance:**
-- Rust vs Python: **~87x** faster (range: 47x - 194x)
-- Rust vs Cython: **~3.5x** faster (range: 1.8x - 8.6x)
+- Rust vs Python: **~93x** faster (range: 47x - 195x)
+- Rust vs Cython: **~3.6x** faster (range: 2.3x - 6.8x)
 
 ### Batch Computation Performance
 
@@ -224,17 +235,17 @@ Compared to the original traj-dist implementation (based on median values from K
 
 | Trajectory Length | Rust Seq vs `traj-dist` | Rust Par vs `traj-dist` |
 |-------------------|-------------------|-------------------|
-| 10 points | 8.02x | 0.14x (parallel overhead) |
-| 100 points | 15.55x | 10.52x |
-| 1000 points | 15.76x | **83.41x** |
+| 10 points | 9.15x | 0.21x (parallel overhead) |
+| 100 points | 11.58x | 9.73x |
+| 1000 points | 12.47x | **71.24x** |
 
 **cdist (DTW, 5×5, varying lengths):**
 
 | Trajectory Length | Rust Seq vs `traj-dist` | Rust Par vs `traj-dist` |
 |-------------------|-------------------|-------------------|
-| 10 points | 15.85x | 1.00x (parallel overhead) |
-| 100 points | 15.21x | 15.15x |
-| 1000 points | 15.20x | **60.97x** |
+| 10 points | 10.77x | 0.55x (parallel overhead) |
+| 100 points | 14.45x | 34.81x |
+| 1000 points | 12.27x | **50.36x** |
 
 **Real-world Example: TrajCL Data Preprocessing**
 - Dataset: 7,000 trajectories (Porto dataset)
@@ -245,10 +256,10 @@ Compared to the original traj-dist implementation (based on median values from K
 
 ## Documentation
 
-- **Installation Guide**: [installation.md](md_docs/docs/installation.md)
-- **Python User Guide**: [usage_for_python.ipynb](md_docs/docs/usage_for_python.ipynb)
-- **Rust User Guide**: [usage_for_rust.ipynb](md_docs/docs/usage_for_rust.ipynb)
-- **Performance Report**: [performance.md](md_docs/docs/performance.md)
+- **Installation Guide**: [installation.md](mk_docs/docs/installation.md)
+- **Python User Guide**: [usage_for_python.ipynb](mk_docs/docs/usage_for_python.ipynb)
+- **Rust User Guide**: [usage_for_rust.ipynb](mk_docs/docs/usage_for_rust.ipynb)
+- **Performance Report**: [performance.md](mk_docs/docs/performance.md)
 - **Examples**: [examples/](examples/) - Python and Rust example code
 
 ## Testing

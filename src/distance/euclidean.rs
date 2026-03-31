@@ -1,6 +1,37 @@
+//! # Euclidean Distance Module
+//!
+//! This module provides Euclidean (Cartesian) distance calculations for 2D coordinates.
+//!
+//! ## Functions
+//!
+//! - `euclidean_distance`: Distance between two points
+//! - `euclidean_distance_traj`: Pairwise distances between all points in two trajectories
+//! - `point_to_segment`: Minimum distance from a point to a line segment
+//! - `point_to_trajectory`: Minimum distance from a point to any segment of a trajectory
+//!
+//! ## Formula
+//!
+//! Euclidean distance between points (x₁, y₁) and (x₂, y₂):
+//! ```text
+//! d = √[(x₂-x₁)² + (y₂-y₁)²]
+//! ```
+//!
+//! ## Usage
+//!
+//! ```rust
+//! use traj_dist_rs::distance::euclidean::euclidean_distance;
+//!
+//! let p1 = [0.0, 0.0];
+//! let p2 = [3.0, 4.0];
+//! let dist = euclidean_distance(&p1, &p2);
+//! assert_eq!(dist, 5.0);
+//! ```
+
 use crate::traits::{AsCoord, CoordSequence};
 
 /// Euclidean distance between two points
+///
+/// Uses the standard Euclidean distance formula: √[(x₂-x₁)² + (y₂-y₁)²]
 pub fn euclidean_distance<C: AsCoord, D: AsCoord>(p1: &C, p2: &D) -> f64 {
     let dx = p1.x() - p2.x();
     let dy = p1.y() - p2.y();

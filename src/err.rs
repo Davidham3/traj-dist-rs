@@ -1,3 +1,21 @@
+//! # Error Types Module
+//!
+//! This module defines error types used throughout the traj-dist-rs library.
+//!
+//! ## Error Types
+//!
+//! - `TrajDistError`: Main error enum for all trajectory distance calculation errors
+//!
+//! ## Error Categories
+//!
+//! - **InvalidParams**: Invalid parameters passed to functions
+//! - **InvalidCoordinate**: Coordinate array with wrong length
+//! - **DataConvertionError**: Error during data type conversion
+//! - **OutofIndex**: Index out of bounds access
+//! - **InvalidSizeOfListArray**: Invalid ListArray size for arrow data
+//! - **InvalidSeqType**: Invalid sequence type
+//! - **InvalidConverter**: Invalid converter configuration
+
 // Copyright 2024 All authors of TrajDL
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +30,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// Main error type for trajectory distance calculations
 #[derive(Debug, thiserror::Error)]
 pub enum TrajDistError {
     #[error("ListArray<i64> must have length 1")]

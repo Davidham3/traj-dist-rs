@@ -5,13 +5,16 @@
 
 use crate::distance::distance_type::DistanceType;
 use crate::distance::euclidean::euclidean_distance;
-use crate::distance::spherical::great_circle_distance;
+use crate::distance::spherical::{SphericalTrajectoryCache, great_circle_distance_cached};
 use crate::traits::{AsCoord, CoordSequence};
 
 /// Precompute the distance matrix between two trajectories
 ///
 /// Given two trajectories and a distance type, this function computes
 /// the distance between every pair of points from the two trajectories.
+///
+/// For spherical distance, this function uses cached intermediate values
+/// for optimal performance.
 ///
 /// # Arguments
 ///
@@ -56,14 +59,26 @@ where
 
     let mut distance_matrix = vec![0.0; n0 * n1];
 
-    for i in 0..n0 {
-        for j in 0..n1 {
-            let p0 = t0.get(i);
-            let p1 = t1.get(j);
-            distance_matrix[i * n1 + j] = match dist_type {
-                DistanceType::Euclidean => euclidean_distance(&p0, &p1),
-                DistanceType::Spherical => great_circle_distance(&p0, &p1),
-            };
+    match dist_type {
+        DistanceType::Euclidean => {
+            for i in 0..n0 {
+                for j in 0..n1 {
+                    let p0 = t0.get(i);
+                    let p1 = t1.get(j);
+                    distance_matrix[i * n1 + j] = euclidean_distance(&p0, &p1);
+                }
+            }
+        }
+        DistanceType::Spherical => {
+            // Use cached values for optimal performance
+            let cache0 = SphericalTrajectoryCache::from_trajectory(t0);
+            let cache1 = SphericalTrajectoryCache::from_trajectory(t1);
+            for i in 0..n0 {
+                for j in 0..n1 {
+                    distance_matrix[i * n1 + j] =
+                        great_circle_distance_cached(&cache0, i, &cache1, j);
+                }
+            }
         }
     }
 

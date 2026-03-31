@@ -20,7 +20,9 @@
 
 use crate::distance::distance_type::DistanceType;
 use crate::distance::euclidean::point_to_trajectory_simple;
-use crate::distance::spherical::point_to_path_simple;
+use crate::distance::spherical::{
+    SphericalTrajectoryCache, great_circle_distance_cached, point_to_path_cached,
+};
 use crate::traits::{AsCoord, CoordSequence};
 
 /// SPD (Symmetric Path Distance) from t1 to t2 using specified distance type
@@ -64,15 +66,31 @@ where
             }
         }
         DistanceType::Spherical => {
+            // Use cached spherical distance for better performance
+            let cache1 = SphericalTrajectoryCache::from_trajectory(t1);
+            let cache2 = SphericalTrajectoryCache::from_trajectory(t2);
+
             for j in 0..l_t2 {
                 let mut dist_j0 = f64::MAX;
 
                 for i in 0..(l_t1 - 1) {
-                    let p0 = t1.get(i);
-                    let p1 = t1.get(i + 1);
-                    let p2 = t2.get(j);
-                    let d = point_to_path_simple(&p0, &p1, &p2);
-                    dist_j0 = dist_j0.min(d);
+                    // Precompute distances needed for point_to_path
+                    let d_ij = great_circle_distance_cached(&cache1, i, &cache2, j);
+                    let d_i1j = great_circle_distance_cached(&cache1, i + 1, &cache2, j);
+                    let d_i_i1 = great_circle_distance_cached(&cache1, i, &cache1, i + 1);
+
+                    let dist = point_to_path_cached(
+                        &cache1,
+                        i,
+                        &cache1,
+                        i + 1,
+                        &cache2,
+                        j,
+                        d_ij,
+                        d_i1j,
+                        d_i_i1,
+                    );
+                    dist_j0 = dist_j0.min(dist);
                 }
 
                 sum += dist_j0;

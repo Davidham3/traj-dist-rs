@@ -1,3 +1,33 @@
+//! # Core Traits Module
+//!
+//! This module defines the core traits used throughout the traj-dist-rs library
+//! for coordinate and trajectory representations.
+//!
+//! ## Traits
+//!
+//! - `AsCoord`: Trait for accessing x and y coordinates of a point
+//! - `CoordSequence`: Trait for accessing sequences of coordinates (trajectories)
+//! - `DistanceCalculator`: Interface for DP-based distance algorithm calculators
+//!
+//! ## Implementations
+//!
+//! This module provides implementations of these traits for common types:
+//! - `[f64; 2]` - Array of two f64 values (x, y)
+//! - `&[f64; 2]` - Reference to array
+//! - `Vec<[f64; 2]>` - Vector of coordinate arrays
+//!
+//! ## Usage
+//!
+//! These traits allow algorithms to work with any coordinate representation
+//! that implements them, providing flexibility for different use cases.
+//!
+//! For concrete implementations of `DistanceCalculator`, see [`crate::distance::base`]:
+//! - `TrajectoryCalculator`: Computes distances on-the-fly from trajectory coordinates
+//! - `PrecomputedDistanceCalculator`: Uses a precomputed distance matrix (zero-copy)
+
+// Re-export DistanceCalculator trait for convenient access at the traits module level
+pub use crate::distance::base::DistanceCalculator;
+
 /// Trait for coordinate representation
 ///
 /// This trait defines the interface for accessing x and y coordinates

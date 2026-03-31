@@ -873,6 +873,7 @@ dependencies = [
     { name = "griffecli" },
     { name = "griffelib" },
 ]
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/04/56/28a0accac339c164b52a92c6cfc45a903acc0c174caa5c1713803467b533/griffe-2.0.0.tar.gz", hash = "sha256:c68979cd8395422083a51ea7cf02f9c119d889646d99b7b656ee43725de1b80f" }
 wheels = [
     { url = "https://mirrors.aliyun.com/pypi/packages/8b/94/ee21d41e7eb4f823b94603b9d40f86d3c7fde80eacc2c3c71845476dddaa/griffe-2.0.0-py3-none-any.whl", hash = "sha256:5418081135a391c3e6e757a7f3f156f1a1a746cc7b4023868ff7d5e2f9a980aa" },
 ]
@@ -885,6 +886,7 @@ dependencies = [
     { name = "colorama" },
     { name = "griffelib" },
 ]
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/a4/f8/2e129fd4a86e52e58eefe664de05e7d502decf766e7316cc9e70fdec3e18/griffecli-2.0.0.tar.gz", hash = "sha256:312fa5ebb4ce6afc786356e2d0ce85b06c1c20d45abc42d74f0cda65e159f6ef" }
 wheels = [
     { url = "https://mirrors.aliyun.com/pypi/packages/e6/ed/d93f7a447bbf7a935d8868e9617cbe1cadf9ee9ee6bd275d3040fbf93d60/griffecli-2.0.0-py3-none-any.whl", hash = "sha256:9f7cd9ee9b21d55e91689358978d2385ae65c22f307a63fb3269acf3f21e643d" },
 ]
@@ -893,6 +895,7 @@ wheels = [
 name = "griffelib"
 version = "2.0.0"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/ad/06/eccbd311c9e2b3ca45dbc063b93134c57a1ccc7607c5e545264ad092c4a9/griffelib-2.0.0.tar.gz", hash = "sha256:e504d637a089f5cab9b5daf18f7645970509bf4f53eda8d79ed71cce8bd97934" }
 wheels = [
     { url = "https://mirrors.aliyun.com/pypi/packages/4d/51/c936033e16d12b627ea334aaaaf42229c37620d0f15593456ab69ab48161/griffelib-2.0.0-py3-none-any.whl", hash = "sha256:01284878c966508b6d6f1dbff9b6fa607bc062d8261c5c7253cb285b06422a7f" },
 ]
@@ -3471,6 +3474,21 @@ wheels = [
 ]
 
 [[package]]
+name = "seaborn"
+version = "0.13.2"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas", version = "2.3.3", source = { registry = "https://mirrors.aliyun.com/pypi/simple" }, marker = "python_full_version < '3.11' or python_full_version >= '3.14'" },
+    { name = "pandas", version = "3.0.1", source = { registry = "https://mirrors.aliyun.com/pypi/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.14'" },
+]
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/86/59/a451d7420a77ab0b98f7affa3a1d78a313d2f7281a57afb1a34bae8ab412/seaborn-0.13.2.tar.gz", hash = "sha256:93e60a40988f4d65e9f4885df477e2fdaff6b73a9ded434c1ab356dd57eefff7" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/83/11/00d3c3dfc25ad54e731d91449895a79e4bf2384dc3ac01809010ba88f6d5/seaborn-0.13.2-py3-none-any.whl", hash = "sha256:636f8336facf092165e27924f223d3c62ca560b1f2bb5dff7ab7fad265361987" },
+]
+
+[[package]]
 name = "send2trash"
 version = "2.1.0"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
@@ -3874,7 +3892,7 @@ wheels = [
 
 [[package]]
 name = "traj-dist-rs"
-version = "1.0.0rc2"
+version = "1.0.0rc3"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
@@ -3892,6 +3910,8 @@ docs = [
     { name = "mkdocstrings", extra = ["python"] },
     { name = "pygments" },
     { name = "pymdown-extensions" },
+    { name = "seaborn" },
+    { name = "tabulate" },
 ]
 test = [
     { name = "polars" },
@@ -3940,6 +3960,8 @@ requires-dist = [
     { name = "pygments", marker = "extra == 'docs'", specifier = ">=2.19.2" },
     { name = "pymdown-extensions", marker = "extra == 'docs'", specifier = ">=10.21" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.3.5" },
+    { name = "seaborn", marker = "extra == 'docs'", specifier = ">=0.13.2" },
+    { name = "tabulate", marker = "extra == 'docs'", specifier = ">=0.9.0" },
 ]
 provides-extras = ["test", "docs"]
 
