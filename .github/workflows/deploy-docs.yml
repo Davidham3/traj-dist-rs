@@ -78,6 +78,5 @@ jobs:
             uv run mike set-default --push --branch gh-pages latest
           else
             echo "Deploying Development Version (dev)"
-            uv run jupyter nbconvert --to notebook --execute docs/usage_for_rust.ipynb --output executed.ipynb
             uv run mike deploy --push --branch gh-pages dev
           fi
