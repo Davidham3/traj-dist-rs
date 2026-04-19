@@ -50,7 +50,9 @@ metrics = [
     ("LCSS", traj_dist_rs.Metric.lcss(eps=0.1, type_d="euclidean")),
     ("EDR", traj_dist_rs.Metric.edr(eps=0.1, type_d="euclidean")),
     ("ERP", traj_dist_rs.Metric.erp(g=[0.0, 0.0], type_d="euclidean")),
+    ("Frechet", traj_dist_rs.Metric.frechet()),
     ("Discret Frechet", traj_dist_rs.Metric.discret_frechet(type_d="euclidean")),
+    ("EDwP", traj_dist_rs.Metric.edwp()),
 ]
 
 for name, metric in metrics:

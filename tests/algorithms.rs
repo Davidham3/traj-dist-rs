@@ -511,3 +511,64 @@ fn test_algorithms_orthogonal_trajectories() {
     let dist = hausdorff(&traj1, &traj2, DistanceType::Euclidean);
     assert_valid_distance(dist);
 }
+
+/// Test EDwP algorithm
+#[test]
+fn test_edwp_euclidean() {
+    let traj1: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]];
+    let traj2: Vec<[f64; 2]> = vec![[0.0, 1.0], [1.0, 0.0], [2.0, 3.0]];
+
+    let result = traj_dist_rs::distance::edwp::edwp(&traj1, &traj2, false);
+
+    assert_valid_dp_result(&result);
+    assert!(
+        result.distance > 0.0,
+        "EDwP should give positive distance for different trajectories"
+    );
+}
+
+/// Test EDwP symmetry property
+#[test]
+fn test_edwp_symmetry() {
+    let traj1: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 1.0]];
+    let traj2: Vec<[f64; 2]> = vec![[0.0, 1.0], [1.0, 0.0]];
+
+    let result1 = traj_dist_rs::distance::edwp::edwp(&traj1, &traj2, false);
+    let result2 = traj_dist_rs::distance::edwp::edwp(&traj2, &traj1, false);
+
+    // EDwP should be symmetric
+    assert!(
+        (result1.distance - result2.distance).abs() < 1e-10,
+        "EDwP should be symmetric: {} vs {}",
+        result1.distance,
+        result2.distance
+    );
+}
+
+/// Test EDwP consistency between full matrix and rolling array modes
+#[test]
+fn test_edwp_consistency_between_modes() {
+    let traj1: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]];
+    let traj2: Vec<[f64; 2]> = vec![[0.0, 1.0], [1.0, 0.0], [2.0, 3.0]];
+
+    let result_full = traj_dist_rs::distance::edwp::edwp(&traj1, &traj2, true);
+    let result_rolling = traj_dist_rs::distance::edwp::edwp(&traj1, &traj2, false);
+
+    // Both should produce the same distance
+    assert!(
+        (result_full.distance - result_rolling.distance).abs() < 1e-10,
+        "EDwP distance mismatch between full matrix and rolling array modes: full={}, rolling={}",
+        result_full.distance,
+        result_rolling.distance
+    );
+
+    // Full matrix should return a matrix
+    assert!(result_full.matrix.is_some());
+    assert_eq!(
+        result_full.matrix.as_ref().unwrap().len(),
+        traj1.len() * traj2.len()
+    );
+
+    // Rolling array should not return a matrix
+    assert!(result_rolling.matrix.is_none());
+}

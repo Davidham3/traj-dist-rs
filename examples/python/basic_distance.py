@@ -71,15 +71,25 @@ result = traj_dist_rs.edr(traj1, traj2, "euclidean", 0.1, use_full_matrix=True)
 print(f"  Distance (epsilon=0.1): {result.distance:.6f}")
 print(f"  Matrix shape: {result.matrix.shape}")
 
+# Frechet Distance (Continuous)
+print("\n6. Frechet Distance (Continuous)")
+print("-" * 40)
+# Frechet considers all continuous points along curve segments
+# Only supports Euclidean distance, no dist_type parameter needed
+dist_frechet = traj_dist_rs.frechet(traj1, traj2)
+print(f"  Distance: {dist_frechet:.6f}")
+
 # Discret Frechet Distance
-print("\n6. Discret Frechet Distance")
+print("\n7. Discret Frechet Distance")
 print("-" * 40)
 result = traj_dist_rs.discret_frechet(traj1, traj2, "euclidean", use_full_matrix=True)
 print(f"  Distance: {result.distance:.6f}")
 print(f"  Matrix shape: {result.matrix.shape}")
+# Continuous Frechet is always <= Discrete Frechet
+print(f"  Continuous <= Discrete: {dist_frechet <= result.distance + 1e-10}")
 
 # ERP (Edit distance with Real Penalty)
-print("\n7. ERP (Edit distance with Real Penalty)")
+print("\n8. ERP (Edit distance with Real Penalty)")
 print("-" * 40)
 # Standard ERP implementation
 gap_point = [0.0, 0.0]

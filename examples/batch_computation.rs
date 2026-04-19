@@ -76,7 +76,9 @@ fn main() {
         (DistanceAlgorithm::LCSS { eps: 0.1 }, "LCSS"),
         (DistanceAlgorithm::EDR { eps: 0.1 }, "EDR"),
         (DistanceAlgorithm::ERP { g: [0.0, 0.0] }, "ERP"),
+        (DistanceAlgorithm::Frechet, "Frechet"),
         (DistanceAlgorithm::DiscretFrechet, "Discret Frechet"),
+        (DistanceAlgorithm::EDwP, "EDwP"),
     ];
 
     for (algorithm, name) in algorithms {

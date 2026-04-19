@@ -10,7 +10,7 @@ A high-performance Rust implementation of trajectory distance algorithms with Py
 
 ## About
 
-**traj-dist-rs** is a high-performance trajectory distance calculation library written in Rust, providing both native Rust APIs and Python bindings via PyO3. It is a complete rewrite of the original [traj-dist](https://github.com/bguillouet/traj-dist) library, focusing on performance optimization and modern language features.
+**traj-dist-rs** is a high-performance trajectory distance calculation library written in Rust, providing both native Rust APIs and Python bindings via PyO3. It is based on the original [traj-dist](https://github.com/bguillouet/traj-dist) library with additional algorithms (e.g., EDwP), focusing on performance optimization and modern language features.
 
 ### Why traj-dist-rs?
 
@@ -27,9 +27,9 @@ A high-performance Rust implementation of trajectory distance algorithms with Py
 ![traj-dist-rs benchmark speedup](mk_docs/docs/assets/benchmark_speedup_readme.svg)
 
 **Median benchmark summary**:
-- **~230x faster than `traj-dist (Python)`** on average
-- **~6.3x faster than `traj-dist (Cython)`** on average
-- Parallel batch `pdist` / `cdist` reaches up to **~62.3x speedup** on large inputs
+- **~231x faster than `traj-dist (Python)`** on average
+- **~15.3x faster than `traj-dist (Cython)`** on average
+- Parallel batch `pdist` / `cdist` reaches up to **~61.1x speedup** on large inputs
 
 See [performance.md](mk_docs/docs/performance.md) for the full benchmark report and additional plots.
 
@@ -41,16 +41,18 @@ See [performance.md](mk_docs/docs/performance.md) for the full benchmark report 
 |-----------|-----------|----------|
 | **SSPD** | Symmetric Segment-Path Distance | General similarity, noise tolerance |
 | **DTW** | Dynamic Time Warping | Similarity with time warping, flexible alignment |
+| **Frechet** | Fréchet Distance (Continuous) | Exact geometric similarity, considers all curve points |
 | **Discret Frechet** | Discrete Fréchet Distance | Geometric similarity, path-based matching |
 | **Hausdorff** | Hausdorff Distance | Maximum distance, outlier-sensitive similarity |
 | **LCSS** | Longest Common Subsequence | Robust similarity with noise tolerance |
 | **EDR** | Edit Distance on Real sequence | Similarity with noise and outlier tolerance |
 | **ERP** | Edit distance with Real Penalty | Robust similarity with gap handling |
+| **EDwP** | Edit Distance with Projections | Inconsistent sampling rates, projection-based matching |
 
 ### Distance Types
 
-- **Euclidean** - 2D Euclidean distance
-- **Spherical** - Haversine distance for geographic coordinates
+- **Euclidean** - 2D Euclidean distance (all algorithms)
+- **Spherical** - Haversine distance for geographic coordinates (all algorithms except Frechet, Discret Frechet, and EDwP)
 
 ### Batch Computation
 
@@ -61,7 +63,7 @@ See [performance.md](mk_docs/docs/performance.md) for the full benchmark report 
 
 ### Additional Features
 
-- Matrix return for DP-based algorithms (DTW, LCSS, EDR, ERP, Discret Frechet)
+- Matrix return for DP-based algorithms (DTW, LCSS, EDR, ERP, Discret Frechet, EDwP)
 - Precomputed distance matrix support for efficient batch computations
 - Zero-copy NumPy array support for optimal performance
 - Pickle serialization for `DpResult` objects (compatible with joblib)
@@ -81,7 +83,7 @@ Common search terms related to this library:
 
 If you used the original `traj-dist` library for trajectory similarity measurement, this library is compatible and offers significant performance improvements:
 
-- **Algorithm compatibility**: Core algorithms (SSPD, DTW, Hausdorff, LCSS, EDR, ERP) supported
+- **Algorithm compatibility**: Core algorithms (SSPD, DTW, Hausdorff, LCSS, EDR, ERP, Frechet, Discret Frechet) supported, plus EDwP (not in original traj-dist)
 - **Performance**: 3-10x faster than Cython implementation
 
 ## Quick Start

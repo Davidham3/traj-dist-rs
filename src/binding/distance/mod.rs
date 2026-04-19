@@ -1,7 +1,9 @@
 pub mod discret_frechet;
 pub mod dtw;
 pub mod edr;
+pub mod edwp;
 pub mod erp;
+pub mod frechet;
 pub mod hausdorff;
 pub mod lcss;
 pub mod sspd;

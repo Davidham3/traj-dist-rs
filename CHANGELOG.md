@@ -9,6 +9,90 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-rc.4] - 2026-04-19
+
+### Added
+
+#### New Algorithm: Frechet Distance (Continuous)
+- Implemented continuous Fréchet distance algorithm in Rust (`src/distance/frechet.rs`)
+  - Considers all continuous points along curve segments (unlike Discrete Fréchet which only considers vertices)
+  - Uses binary search over critical values with a free-space decision procedure
+  - Result is always ≤ the Discrete Fréchet distance for the same trajectories
+  - Only supports Euclidean distance (by design, as the algorithm relies on circle-line intersections)
+  - No Python implementation in upstream traj-dist (only Cython); no Haversine/Spherical support
+  - Time complexity: O(n*m * log(n*m))
+- Python bindings for Frechet (`src/binding/distance/frechet.rs`)
+  - `traj_dist_rs.frechet(traj1, traj2)` returns `float`
+  - Supports both list and NumPy array inputs
+- Batch computation support via `Metric.frechet()` factory method
+  - Works with `pdist()` and `cdist()` for batch distance computation
+
+#### New Algorithm: EDwP (Edit Distance with Projections)
+- Implemented EDwP algorithm in Rust (`src/distance/edwp.rs`)
+  - Designed for trajectories with inconsistent sampling rates
+  - Uses point-to-segment projections to handle different sampling densities
+  - Only supports Euclidean distance (by design, as projections are geometry-dependent)
+  - Supports both full DP matrix return and memory-optimized rolling array mode
+- Python bindings for EDwP (`src/binding/distance/edwp.rs`)
+  - `traj_dist_rs.edwp(traj1, traj2, use_full_matrix=False)` returns `DpResult`
+  - Supports both list and NumPy array inputs
+- Batch computation support via `Metric.edwp()` factory method
+
+#### Examples & Scripts
+- Added Frechet and EDwP to batch computation examples (`batch_computation.rs`, `batch_computation.py`)
+- Added Rust examples execution to `pre_build.sh` (Step 14-15)
+- Added Frechet to `benchmark_guide.md` supported algorithms list
+  - Works with `pdist()` and `cdist()` for batch distance computation
+- Python reference implementation from [TrajCL](https://github.com/changyanchuan/TrajCL) included in `scripts/benchmark/extra_algos/edwp.py` for validation
+
+#### Utility Functions
+- Added `project_point_to_segment()` in `distance::euclidean` module
+  - Projects a point onto a line segment, returning the closest point on the segment
+  - Supports independent generic type parameters (`<C, D, E: AsCoord>`) for flexible usage with mixed coordinate types
+  - Used by EDwP algorithm for point-to-segment projection calculations
+- Added `point_to_segment_distance()` in `distance::euclidean` module
+  - Simplified version without precomputed parameters, used by Frechet algorithm
+  - Uses threshold `u <= 0.00001` matching the original traj-dist implementation
+- Added `circle_line_intersection()` in `distance::euclidean` module
+  - Computes intersection points between a circle and a line
+  - Used by Frechet algorithm for free-space computation
+
+### Changed
+
+#### Code Quality
+- EDwP projection logic uses shared `project_point_to_segment()` function instead of inline implementation
+  - Eliminates code duplication across 4 projection sites (2 in full_matrix, 2 in rolling_array)
+  - Ensures consistent projection behavior across the codebase
+
+#### Documentation
+- Updated `README.md` and `mk_docs/docs/index.md` algorithm compatibility list to include Frechet and EDwP
+- Updated `src/lib.rs` module-level documentation to list all 9 supported algorithms including Frechet and EDwP
+- Updated `examples/python/basic_distance.py` and `examples/basic_distance.rs` with Frechet usage examples
+- Updated `mk_docs/docs/performance.md` Algorithms covered list to include FRECHET
+
+#### Benchmark Scripts
+- Added Frechet to `scripts/benchmark/algorithms_config.json`
+- Added Frechet function mapping in `benchmark_traj_dist.py` (Cython: `tdist.c_frechet`) and `benchmark_traj_dist_rs.py`
+- Added `FRECHET` to `ALGORITHM_ORDER` and `norm_algo()` in `analyze_benchmark_results.py`
+- Added FRECHET to `render_scope()` Algorithms covered list in `analyze_benchmark_results.py`
+- Fixed `plot_overview()` NaN annotation handling for algorithms with partial baseline coverage (Frechet has no Python impl, EDwP has no Cython impl)
+
+### Testing
+
+#### EDwP Test Coverage
+- Rust unit tests: empty trajectories, single-point, identical, symmetry, matrix dimensions, matrix consistency
+- Rust integration tests in `tests/algorithms.rs`, `tests/boundary_cases.rs`, `tests/matrix_return.rs`
+- Python integration tests (`py_tests/test_edwp.py`) validated against Python reference implementation with 0 error margin
+- EDwP test case generation script (`scripts/generate_edwp_test_cases.py`)
+
+#### Frechet Test Coverage
+- Cython test samples generated (`py_tests/data/cython_samples/frechet_euclidean.parquet`, 1225 trajectory pairs)
+- Python integration tests (`py_tests/test_frechet.py`): accuracy validation, mathematical properties, boundary cases, batch computation
+- Frechet test case generation added to `scripts/generate_all_test_cases.sh` and `scripts/generate_test_case.py`
+- Test framework (`py_tests/test_framework.py`) updated with Frechet-specific handling (no `type_d` parameter, returns `float` directly)
+
+---
+
 ## [1.0.0-rc.3] - 2026-03-30
 
 ### Added
@@ -626,7 +710,8 @@ print(f"DTW distance: {result.distance}")
 
 ---
 
-[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-rc.3...HEAD
+[Unreleased]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-rc.4...HEAD
+[1.0.0-rc.4]: https://github.com/Davidham3/traj-dist-rs/compare/v1.0.0-rc.3...v1.0.0-rc.4
 [1.0.0-rc.3]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-rc.3
 [1.0.0-rc.2]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-rc.2
 [1.0.0-rc.1]: https://github.com/Davidham3/traj-dist-rs/releases/tag/v1.0.0-rc.1

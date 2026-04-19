@@ -377,6 +377,25 @@ def sowd_spherical(all_metainfo, data_dir):
         raise RuntimeError(f"Failed to read SOWD Spherical distance test data: {e}")
 
 
+@pytest.fixture(scope="session")
+def edwp_test_data(data_dir):
+    """EDwP Euclidean distance test data (Python reference implementation)"""
+
+    sample_path = data_dir / "cython_samples" / "edwp_euclidean.parquet"
+
+    if not sample_path.exists():
+        raise RuntimeError(
+            f"EDwP test data not found: {sample_path}\n"
+            f"Please run 'python scripts/generate_edwp_test_cases.py' to generate test data."
+        )
+
+    try:
+        df = pl.read_parquet(sample_path)
+        return df
+    except Exception as e:
+        raise RuntimeError(f"Failed to read EDwP Euclidean distance test data: {e}")
+
+
 # Helper function: get all test data for an algorithm
 def get_algorithm_test_data(algorithm_name, all_metainfo, data_dir):
     """

@@ -5,8 +5,8 @@
 
 use traj_dist_rs::distance::{
     base::TrajectoryCalculator, discret_frechet::discret_frechet, distance_type::DistanceType,
-    dtw::dtw, edr::edr, erp::erp_compat_traj_dist, erp::erp_standard, hausdorff::hausdorff,
-    lcss::lcss, sspd::sspd,
+    dtw::dtw, edr::edr, erp::erp_compat_traj_dist, erp::erp_standard, frechet::frechet,
+    hausdorff::hausdorff, lcss::lcss, sspd::sspd,
 };
 
 fn main() {
@@ -91,8 +91,16 @@ fn main() {
         println!("  Matrix length: {}", matrix.len());
     }
 
+    // Frechet Distance (Continuous)
+    println!("\n6. Frechet Distance (Continuous)");
+    println!("{}", "-".repeat(40));
+    // Frechet considers all continuous points along curve segments
+    // Only supports Euclidean distance
+    let dist_frechet = frechet(&traj1, &traj2);
+    println!("  Distance: {:.6}", dist_frechet);
+
     // Discret Frechet Distance
-    println!("\n6. Discret Frechet Distance");
+    println!("\n7. Discret Frechet Distance");
     println!("{}", "-".repeat(40));
     let calculator = TrajectoryCalculator::new(&traj1, &traj2, DistanceType::Euclidean);
     let result = discret_frechet(&calculator, true);
@@ -103,9 +111,14 @@ fn main() {
         println!("  Matrix shape: {}x{}", rows, cols);
         println!("  Matrix length: {}", matrix.len());
     }
+    // Continuous Frechet is always <= Discrete Frechet
+    println!(
+        "  Continuous <= Discrete: {}",
+        dist_frechet <= result.distance + 1e-10
+    );
 
     // ERP (Edit distance with Real Penalty)
-    println!("\n7. ERP (Edit distance with Real Penalty)");
+    println!("\n8. ERP (Edit distance with Real Penalty)");
     println!("{}", "-".repeat(40));
     // Standard ERP implementation
     let calculator = TrajectoryCalculator::new(&traj1, &traj2, DistanceType::Euclidean);

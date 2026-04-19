@@ -29,7 +29,9 @@ ALGORITHM_ORDER = [
     "DISCRET_FRECHET",
     "DTW",
     "EDR",
+    "EDWP",
     "ERP",
+    "FRECHET",
     "HAUSDORFF",
     "LCSS",
     "SSPD",
@@ -64,11 +66,12 @@ def norm_algo(x: str) -> str:
         "dtw": "DTW",
         "discret frechet": "DISCRET_FRECHET",
         "discrete frechet": "DISCRET_FRECHET",
-        "frechet": "DISCRET_FRECHET",
+        "frechet": "FRECHET",
         "hausdorff": "HAUSDORFF",
         "hausdorf": "HAUSDORFF",
         "lcss": "LCSS",
         "edr": "EDR",
+        "edwp": "EDWP",
         "erp": "ERP",
     }.get(x, x.upper())
 
@@ -263,15 +266,16 @@ def plot_overview(comparison_df: pd.DataFrame):
     for bars in [b1, b2]:
         for bar in bars:
             h = bar.get_height()
-            ax.annotate(
-                f"{h:.1f}x",
-                (bar.get_x() + bar.get_width() / 2, h),
-                xytext=(0, 3),
-                textcoords="offset points",
-                ha="center",
-                va="bottom",
-                fontsize=9,
-            )
+            if pd.notna(h) and h > 0:
+                ax.annotate(
+                    f"{h:.1f}x",
+                    (bar.get_x() + bar.get_width() / 2, h),
+                    xytext=(0, 3),
+                    textcoords="offset points",
+                    ha="center",
+                    va="bottom",
+                    fontsize=9,
+                )
 
     ax.legend(loc="upper right", frameon=True)
     fig.tight_layout()
@@ -463,10 +467,14 @@ def plot_batch(batch_df: pd.DataFrame):
 
 
 def fmt_ms(x):
+    if pd.isna(x):
+        return "N/A"
     return f"{x:.4f} ms"
 
 
 def fmt_x(x):
+    if pd.isna(x):
+        return "N/A"
     return f"{x:.2f}x"
 
 
@@ -502,7 +510,9 @@ def render_scope():
             "- DISCRET_FRECHET",
             "- DTW",
             "- EDR",
+            "- EDWP (Euclidean only, no Cython implementation; Python baseline from [TrajCL](https://github.com/changyanchuan/TrajCL))",
             "- ERP",
+            "- FRECHET (Euclidean only, Cython implementation only; no Python implementation in upstream traj-dist)",
             "- HAUSDORFF",
             "- LCSS",
             "- SSPD",

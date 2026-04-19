@@ -173,7 +173,7 @@ The script will automatically complete the following steps:
    - Single trajectory pair distance calculation performance
 
 4. **Test traj-dist-rs (Rust implementation)**
-   - Single trajectory pair distance calculation performance
+   - Single trajectory pair distance calculation performance (including EDwP)
    - Batch computation performance (pdist/cdist, including sequential and parallel)
 
 5. **Generate performance comparison report**
@@ -181,7 +181,7 @@ The script will automatically complete the following steps:
    - Generate Markdown format report to mk_docs/docs/performance.md
 
 **Expected time**:
-- K=1000, WARMUP_RUNS=10, NUM_RUNS=50: Approximately 10-15 minutes
+- K=1000, WARMUP_RUNS=10, NUM_RUNS=50: Approximately 30-60 minutes
 - K=50, WARMUP_RUNS=3, NUM_RUNS=10: Approximately 1-2 minutes
 
 ## 4. Viewing Results
@@ -235,11 +235,17 @@ The benchmark script tests the following distance algorithms:
 4. **LCSS** (Longest Common Subsequence)
 5. **EDR** (Edit Distance on Real sequence)
 6. **ERP** (Edit distance with Real Penalty)
-7. **Discret Frechet Distance**
+7. **Frechet Distance** (Continuous) — Euclidean distance only, Cython implementation only; no Python implementation in upstream traj-dist
+8. **Discret Frechet Distance**
+9. **EDwP** (Edit Distance with Projections) — Euclidean distance only, no Cython implementation
 
-All algorithms support two distance types:
+Algorithms 1–6 and 8 support two distance types:
 - **Euclidean**: Euclidean distance based on 2D coordinates
 - **Spherical**: Haversine distance based on 2D coordinates (spherical distance)
+
+Algorithm 7 (Frechet) only supports Euclidean distance. Frechet is benchmarked as Rust vs Cython only (no Python implementation available in upstream traj-dist).
+
+Algorithm 9 (EDwP) only supports Euclidean distance. EDwP is benchmarked as Rust vs Python (using the reference Python implementation from [TrajCL](https://github.com/changyanchuan/TrajCL)). There is no Cython implementation available for EDwP.
 
 ## 6. References
 

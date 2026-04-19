@@ -356,3 +356,43 @@ fn test_small_coordinates() {
     let dist = hausdorff(&traj1, &traj2, DistanceType::Euclidean);
     assert_valid_distance(dist);
 }
+
+/// Test EDwP empty trajectories
+#[test]
+fn test_edwp_empty_trajectories() {
+    let empty: Vec<[f64; 2]> = vec![];
+    let traj: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 1.0]];
+
+    // EDwP should return f64::MAX for empty trajectories
+    let result = traj_dist_rs::distance::edwp::edwp(&empty, &traj, false);
+    assert_eq!(result.distance, f64::MAX);
+
+    let result = traj_dist_rs::distance::edwp::edwp(&traj, &empty, false);
+    assert_eq!(result.distance, f64::MAX);
+
+    let result = traj_dist_rs::distance::edwp::edwp(&empty, &empty, false);
+    assert_eq!(result.distance, f64::MAX);
+}
+
+/// Test EDwP single point trajectories
+#[test]
+fn test_edwp_single_point() {
+    let p1: Vec<[f64; 2]> = vec![[0.0, 0.0]];
+    let p2: Vec<[f64; 2]> = vec![[1.0, 1.0]];
+
+    // EDwP single point should work and return finite distance
+    let result = traj_dist_rs::distance::edwp::edwp(&p1, &p2, false);
+    assert_valid_dp_result(&result);
+    // Single point distance should be finite
+    assert!(result.distance.is_finite());
+}
+
+/// Test EDwP identical trajectories
+#[test]
+fn test_edwp_identical() {
+    let traj: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]];
+
+    // EDwP identical should be 0
+    let result = traj_dist_rs::distance::edwp::edwp(&traj, &traj, false);
+    assert_identical_distance(result.distance);
+}

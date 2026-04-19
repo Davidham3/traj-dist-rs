@@ -440,3 +440,60 @@ fn test_spherical_with_matrix() {
     assert!(result.matrix.is_some());
     assert_valid_dp_result(&result);
 }
+
+/// Test EDwP with matrix return
+#[test]
+fn test_edwp_with_matrix() {
+    let traj1: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]];
+    let traj2: Vec<[f64; 2]> = vec![[0.0, 1.0], [1.0, 0.0], [2.0, 3.0]];
+
+    // Without matrix
+    let result_no_matrix = traj_dist_rs::distance::edwp::edwp(&traj1, &traj2, false);
+    assert!(result_no_matrix.matrix.is_none());
+    assert_valid_dp_result(&result_no_matrix);
+
+    // With matrix
+    let result_with_matrix = traj_dist_rs::distance::edwp::edwp(&traj1, &traj2, true);
+    assert!(result_with_matrix.matrix.is_some());
+    assert_valid_dp_result(&result_with_matrix);
+
+    // Distances should be equal
+    assert!(
+        (result_no_matrix.distance - result_with_matrix.distance).abs() < 1e-10,
+        "EDwP distance mismatch: {} vs {}",
+        result_no_matrix.distance,
+        result_with_matrix.distance
+    );
+}
+
+/// Test EDwP matrix content validity
+#[test]
+fn test_edwp_matrix_content() {
+    let traj1: Vec<[f64; 2]> = vec![[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]];
+    let traj2: Vec<[f64; 2]> = vec![[0.0, 1.0], [1.0, 0.0]];
+
+    let result = traj_dist_rs::distance::edwp::edwp(&traj1, &traj2, true);
+    assert_valid_dp_result(&result);
+
+    let matrix = result.matrix.unwrap();
+    let n0 = traj1.len();
+    let n1 = traj2.len();
+
+    // Matrix should have correct dimensions (row-major: n0 * n1)
+    assert_eq!(
+        matrix.len(),
+        n0 * n1,
+        "EDwP matrix should have {} elements, got {}",
+        n0 * n1,
+        matrix.len()
+    );
+
+    // The last element should equal the distance
+    let last_element = matrix[n0 * n1 - 1];
+    assert!(
+        (last_element - result.distance).abs() < 1e-10,
+        "EDwP matrix last element ({}) should equal distance ({})",
+        last_element,
+        result.distance
+    );
+}

@@ -109,6 +109,35 @@ impl PyMetric {
         let calculator = build_calculator(algorithm, type_d)?;
         Ok(Self { inner: calculator })
     }
+
+    /// Edit Distance with Projections.
+    ///
+    /// EDwP is designed for trajectories with inconsistent sampling rates.
+    /// Note: EDwP only supports Euclidean distance (not spherical distance).
+    #[staticmethod]
+    #[pyo3(signature = ())]
+    fn edwp() -> PyResult<Self> {
+        let algorithm = DistanceAlgorithm::EDwP;
+        let distance_type = DistanceType::Euclidean;
+        Ok(Self {
+            inner: Metric::new(algorithm, distance_type),
+        })
+    }
+
+    /// Frechet Distance (continuous).
+    ///
+    /// Unlike Discrete Frechet, this considers all continuous points along
+    /// the curve segments, providing an exact solution.
+    /// Note: Frechet only supports Euclidean distance (not spherical distance).
+    #[staticmethod]
+    #[pyo3(signature = ())]
+    fn frechet() -> PyResult<Self> {
+        let algorithm = DistanceAlgorithm::Frechet;
+        let distance_type = DistanceType::Euclidean;
+        Ok(Self {
+            inner: Metric::new(algorithm, distance_type),
+        })
+    }
 }
 
 // Helper function to keep factory method code clean

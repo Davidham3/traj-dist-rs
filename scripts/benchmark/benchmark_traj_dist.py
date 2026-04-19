@@ -8,6 +8,7 @@ Saves results as parquet files with algorithm, distance type, hyperparameters, a
 
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List
@@ -16,6 +17,9 @@ import numpy as np
 import polars as pl
 import pyarrow as pa
 import pyarrow.parquet as pq
+
+# Add extra_algos directory to path for EDwP Python implementation
+sys.path.insert(0, str(Path(__file__).parent / "extra_algos"))
 
 
 def parse_args():
@@ -98,6 +102,9 @@ def get_traj_dist_functions(implementation: str):
             "discret_frechet": {
                 "euclidean": tdist.c_discret_frechet,
             },
+            "frechet": {
+                "euclidean": tdist.c_frechet,
+            },
             "lcss": {
                 "euclidean": tdist.c_e_lcss,
                 "spherical": tdist.c_g_lcss,
@@ -110,6 +117,7 @@ def get_traj_dist_functions(implementation: str):
                 "euclidean": tdist.c_e_erp,
                 "spherical": tdist.c_g_erp,
             },
+            # EDwP has no Cython implementation — will be skipped
         }
     else:  # python
         import traj_dist.pydist.discret_frechet as py_discret_frechet
@@ -119,6 +127,7 @@ def get_traj_dist_functions(implementation: str):
         import traj_dist.pydist.hausdorff as py_hausdorff
         import traj_dist.pydist.lcss as py_lcss
         import traj_dist.pydist.sspd as py_sspd
+        from edwp import edwp as edwp_python
 
         functions = {
             "sspd": {
@@ -148,8 +157,18 @@ def get_traj_dist_functions(implementation: str):
                 "euclidean": py_erp.e_erp,
                 "spherical": py_erp.s_erp,
             },
+            # frechet: Python implementation has a Python 2/3 bug
+            # (len(cc) / 2 returns float in Python 3, cannot be used as list index)
+            # Only Cython implementation is available for frechet benchmark
+            "edwp": {
+                "euclidean": edwp_python,
+            },
         }
     return functions
+
+
+# Algorithms that require list input instead of numpy arrays
+ALGORITHMS_REQUIRING_LIST_INPUT = {"edwp"}
 
 
 def benchmark_algorithm(
@@ -210,20 +229,30 @@ def benchmark_algorithm(
     if hyperparameter_value is not None:
         print(f"  Hyperparameter: {hyperparam_name} = {hyperparameter_value}")
 
+    requires_list_input = algorithm_name in ALGORITHMS_REQUIRING_LIST_INPUT
+
     for row_idx in range(len(baseline_df)):
         row = baseline_df[row_idx]
         traj1 = row["traj1"].item().to_numpy()
         traj2 = row["traj2"].item().to_numpy()
 
+        # EDwP Python implementation requires list input
+        if requires_list_input:
+            traj1_input = traj1.tolist()
+            traj2_input = traj2.tolist()
+        else:
+            traj1_input = traj1
+            traj2_input = traj2
+
         # Warmup
         for _ in range(warmup_runs):
-            dist_func(traj1, traj2, **call_params)
+            dist_func(traj1_input, traj2_input, **call_params)
 
         # Measure time
         times = []
         for _ in range(num_runs):
             start = time.perf_counter()
-            dist_func(traj1, traj2, **call_params)
+            dist_func(traj1_input, traj2_input, **call_params)
             end = time.perf_counter()
             times.append(end - start)
 

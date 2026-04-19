@@ -105,6 +105,25 @@ class Metric:
         Edit distance with Real Penalty.
         """
 
+    @staticmethod
+    def edwp() -> Metric:
+        r"""
+        Edit Distance with Projections.
+
+        EDwP is designed for trajectories with inconsistent sampling rates.
+        Note: EDwP only supports Euclidean distance (not spherical distance).
+        """
+
+    @staticmethod
+    def frechet() -> Metric:
+        r"""
+        Frechet Distance (continuous).
+
+        Unlike Discrete Frechet, this considers all continuous points along
+        the curve segments, providing an exact solution.
+        Note: Frechet only supports Euclidean distance (not spherical distance).
+        """
+
 def __dp_result_from_pickle(data: bytes) -> DpResult:
     r"""
     Helper function to create DpResult from pickle data
@@ -445,6 +464,51 @@ def edr_with_matrix(
     ```
     """
 
+def edwp(
+    t1: typing.List[typing.List[float]] | numpy.ndarray,
+    t2: typing.List[typing.List[float]] | numpy.ndarray,
+    use_full_matrix: builtins.bool = False,
+) -> DpResult:
+    r"""
+    Compute the EDwP (Edit Distance with Projections) distance between two trajectories
+
+    EDwP is designed for trajectories with inconsistent sampling rates. It uses
+    point-to-segment projections to handle different sampling densities.
+
+    # Arguments
+    * `t1` - First trajectory (list of [x, y] pairs)
+    * `t2` - Second trajectory (list of [x, y] pairs)
+    * `use_full_matrix` - If true, compute and return the full DP matrix;
+                           if false (default), return None for the matrix to save space
+
+    # Returns
+    * A `DpResult` object with two properties:
+      - `distance`: EDwP distance as f64
+      - `matrix`: numpy array of shape (n0, n1) if use_full_matrix=True, else None
+
+    # Notes
+    - EDwP only supports Euclidean distance (not spherical distance)
+    - Passing "spherical" as distance type will result in an error
+
+    # Examples
+    ```python
+    import traj_dist_rs
+
+    t1 = [[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]]
+    t2 = [[0.1, 0.1], [1.1, 1.1], [2.1, 2.1]]
+
+    # Without matrix
+    result = traj_dist_rs.edwp(t1, t2, False)
+    print(result.distance)  # Distance value
+    print(result.matrix)  # None
+
+    # With matrix
+    result = traj_dist_rs.edwp(t1, t2, True)
+    print(result.distance)  # Distance value
+    print(result.matrix)  # numpy array
+    ```
+    """
+
 def erp_compat_traj_dist(
     t1: typing.List[typing.List[float]] | numpy.ndarray,
     t2: typing.List[typing.List[float]] | numpy.ndarray,
@@ -645,6 +709,43 @@ def erp_standard_with_matrix(
     # With matrix
     result = traj_dist_rs.erp_standard_with_matrix(dist_matrix, seq0_gap_dists, seq1_gap_dists, use_full_matrix=True)
     print(result.matrix)  # numpy array
+    ```
+    """
+
+def frechet(
+    t1: typing.List[typing.List[float]] | numpy.ndarray,
+    t2: typing.List[typing.List[float]] | numpy.ndarray,
+) -> builtins.float:
+    r"""
+    Compute the Frechet distance between two trajectories
+
+    The Frechet distance considers all continuous points along the curve segments,
+    providing an exact solution (unlike Discrete Frechet which only considers vertices).
+
+    Intuitively, it represents the minimum leash length required for a person
+    and their dog to walk along the two curves without backtracking.
+
+    # Arguments
+    * `t1` - First trajectory (list of [x, y] pairs or numpy array)
+    * `t2` - Second trajectory (list of [x, y] pairs or numpy array)
+
+    # Returns
+    * The Frechet distance as a float
+
+    # Notes
+    - Frechet distance only supports Euclidean distance (not spherical distance)
+    - Trajectories with fewer than 2 points return float('inf')
+    - Result is always <= the Discrete Frechet distance for the same trajectories
+
+    # Examples
+    ```python
+    import traj_dist_rs
+
+    t1 = [[0.0, 0.0], [1.0, 1.0], [2.0, 0.0]]
+    t2 = [[0.0, 0.5], [1.0, 1.5], [2.0, 0.5]]
+
+    distance = traj_dist_rs.frechet(t1, t2)
+    print(f"Frechet distance: {distance}")
     ```
     """
 

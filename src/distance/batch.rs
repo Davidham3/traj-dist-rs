@@ -50,6 +50,10 @@ pub enum DistanceAlgorithm {
     ERP { g: [f64; 2] },
     /// Discrete Frechet Distance (no parameters)
     DiscretFrechet,
+    /// Edit Distance with Projections (no parameters, Euclidean only)
+    EDwP,
+    /// Frechet Distance (no parameters, Euclidean only)
+    Frechet,
 }
 
 /// Metric configuration for distance calculations
@@ -134,6 +138,20 @@ impl Metric {
             DistanceAlgorithm::DiscretFrechet => {
                 let calculator = TrajectoryCalculator::new(traj1, traj2, self.distance_type);
                 crate::distance::discret_frechet::discret_frechet(&calculator, false).distance
+            }
+            DistanceAlgorithm::EDwP => {
+                // EDwP only supports Euclidean distance
+                if self.distance_type != DistanceType::Euclidean {
+                    panic!("EDwP only supports Euclidean distance");
+                }
+                crate::distance::edwp::edwp(traj1, traj2, false).distance
+            }
+            DistanceAlgorithm::Frechet => {
+                // Frechet only supports Euclidean distance
+                if self.distance_type != DistanceType::Euclidean {
+                    panic!("Frechet only supports Euclidean distance");
+                }
+                crate::distance::frechet::frechet(traj1, traj2)
             }
         }
     }

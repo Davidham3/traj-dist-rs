@@ -14,11 +14,12 @@
 //! - LCSS (Longest Common Subsequence)
 //! - EDR (Edit Distance on Real sequence)
 //! - ERP (Edit distance with Real Penalty)
+//! - Frechet Distance (Continuous) - Euclidean only
 //! - Discrete Frechet Distance
-//! - Frechet Distance (planned)
+//! - EDwP (Edit Distance with Projections) - Euclidean only
 //! - SOWD (One-Way Distance) (planned)
 //!
-//! Trajectory similarity is often measured via trajectory distances such as DTW, LCSS, EDR, ERP, Hausdorff, (Discrete) Fréchet, and SSPD.
+//! Trajectory similarity is often measured via trajectory distances such as DTW, LCSS, EDR, ERP, EDwP, Hausdorff, (Discrete) Fréchet, and SSPD.
 //!
 //! ## Features
 //!
@@ -148,6 +149,11 @@ fn _lib(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     )?)?;
     m.add_function(wrap_pyfunction!(
         crate::binding::distance::erp::erp_standard_with_matrix,
+        m
+    )?)?;
+    m.add_function(wrap_pyfunction!(crate::binding::distance::edwp::edwp, m)?)?;
+    m.add_function(wrap_pyfunction!(
+        crate::binding::distance::frechet::frechet,
         m
     )?)?;
 

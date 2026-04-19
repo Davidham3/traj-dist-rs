@@ -7,7 +7,9 @@
 //! ## Available Algorithms
 //!
 //! - `discret_frechet`: Discrete Fréchet distance calculation
+//! - `frechet`: Fréchet distance calculation
 //! - `dtw`: Dynamic Time Warping distance calculation
+//! - `edwp`: Edit Distance with Projections calculation
 //! - `hausdorff`: Hausdorff distance calculation
 //! - `lcss`: Longest Common Subsequence distance calculation
 //! - `edr`: Edit Distance on Real sequence calculation
@@ -66,8 +68,10 @@ pub mod discret_frechet;
 pub mod distance_type;
 pub mod dtw;
 pub mod edr;
+pub mod edwp;
 pub mod erp;
 pub mod euclidean;
+pub mod frechet;
 pub mod hausdorff;
 pub mod lcss;
 pub mod spherical;

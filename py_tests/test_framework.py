@@ -297,6 +297,20 @@ class BaseDistanceTest(ABC):
                 return result.distance
             return result
 
+        # Special handling for EDwP algorithm, it only supports Euclidean and has no distance_type parameter
+        if self.algorithm_name == "edwp":
+            result = func(traj1, traj2, use_full_matrix=False)
+            if hasattr(result, "distance"):
+                return result.distance
+            return result
+
+        # Special handling for Frechet algorithm, it only supports Euclidean and has no distance_type parameter
+        if self.algorithm_name == "frechet":
+            result = func(traj1, traj2)
+            if hasattr(result, "distance"):
+                return result.distance
+            return result
+
         # Special handling for Discret Frechet algorithm, it has use_full_matrix parameter but no hyperparameters
         if self.algorithm_name == "discret_frechet":
             result = func(traj1, traj2, distance_type, use_full_matrix=False)

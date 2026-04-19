@@ -71,6 +71,10 @@ def load_baseline_trajectories(baseline_path: Path) -> pl.DataFrame:
     return df
 
 
+# Algorithms that don't accept distance_type parameter
+ALGORITHMS_WITHOUT_DISTANCE_TYPE = {"edwp", "frechet"}
+
+
 def get_rust_function(algorithm_name: str):
     """Get Rust algorithm function"""
     # Algorithm name to function name mapping
@@ -84,6 +88,7 @@ def get_rust_function(algorithm_name: str):
         "edr": "edr",
         "erp": "erp_compat_traj_dist",
         "sowd_grid": "sowd_grid",
+        "edwp": "edwp",
     }
 
     if algorithm_name not in function_map:
@@ -143,6 +148,8 @@ def benchmark_algorithm(
     if hyperparameter_value is not None:
         print(f"  Hyperparameter: {hyperparam_name} = {hyperparameter_value}")
 
+    skip_distance_type = algorithm_name in ALGORITHMS_WITHOUT_DISTANCE_TYPE
+
     for row_idx in range(len(baseline_df)):
         row = baseline_df[row_idx]
         traj1 = row["traj1"].item().to_numpy()
@@ -150,13 +157,19 @@ def benchmark_algorithm(
 
         # Warmup
         for _ in range(warmup_runs):
-            rust_func(traj1, traj2, distance_type, **call_params)
+            if skip_distance_type:
+                rust_func(traj1, traj2, **call_params)
+            else:
+                rust_func(traj1, traj2, distance_type, **call_params)
 
         # Measure time
         times = []
         for _ in range(num_runs):
             start = time.perf_counter()
-            rust_func(traj1, traj2, distance_type, **call_params)
+            if skip_distance_type:
+                rust_func(traj1, traj2, **call_params)
+            else:
+                rust_func(traj1, traj2, distance_type, **call_params)
             end = time.perf_counter()
             times.append(end - start)
 

@@ -115,6 +115,8 @@ def get_distance_function(args):
         return (
             tdist.c_discret_frechet
         )  # discret_frechet only supports Euclidean distance
+    elif args.algorithm == "frechet":
+        return tdist.c_frechet  # frechet only supports Euclidean distance
     elif args.algorithm == "lcss":
         return tdist.c_e_lcss if args.type_d == "euclidean" else tdist.c_g_lcss
     elif args.algorithm == "edr":

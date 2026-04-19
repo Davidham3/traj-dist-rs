@@ -67,6 +67,12 @@ python scripts/generate_test_case.py \
     --type_d euclidean \
     --output-dir py_tests/data
 
+echo "Generating Frechet test cases..."
+python scripts/generate_test_case.py \
+    --algorithm frechet \
+    --type_d euclidean \
+    --output-dir py_tests/data
+
 # ==========================================
 # Algorithms with hyperparameters (3 hyperparameter values per group)
 # ==========================================
@@ -201,6 +207,13 @@ python scripts/generate_test_case.py \
     --g -122.39607 37.78732 \
     --output-dir py_tests/data
 
+# ==========================================
+# EDwP algorithm (Python reference implementation only)
+# ==========================================
+
+echo "Generating EDwP (Euclidean) test cases..."
+python scripts/generate_edwp_test_cases.py \
+    --output-dir py_tests/data
 
 echo "=========================================="
 echo "Test case generation completed"

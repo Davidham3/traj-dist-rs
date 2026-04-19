@@ -39,15 +39,17 @@ Examples:
     >>> print(f"DTW distance: {distance}")
 """
 
+from importlib.metadata import version
+
 # Import all functions from the compiled Rust module
 from ._lib import (DpResult, Metric, cdist, discret_frechet,
                    discret_frechet_with_matrix, dtw, dtw_with_matrix, edr,
-                   edr_with_matrix, erp_compat_traj_dist,
+                   edr_with_matrix, edwp, erp_compat_traj_dist,
                    erp_compat_traj_dist_with_matrix, erp_standard,
-                   erp_standard_with_matrix, hausdorff, lcss, lcss_with_matrix,
-                   pdist, sspd)
+                   erp_standard_with_matrix, frechet, hausdorff, lcss,
+                   lcss_with_matrix, pdist, sspd)
 
-__version__ = "1.0.0rc3"
+__version__ = version("traj-dist-rs")
 __author__ = "traj-dist-rs contributors"
 __all__ = [
     "sspd",
@@ -64,6 +66,8 @@ __all__ = [
     "erp_compat_traj_dist_with_matrix",
     "erp_standard",
     "erp_standard_with_matrix",
+    "edwp",
+    "frechet",
     "pdist",
     "cdist",
     "Metric",
