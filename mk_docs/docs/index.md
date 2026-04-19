@@ -48,6 +48,7 @@ A high-performance Rust implementation of trajectory distance algorithms with Py
 - **`pdist`** - Pairwise distance matrix for trajectory collections (compressed format)
 - **`cdist`** - Cross-distance matrix between two trajectory collections
 - **Parallel processing** - Automatic parallelization using Rayon for large datasets
+- **Progress display** - Built-in progress bar via `show_progress=True` (powered by `indicatif`, rendered to stderr)
 - **Metric API** - Type-safe configuration with factory methods
 
 ### Additional Features

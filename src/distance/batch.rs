@@ -30,6 +30,9 @@ use crate::traits::CoordSequence;
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
+#[cfg(feature = "progress")]
+use indicatif::{ProgressBar, ProgressStyle};
+
 /// Distance algorithm with parameters
 ///
 /// This enum combines the algorithm selection with its required parameters,
@@ -102,7 +105,26 @@ impl Metric {
     pub fn distance_type(&self) -> DistanceType {
         self.distance_type
     }
+}
 
+impl std::fmt::Display for Metric {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let algo_name = match self.algorithm {
+            DistanceAlgorithm::SSPD => "SSPD",
+            DistanceAlgorithm::DTW => "DTW",
+            DistanceAlgorithm::Hausdorff => "Hausdorff",
+            DistanceAlgorithm::LCSS { .. } => "LCSS",
+            DistanceAlgorithm::EDR { .. } => "EDR",
+            DistanceAlgorithm::ERP { .. } => "ERP",
+            DistanceAlgorithm::DiscretFrechet => "Discret Frechet",
+            DistanceAlgorithm::EDwP => "EDwP",
+            DistanceAlgorithm::Frechet => "Frechet",
+        };
+        write!(f, "{}/{}", algo_name, self.distance_type)
+    }
+}
+
+impl Metric {
     /// Compute the distance between two trajectories
     ///
     /// # Arguments
@@ -208,12 +230,13 @@ impl Metric {
 ///     DistanceAlgorithm::SSPD,
 ///     DistanceType::Euclidean
 /// );
-/// let distances = pdist(&trajectories, &metric, true).unwrap();
+/// let distances = pdist(&trajectories, &metric, true, false).unwrap();
 /// ```
 pub fn pdist<T>(
     trajectories: &[T],
     metric: &Metric,
     parallel: bool,
+    show_progress: bool,
 ) -> Result<Vec<f64>, TrajDistError>
 where
     T: CoordSequence + Sync,
@@ -225,26 +248,99 @@ where
         ));
     }
 
+    // Create progress bar (only when progress feature is enabled and show_progress=true)
+    #[cfg(feature = "progress")]
+    let progress_bar = if show_progress {
+        let total = (n * (n - 1) / 2) as u64;
+        let pb = ProgressBar::new(total);
+        pb.set_style(
+            ProgressStyle::with_template(
+                "pdist [{msg}]  {bar:40.cyan/blue}  {pos}/{len}  [{elapsed_precise}<{eta_precise}, {per_sec}]"
+            )
+            .unwrap()
+            .progress_chars("█▉▊▋▌▍▎▏  ")
+        );
+        pb.set_message(format!("{}", metric));
+        Some(pb)
+    } else {
+        None
+    };
+
+    #[cfg(not(feature = "progress"))]
+    let _ = show_progress;
+
     // Use Rayon's global thread pool for parallel processing
     #[cfg(feature = "parallel")]
     let distances = if parallel {
-        compute_pdist_parallel(trajectories, metric)
+        #[cfg(feature = "progress")]
+        {
+            compute_pdist_parallel(trajectories, metric, &progress_bar)
+        }
+        #[cfg(not(feature = "progress"))]
+        {
+            compute_pdist_parallel(trajectories, metric)
+        }
     } else {
-        compute_pdist_sequential(trajectories, metric)
+        #[cfg(feature = "progress")]
+        {
+            compute_pdist_sequential(trajectories, metric, &progress_bar)
+        }
+        #[cfg(not(feature = "progress"))]
+        {
+            compute_pdist_sequential(trajectories, metric)
+        }
     };
 
     #[cfg(not(feature = "parallel"))]
     {
-        let _ = parallel; // Suppress unused variable warning when parallel feature is disabled
+        let _ = parallel;
     }
 
     #[cfg(not(feature = "parallel"))]
-    let distances = compute_pdist_sequential(trajectories, metric);
+    let distances = {
+        #[cfg(feature = "progress")]
+        {
+            compute_pdist_sequential(trajectories, metric, &progress_bar)
+        }
+        #[cfg(not(feature = "progress"))]
+        {
+            compute_pdist_sequential(trajectories, metric)
+        }
+    };
+
+    #[cfg(feature = "progress")]
+    if let Some(pb) = progress_bar {
+        pb.finish();
+    }
 
     Ok(distances)
 }
 
 /// Compute pairwise distances sequentially
+#[cfg(feature = "progress")]
+fn compute_pdist_sequential<T: CoordSequence>(
+    trajectories: &[T],
+    metric: &Metric,
+    progress_bar: &Option<ProgressBar>,
+) -> Vec<f64> {
+    let n = trajectories.len();
+    let mut distances = Vec::with_capacity(n * (n - 1) / 2);
+
+    for i in 0..n {
+        for j in (i + 1)..n {
+            let dist = metric.distance(&trajectories[i], &trajectories[j]);
+            distances.push(dist);
+            if let Some(pb) = progress_bar {
+                pb.inc(1);
+            }
+        }
+    }
+
+    distances
+}
+
+/// Compute pairwise distances sequentially (no progress)
+#[cfg(not(feature = "progress"))]
 fn compute_pdist_sequential<T: CoordSequence>(trajectories: &[T], metric: &Metric) -> Vec<f64> {
     let n = trajectories.len();
     let mut distances = Vec::with_capacity(n * (n - 1) / 2);
@@ -264,19 +360,46 @@ fn compute_pdist_sequential<T: CoordSequence>(trajectories: &[T], metric: &Metri
 /// Uses Rayon's global thread pool for efficient parallel execution.
 /// Creates an index vector of all unique pairs, then computes distances
 /// in parallel.
-#[cfg(feature = "parallel")]
+#[cfg(all(feature = "parallel", feature = "progress"))]
+fn compute_pdist_parallel<T: CoordSequence + Sync>(
+    trajectories: &[T],
+    metric: &Metric,
+    progress_bar: &Option<ProgressBar>,
+) -> Vec<f64> {
+    let n = trajectories.len();
+
+    let pairs: Vec<(usize, usize)> = (0..n)
+        .flat_map(|i| ((i + 1)..n).map(move |j| (i, j)))
+        .collect();
+
+    match progress_bar {
+        Some(pb) => {
+            use indicatif::ParallelProgressIterator;
+            pairs
+                .into_par_iter()
+                .progress_with(pb.clone())
+                .map(|(i, j)| metric.distance(&trajectories[i], &trajectories[j]))
+                .collect()
+        }
+        None => pairs
+            .into_par_iter()
+            .map(|(i, j)| metric.distance(&trajectories[i], &trajectories[j]))
+            .collect(),
+    }
+}
+
+/// Compute pairwise distances in parallel (no progress)
+#[cfg(all(feature = "parallel", not(feature = "progress")))]
 fn compute_pdist_parallel<T: CoordSequence + Sync>(
     trajectories: &[T],
     metric: &Metric,
 ) -> Vec<f64> {
     let n = trajectories.len();
 
-    // Create index pairs for all unique pairs (i, j) where i < j
     let pairs: Vec<(usize, usize)> = (0..n)
         .flat_map(|i| ((i + 1)..n).map(move |j| (i, j)))
         .collect();
 
-    // Compute distances in parallel using Rayon's global thread pool
     pairs
         .into_par_iter()
         .map(|(i, j)| metric.distance(&trajectories[i], &trajectories[j]))
@@ -331,13 +454,14 @@ fn compute_pdist_parallel<T: CoordSequence + Sync>(
 ///     DistanceAlgorithm::SSPD,
 ///     DistanceType::Euclidean
 /// );
-/// let distances = cdist(&trajectories_a, &trajectories_b, &metric, true).unwrap();
+/// let distances = cdist(&trajectories_a, &trajectories_b, &metric, true, false).unwrap();
 /// ```
 pub fn cdist<T>(
     trajectories_a: &[T],
     trajectories_b: &[T],
     metric: &Metric,
     parallel: bool,
+    show_progress: bool,
 ) -> Result<Vec<f64>, TrajDistError>
 where
     T: CoordSequence + Sync,
@@ -357,28 +481,105 @@ where
         ));
     }
 
+    // Create progress bar (only when progress feature is enabled and show_progress=true)
+    #[cfg(feature = "progress")]
+    let progress_bar = if show_progress {
+        let total = (n_a * n_b) as u64;
+        let pb = ProgressBar::new(total);
+        pb.set_style(
+            ProgressStyle::with_template(
+                "cdist [{msg}]  {bar:40.cyan/blue}  {pos}/{len}  [{elapsed_precise}<{eta_precise}, {per_sec}]"
+            )
+            .unwrap()
+            .progress_chars("█▉▊▋▌▍▎▏  ")
+        );
+        pb.set_message(format!("{}", metric));
+        Some(pb)
+    } else {
+        None
+    };
+
+    #[cfg(not(feature = "progress"))]
+    let _ = show_progress;
+
     let mut distances = vec![0.0; n_a * n_b];
 
     // Use Rayon's global thread pool for parallel processing
     #[cfg(feature = "parallel")]
     {
         if parallel {
+            #[cfg(feature = "progress")]
+            compute_cdist_parallel(
+                trajectories_a,
+                trajectories_b,
+                &mut distances,
+                metric,
+                &progress_bar,
+            );
+            #[cfg(not(feature = "progress"))]
             compute_cdist_parallel(trajectories_a, trajectories_b, &mut distances, metric);
         } else {
+            #[cfg(feature = "progress")]
+            compute_cdist_sequential(
+                trajectories_a,
+                trajectories_b,
+                &mut distances,
+                metric,
+                &progress_bar,
+            );
+            #[cfg(not(feature = "progress"))]
             compute_cdist_sequential(trajectories_a, trajectories_b, &mut distances, metric);
         }
     }
 
     #[cfg(not(feature = "parallel"))]
     {
-        let _ = parallel; // Suppress unused variable warning when parallel feature is disabled
+        let _ = parallel;
+        #[cfg(feature = "progress")]
+        compute_cdist_sequential(
+            trajectories_a,
+            trajectories_b,
+            &mut distances,
+            metric,
+            &progress_bar,
+        );
+        #[cfg(not(feature = "progress"))]
         compute_cdist_sequential(trajectories_a, trajectories_b, &mut distances, metric);
+    }
+
+    #[cfg(feature = "progress")]
+    if let Some(pb) = progress_bar {
+        pb.finish();
     }
 
     Ok(distances)
 }
 
 /// Compute cdist distances sequentially
+#[cfg(feature = "progress")]
+fn compute_cdist_sequential<T: CoordSequence>(
+    trajectories_a: &[T],
+    trajectories_b: &[T],
+    distances: &mut [f64],
+    metric: &Metric,
+    progress_bar: &Option<ProgressBar>,
+) {
+    let n_b = trajectories_b.len();
+
+    for (i, traj_a) in trajectories_a.iter().enumerate() {
+        for (j, traj_b) in trajectories_b.iter().enumerate() {
+            let idx = i * n_b + j;
+            distances[idx] = metric.distance(traj_a, traj_b);
+        }
+        // Update progress per row (n_b distances computed)
+        if let Some(pb) = progress_bar {
+            pb.inc(n_b as u64);
+        }
+    }
+}
+
+/// Compute cdist distances sequentially (no progress)
+#[cfg(not(feature = "progress"))]
 fn compute_cdist_sequential<T: CoordSequence>(
     trajectories_a: &[T],
     trajectories_b: &[T],
@@ -398,8 +599,33 @@ fn compute_cdist_sequential<T: CoordSequence>(
 /// Compute cdist distances in parallel
 ///
 /// Uses Rayon's global thread pool and `par_chunks_mut` for efficient
-/// in-place matrix filling.
-#[cfg(feature = "parallel")]
+/// in-place matrix filling. Progress is updated per row (n_b distances).
+#[cfg(all(feature = "parallel", feature = "progress"))]
+fn compute_cdist_parallel<T: CoordSequence + Sync>(
+    trajectories_a: &[T],
+    trajectories_b: &[T],
+    distances: &mut [f64],
+    metric: &Metric,
+    progress_bar: &Option<ProgressBar>,
+) {
+    let n_b = trajectories_b.len();
+
+    distances
+        .par_chunks_mut(n_b)
+        .enumerate()
+        .for_each(|(i, row)| {
+            for (j, dist) in row.iter_mut().enumerate() {
+                *dist = metric.distance(&trajectories_a[i], &trajectories_b[j]);
+            }
+            // Update progress per row
+            if let Some(pb) = progress_bar {
+                pb.inc(n_b as u64);
+            }
+        });
+}
+
+/// Compute cdist distances in parallel (no progress)
+#[cfg(all(feature = "parallel", not(feature = "progress")))]
 fn compute_cdist_parallel<T: CoordSequence + Sync>(
     trajectories_a: &[T],
     trajectories_b: &[T],

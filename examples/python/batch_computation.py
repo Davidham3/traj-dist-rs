@@ -130,6 +130,22 @@ metric_edr = traj_dist_rs.Metric.edr(eps=0.2, type_d="euclidean")
 distances_edr = traj_dist_rs.pdist(trajectories, metric_edr)
 print(f"  EDR (epsilon=0.2): {distances_edr.mean():.6f}")
 
+# Method 6: Using show_progress for long-running computations
+print("\n6. pdist with Progress Bar")
+print("-" * 60)
+
+# show_progress=True displays a real-time progress bar to stderr
+# Useful for large datasets where computation takes a while
+metric = traj_dist_rs.Metric.dtw(type_d="euclidean")
+distances = traj_dist_rs.pdist(trajectories, metric, parallel=True, show_progress=True)
+print(f"  Computed {len(distances)} distances with progress bar")
+
+# cdist also supports show_progress
+distance_matrix = traj_dist_rs.cdist(
+    traj_set_a, traj_set_b, metric, parallel=True, show_progress=True
+)
+print(f"  cdist matrix shape: {distance_matrix.shape}")
+
 print("\n" + "=" * 60)
 print("All batch computations completed successfully!")
 print("=" * 60)

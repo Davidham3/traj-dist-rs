@@ -19,8 +19,9 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 default = []
-python-binding = ["pyo3", "pyo3-stub-gen", "pyo3-stub-gen-derive", "numpy"]
+python-binding = ["pyo3", "pyo3-stub-gen", "pyo3-stub-gen-derive", "numpy", "progress"]
 parallel = ["rayon", "num_cpus"]
+progress = ["indicatif"]
 
 [dependencies]
 thiserror = "2"
@@ -33,6 +34,7 @@ pyo3-stub-gen-derive = { version = "0.17", optional = true }
 numpy = { version = "0.26", optional = true }
 rayon = { version = "1.8", optional = true }
 num_cpus = { version = "1.16", optional = true }
+indicatif = { version = "0.17", features = ["rayon"], optional = true }
 
 [dev-dependencies]
 tempfile = "3"

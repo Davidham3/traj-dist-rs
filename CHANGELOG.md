@@ -45,6 +45,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Works with `pdist()` and `cdist()` for batch distance computation
 - Python reference implementation from [TrajCL](https://github.com/changyanchuan/TrajCL) included in `scripts/benchmark/extra_algos/edwp.py` for validation
 
+#### Progress Display for Batch Computation
+- Added `show_progress` parameter to `pdist()` and `cdist()` (both Rust and Python APIs)
+  - Displays a real-time progress bar during batch distance computation using `indicatif` crate
+  - Progress bar is rendered to stderr to avoid interfering with stdout
+  - Implemented at the Rust layer to preserve Rayon's parallel processing capability
+  - Uses `ParallelProgressIterator` for thread-safe progress updates in parallel mode
+  - Progress granularity: per distance pair for `pdist`, per row (`n_b` distances) for `cdist`
+  - Progress bar format: `pdist [SSPD/euclidean]  ████████░░░░  45/100  [00:02:00<00:01:00, 22.5/s]`
+  - Zero-overhead design: no `ProgressBar` created when `show_progress=false`
+  - Conditional compilation via `progress` feature flag for zero dependency cost when disabled
+  - Python binding uses `py.detach()` to release GIL, allowing Rust to freely parallelize and output progress
+- Added `progress` feature flag in `Cargo.toml`
+  - `progress = ["indicatif"]` — opt-in progress bar support
+  - Automatically enabled by `python-binding` feature
+- Added `Display` trait implementation for `Metric` type
+  - Formats as `"AlgorithmName/distance_type"` (e.g., `"SSPD/euclidean"`)
+  - Used in progress bar prefix for clear identification
+
+
 #### Utility Functions
 - Added `project_point_to_segment()` in `distance::euclidean` module
   - Projects a point onto a line segment, returning the closest point on the segment
@@ -58,6 +77,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Used by Frechet algorithm for free-space computation
 
 ### Changed
+
+#### Dependencies
+- Added `indicatif` (v0.17, with `rayon` feature) as optional dependency for progress bar display
+- Added `progress` feature flag: `progress = ["indicatif"]`
+- `python-binding` feature now automatically enables `progress`
+- Updated `pyproject.toml` maturin features to include `"progress"`
+
+#### API Changes
+- `pdist()` and `cdist()` signatures updated with new `show_progress` parameter (default: `false`)
+  - Rust: `pdist(trajectories, metric, parallel, show_progress)`
+  - Python: `pdist(trajectories, metric, parallel=True, show_progress=False)`
+- Replaced deprecated `py.allow_threads()` with `py.detach()` in Python bindings (PyO3 0.26+)
+
 
 #### Code Quality
 - EDwP projection logic uses shared `project_point_to_segment()` function instead of inline implementation

@@ -89,7 +89,7 @@ build-backend = "maturin"
 [tool.maturin]
 python-source = "python"
 module-name = "traj_dist_rs._lib"
-features = ["python-binding", "parallel", "pyo3/extension-module"]
+features = ["python-binding", "parallel", "progress", "pyo3/extension-module"]
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"

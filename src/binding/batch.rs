@@ -216,13 +216,14 @@ fn build_calculator(algorithm: DistanceAlgorithm, type_d: &str) -> PyResult<Metr
 /// ```
 #[cfg(feature = "python-binding")]
 #[gen_stub_pyfunction]
-#[pyfunction(signature = (trajectories, metric, parallel=true))]
+#[pyfunction(signature = (trajectories, metric, parallel=true, show_progress=false))]
 pub fn pdist<'py>(
     py: Python<'py>,
     #[gen_stub(override_type(type_repr="typing.Sequence[typing.List[typing.List[float]] | numpy.ndarray]", imports=("typing", "numpy")))]
     trajectories: &Bound<'py, PyList>,
     metric: &PyMetric,
     parallel: bool,
+    show_progress: bool,
 ) -> PyResult<Py<PyArray1<f64>>> {
     if trajectories.len() < 2 {
         return Err(PyValueError::new_err(
@@ -239,8 +240,12 @@ pub fn pdist<'py>(
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    // Directly use the inner Metric inside PyMetric
-    let distances = crate::distance::batch::pdist(&trajectories, &metric.inner, parallel)
+    // Release the GIL so Rust can freely use Rayon parallelism and indicatif progress output
+    let metric_inner = metric.inner;
+    let distances = py
+        .detach(|| {
+            crate::distance::batch::pdist(&trajectories, &metric_inner, parallel, show_progress)
+        })
         .map_err(|e| PyValueError::new_err(format!("Failed to compute distances: {}", e)))?;
 
     let array = PyArray1::from_vec(py, distances);
@@ -318,7 +323,7 @@ pub fn pdist<'py>(
 /// ```
 #[cfg(feature = "python-binding")]
 #[gen_stub_pyfunction]
-#[pyfunction(signature = (trajectories_a, trajectories_b, metric, parallel=true))]
+#[pyfunction(signature = (trajectories_a, trajectories_b, metric, parallel=true, show_progress=false))]
 pub fn cdist<'py>(
     py: Python<'py>,
     #[gen_stub(override_type(type_repr="typing.Sequence[typing.List[typing.List[float]] | numpy.ndarray]", imports=("typing", "numpy")))]
@@ -327,6 +332,7 @@ pub fn cdist<'py>(
     trajectories_b: &Bound<'py, PyList>,
     metric: &PyMetric,
     parallel: bool,
+    show_progress: bool,
 ) -> PyResult<Py<PyArray2<f64>>> {
     if trajectories_a.is_empty() {
         return Err(PyValueError::new_err(
@@ -365,12 +371,21 @@ pub fn cdist<'py>(
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    // Directly use the inner Metric inside PyMetric
-    let distances =
-        crate::distance::batch::cdist(&trajectories_a, &trajectories_b, &metric.inner, parallel)
-            .map_err(|e| PyValueError::new_err(format!("Failed to compute distances: {}", e)))?;
-
+    // Release the GIL so Rust can freely use Rayon parallelism and indicatif progress output
+    let metric_inner = metric.inner;
     let n_b = trajectories_b.len();
+    let distances = py
+        .detach(|| {
+            crate::distance::batch::cdist(
+                &trajectories_a,
+                &trajectories_b,
+                &metric_inner,
+                parallel,
+                show_progress,
+            )
+        })
+        .map_err(|e| PyValueError::new_err(format!("Failed to compute distances: {}", e)))?;
+
     // Convert Vec<f64> to Vec<Vec<f64>> for PyArray2::from_vec2
     let distances_2d: Vec<Vec<f64>> = distances.chunks(n_b).map(|row| row.to_vec()).collect();
     let array = PyArray2::from_vec2(py, &distances_2d)

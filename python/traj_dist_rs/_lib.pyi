@@ -136,6 +136,7 @@ def cdist(
     trajectories_b: typing.Sequence[typing.List[typing.List[float]] | numpy.ndarray],
     metric: Metric,
     parallel: builtins.bool = True,
+    show_progress: builtins.bool = False,
 ) -> numpy.typing.NDArray[numpy.float64]:
     r"""
     Compute distances between two trajectory collections
@@ -864,6 +865,7 @@ def pdist(
     trajectories: typing.Sequence[typing.List[typing.List[float]] | numpy.ndarray],
     metric: Metric,
     parallel: builtins.bool = True,
+    show_progress: builtins.bool = False,
 ) -> numpy.typing.NDArray[numpy.float64]:
     r"""
     Compute pairwise distances between trajectories

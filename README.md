@@ -59,6 +59,7 @@ See [performance.md](mk_docs/docs/performance.md) for the full benchmark report 
 - **`pdist`** - Pairwise distance matrix for trajectory collections (compressed format)
 - **`cdist`** - Cross-distance matrix between two trajectory collections
 - **Parallel processing** - Automatic parallelization using Rayon for large datasets
+- **Progress display** - Built-in progress bar via `show_progress=True` (powered by `indicatif`, rendered to stderr)
 - **Metric API** - Type-safe configuration with factory methods
 
 ### Additional Features
@@ -116,6 +117,9 @@ metric = traj_dist_rs.Metric.sspd(type_d="euclidean")
 distances = traj_dist_rs.pdist(trajectories, metric=metric, parallel=True)
 print(f"Computed {len(distances)} pairwise distances")
 
+# With progress bar (rendered to stderr)
+distances = traj_dist_rs.pdist(trajectories, metric=metric, parallel=True, show_progress=True)
+
 # Cross-distance computation with cdist
 dist_matrix = traj_dist_rs.cdist(trajectories[:5], trajectories[5:], metric=metric)
 print(f"Distance matrix shape: {dist_matrix.shape}")
@@ -150,7 +154,7 @@ fn main() {
         vec![[0.5, 0.5], [1.5, 1.5]],
     ];
     let metric = Metric::new(DistanceAlgorithm::SSPD, DistanceType::Euclidean);
-    let distances = pdist(&trajectories, &metric, true).unwrap();
+    let distances = pdist(&trajectories, &metric, true, true).unwrap();
     println!("Computed {} pairwise distances", distances.len());
 }
 ```

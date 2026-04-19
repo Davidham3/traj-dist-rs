@@ -34,7 +34,7 @@ fn main() {
 
     // Calculate pairwise distances using pdist
     let metric = Metric::new(DistanceAlgorithm::SSPD, DistanceType::Euclidean);
-    match pdist(&trajectories, &metric, false) {
+    match pdist(&trajectories, &metric, false, true) {
         Ok(compressed_distances) => {
             println!(
                 "  Number of pairwise distances: {}",
@@ -83,7 +83,7 @@ fn main() {
 
     for (algorithm, name) in algorithms {
         let metric = Metric::new(algorithm, DistanceType::Euclidean);
-        match pdist(&trajectories, &metric, false) {
+        match pdist(&trajectories, &metric, false, true) {
             Ok(distances) => {
                 let mean = distances.iter().sum::<f64>() / distances.len() as f64;
                 println!(
@@ -109,7 +109,7 @@ fn main() {
 
     // Calculate distance matrix using cdist
     let metric = Metric::new(DistanceAlgorithm::SSPD, DistanceType::Euclidean);
-    match cdist(&traj_set_a, &traj_set_b, &metric, false) {
+    match cdist(&traj_set_a, &traj_set_b, &metric, false, true) {
         Ok(distance_matrix) => {
             let rows = traj_set_a.len();
             let cols = traj_set_b.len();
@@ -153,7 +153,7 @@ fn main() {
     ];
 
     let metric = Metric::new(DistanceAlgorithm::SSPD, DistanceType::Spherical);
-    match cdist(&geo_trajectories, &geo_trajectories, &metric, false) {
+    match cdist(&geo_trajectories, &geo_trajectories, &metric, false, true) {
         Ok(distance_matrix) => {
             let rows = geo_trajectories.len();
             let cols = geo_trajectories.len();
@@ -182,7 +182,7 @@ fn main() {
     let metric = Metric::new(DistanceAlgorithm::SSPD, DistanceType::Euclidean);
 
     // Sequential
-    match pdist(&trajectories, &metric, false) {
+    match pdist(&trajectories, &metric, false, true) {
         Ok(distances) => {
             println!("  Sequential: {} distances computed", distances.len());
         }
@@ -192,7 +192,7 @@ fn main() {
     }
 
     // Parallel
-    match pdist(&trajectories, &metric, true) {
+    match pdist(&trajectories, &metric, true, true) {
         Ok(distances) => {
             println!("  Parallel: {} distances computed", distances.len());
         }
@@ -208,7 +208,7 @@ fn main() {
     let metric = Metric::new(DistanceAlgorithm::DTW, DistanceType::Euclidean);
 
     // Sequential
-    match cdist(&traj_set_a, &traj_set_b, &metric, false) {
+    match cdist(&traj_set_a, &traj_set_b, &metric, false, true) {
         Ok(_matrix) => {
             let rows = traj_set_a.len();
             let cols = traj_set_b.len();
@@ -220,7 +220,7 @@ fn main() {
     }
 
     // Parallel
-    match cdist(&traj_set_a, &traj_set_b, &metric, true) {
+    match cdist(&traj_set_a, &traj_set_b, &metric, true, true) {
         Ok(_matrix) => {
             let rows = traj_set_a.len();
             let cols = traj_set_b.len();
@@ -240,4 +240,4 @@ fn main() {
 // Add this to your Cargo.toml:
 // [dependencies]
 // rand = "0.8"
-// traj-dist-rs = { path = "..", features = ["parallel"] }
+// traj-dist-rs = { path = "..", features = ["parallel", "progress"] }
