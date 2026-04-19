@@ -629,9 +629,9 @@
 <p>Benchmarks are summarized using the <strong>median runtime</strong>.</p>
 <h2 id="tldr">TL;DR</h2>
 <ul>
-<li><code>traj-dist-rs</code> is on average <strong>~230x faster</strong> than <code>traj-dist (Python)</code></li>
-<li><code>traj-dist-rs</code> is on average <strong>~6.3x faster</strong> than <code>traj-dist (Cython)</code></li>
-<li>Parallel batch execution reaches up to <strong>~62.3x speedup</strong> over <code>traj-dist (Cython)</code> on large inputs</li>
+<li><code>traj-dist-rs</code> is on average <strong>~231x faster</strong> than <code>traj-dist (Python)</code></li>
+<li><code>traj-dist-rs</code> is on average <strong>~15.3x faster</strong> than <code>traj-dist (Cython)</code></li>
+<li>Parallel batch execution reaches up to <strong>~61.1x speedup</strong> over <code>traj-dist (Cython)</code> on large inputs</li>
 </ul>
 <h2 id="benchmark-scope">Benchmark Scope</h2>
 <p>This report compares <code>traj-dist-rs</code>, <code>traj-dist (Cython)</code>, and <code>traj-dist (Python)</code>.</p>
@@ -640,7 +640,9 @@
 <li>DISCRET_FRECHET</li>
 <li>DTW</li>
 <li>EDR</li>
+<li>EDWP (Euclidean only, no Cython implementation; Python baseline from <a href="https://github.com/changyanchuan/TrajCL">TrajCL</a>)</li>
 <li>ERP</li>
+<li>FRECHET (Euclidean only, Cython implementation only; no Python implementation in upstream traj-dist)</li>
 <li>HAUSDORFF</li>
 <li>LCSS</li>
 <li>SSPD</li>
@@ -676,90 +678,110 @@ Batch benchmarks compare Rust and Cython implementations.</p>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: left;">eps=None; g=None</td>
 <td style="text-align: left;">0.0009 ms</td>
-<td style="text-align: left;">0.0062 ms</td>
-<td style="text-align: left;">0.4703 ms</td>
-<td style="text-align: left;">6.89x</td>
-<td style="text-align: left;">522.56x</td>
+<td style="text-align: left;">0.0061 ms</td>
+<td style="text-align: left;">0.4330 ms</td>
+<td style="text-align: left;">6.78x</td>
+<td style="text-align: left;">481.11x</td>
 </tr>
 <tr>
 <td style="text-align: left;">DTW</td>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: left;">eps=None; g=None</td>
 <td style="text-align: left;">0.0008 ms</td>
-<td style="text-align: left;">0.0070 ms</td>
-<td style="text-align: left;">0.4521 ms</td>
-<td style="text-align: left;">8.75x</td>
-<td style="text-align: left;">565.12x</td>
+<td style="text-align: left;">0.0069 ms</td>
+<td style="text-align: left;">0.4282 ms</td>
+<td style="text-align: left;">8.63x</td>
+<td style="text-align: left;">535.25x</td>
 </tr>
 <tr>
 <td style="text-align: left;">DTW</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: left;">eps=None; g=None</td>
 <td style="text-align: left;">0.0026 ms</td>
-<td style="text-align: left;">0.0094 ms</td>
-<td style="text-align: left;">0.3807 ms</td>
-<td style="text-align: left;">3.62x</td>
-<td style="text-align: left;">146.40x</td>
+<td style="text-align: left;">0.0090 ms</td>
+<td style="text-align: left;">0.3717 ms</td>
+<td style="text-align: left;">3.46x</td>
+<td style="text-align: left;">142.96x</td>
 </tr>
 <tr>
 <td style="text-align: left;">EDR</td>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: left;">eps=0.01; g=None</td>
 <td style="text-align: left;">0.0010 ms</td>
-<td style="text-align: left;">0.0064 ms</td>
-<td style="text-align: left;">0.3089 ms</td>
-<td style="text-align: left;">6.40x</td>
-<td style="text-align: left;">308.90x</td>
+<td style="text-align: left;">0.0077 ms</td>
+<td style="text-align: left;">0.2953 ms</td>
+<td style="text-align: left;">7.70x</td>
+<td style="text-align: left;">295.30x</td>
 </tr>
 <tr>
 <td style="text-align: left;">EDR</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: left;">eps=0.01; g=None</td>
-<td style="text-align: left;">0.0030 ms</td>
-<td style="text-align: left;">0.0091 ms</td>
-<td style="text-align: left;">0.2117 ms</td>
-<td style="text-align: left;">3.03x</td>
-<td style="text-align: left;">70.55x</td>
+<td style="text-align: left;">0.0029 ms</td>
+<td style="text-align: left;">0.0114 ms</td>
+<td style="text-align: left;">0.2057 ms</td>
+<td style="text-align: left;">3.93x</td>
+<td style="text-align: left;">70.93x</td>
+</tr>
+<tr>
+<td style="text-align: left;">EDWP</td>
+<td style="text-align: left;">euclidean</td>
+<td style="text-align: left;">eps=None; g=None</td>
+<td style="text-align: left;">0.0029 ms</td>
+<td style="text-align: left;">N/A</td>
+<td style="text-align: left;">1.1206 ms</td>
+<td style="text-align: left;">N/A</td>
+<td style="text-align: left;">386.41x</td>
 </tr>
 <tr>
 <td style="text-align: left;">ERP</td>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: left;">eps=None; g=[-122.41443, 37.77646]</td>
 <td style="text-align: left;">0.0016 ms</td>
-<td style="text-align: left;">0.0197 ms</td>
-<td style="text-align: left;">0.2717 ms</td>
-<td style="text-align: left;">12.31x</td>
-<td style="text-align: left;">169.81x</td>
+<td style="text-align: left;">0.0240 ms</td>
+<td style="text-align: left;">0.2574 ms</td>
+<td style="text-align: left;">15.00x</td>
+<td style="text-align: left;">160.88x</td>
 </tr>
 <tr>
 <td style="text-align: left;">ERP</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: left;">eps=None; g=[-122.41443, 37.77646]</td>
-<td style="text-align: left;">0.0042 ms</td>
-<td style="text-align: left;">0.0265 ms</td>
-<td style="text-align: left;">0.8237 ms</td>
-<td style="text-align: left;">6.31x</td>
-<td style="text-align: left;">196.11x</td>
+<td style="text-align: left;">0.0040 ms</td>
+<td style="text-align: left;">0.0334 ms</td>
+<td style="text-align: left;">0.8215 ms</td>
+<td style="text-align: left;">8.35x</td>
+<td style="text-align: left;">205.38x</td>
+</tr>
+<tr>
+<td style="text-align: left;">FRECHET</td>
+<td style="text-align: left;">euclidean</td>
+<td style="text-align: left;">eps=None; g=None</td>
+<td style="text-align: left;">0.0152 ms</td>
+<td style="text-align: left;">1.9191 ms</td>
+<td style="text-align: left;">N/A</td>
+<td style="text-align: left;">126.25x</td>
+<td style="text-align: left;">N/A</td>
 </tr>
 <tr>
 <td style="text-align: left;">HAUSDORFF</td>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: left;">eps=None; g=None</td>
 <td style="text-align: left;">0.0014 ms</td>
-<td style="text-align: left;">0.0166 ms</td>
-<td style="text-align: left;">0.4231 ms</td>
-<td style="text-align: left;">11.86x</td>
-<td style="text-align: left;">302.21x</td>
+<td style="text-align: left;">0.0160 ms</td>
+<td style="text-align: left;">0.3951 ms</td>
+<td style="text-align: left;">11.43x</td>
+<td style="text-align: left;">282.18x</td>
 </tr>
 <tr>
 <td style="text-align: left;">HAUSDORFF</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: left;">eps=None; g=None</td>
 <td style="text-align: left;">0.0249 ms</td>
-<td style="text-align: left;">0.0727 ms</td>
-<td style="text-align: left;">1.3400 ms</td>
-<td style="text-align: left;">2.92x</td>
-<td style="text-align: left;">53.82x</td>
+<td style="text-align: left;">0.0735 ms</td>
+<td style="text-align: left;">1.2738 ms</td>
+<td style="text-align: left;">2.95x</td>
+<td style="text-align: left;">51.16x</td>
 </tr>
 <tr>
 <td style="text-align: left;">LCSS</td>
@@ -767,49 +789,49 @@ Batch benchmarks compare Rust and Cython implementations.</p>
 <td style="text-align: left;">eps=0.01; g=None</td>
 <td style="text-align: left;">0.0009 ms</td>
 <td style="text-align: left;">0.0058 ms</td>
-<td style="text-align: left;">0.2982 ms</td>
+<td style="text-align: left;">0.2816 ms</td>
 <td style="text-align: left;">6.44x</td>
-<td style="text-align: left;">331.33x</td>
+<td style="text-align: left;">312.89x</td>
 </tr>
 <tr>
 <td style="text-align: left;">LCSS</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: left;">eps=0.01; g=None</td>
 <td style="text-align: left;">0.0028 ms</td>
-<td style="text-align: left;">0.0083 ms</td>
-<td style="text-align: left;">0.1700 ms</td>
-<td style="text-align: left;">2.96x</td>
-<td style="text-align: left;">60.71x</td>
+<td style="text-align: left;">0.0085 ms</td>
+<td style="text-align: left;">0.1661 ms</td>
+<td style="text-align: left;">3.04x</td>
+<td style="text-align: left;">59.32x</td>
 </tr>
 <tr>
 <td style="text-align: left;">SSPD</td>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: left;">eps=None; g=None</td>
 <td style="text-align: left;">0.0020 ms</td>
-<td style="text-align: left;">0.0165 ms</td>
-<td style="text-align: left;">0.4206 ms</td>
-<td style="text-align: left;">8.25x</td>
-<td style="text-align: left;">210.30x</td>
+<td style="text-align: left;">0.0170 ms</td>
+<td style="text-align: left;">0.4019 ms</td>
+<td style="text-align: left;">8.50x</td>
+<td style="text-align: left;">200.93x</td>
 </tr>
 <tr>
 <td style="text-align: left;">SSPD</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: left;">eps=None; g=None</td>
-<td style="text-align: left;">0.0326 ms</td>
-<td style="text-align: left;">0.0712 ms</td>
-<td style="text-align: left;">1.8739 ms</td>
-<td style="text-align: left;">2.18x</td>
-<td style="text-align: left;">57.48x</td>
+<td style="text-align: left;">0.0325 ms</td>
+<td style="text-align: left;">0.0746 ms</td>
+<td style="text-align: left;">1.7528 ms</td>
+<td style="text-align: left;">2.30x</td>
+<td style="text-align: left;">53.93x</td>
 </tr>
 </tbody>
 </table>
 <h2 id="key-findings">Key Findings</h2>
 <ul>
-<li>Against <code>traj-dist (Cython)</code>, the largest single-case speedup is <strong>12.31x</strong> on <strong>ERP (euclidean)</strong>.</li>
-<li>Against <code>traj-dist (Python)</code>, the largest single-case speedup is <strong>565.12x</strong> on <strong>DTW (euclidean)</strong>.</li>
-<li>On <strong>euclidean</strong> benchmarks, <code>traj-dist-rs</code> is on average <strong>8.70x</strong> faster than <code>traj-dist (Cython)</code> and <strong>344.32x</strong> faster than <code>traj-dist (Python)</code>.</li>
-<li>On <strong>spherical</strong> benchmarks, <code>traj-dist-rs</code> is on average <strong>3.50x</strong> faster than <code>traj-dist (Cython)</code> and <strong>97.51x</strong> faster than <code>traj-dist (Python)</code>.</li>
-<li>In batch mode, parallel Rust reaches up to <strong>62.32x</strong> speedup on <code>pdist</code> and <strong>51.53x</strong> on <code>cdist</code>.</li>
+<li>Against <code>traj-dist (Cython)</code>, the largest single-case speedup is <strong>126.25x</strong> on <strong>FRECHET (euclidean)</strong>.</li>
+<li>Against <code>traj-dist (Python)</code>, the largest single-case speedup is <strong>535.25x</strong> on <strong>DTW (euclidean)</strong>.</li>
+<li>On <strong>euclidean</strong> benchmarks, <code>traj-dist-rs</code> is on average <strong>23.84x</strong> faster than <code>traj-dist (Cython)</code> and <strong>331.87x</strong> faster than <code>traj-dist (Python)</code>.</li>
+<li>On <strong>spherical</strong> benchmarks, <code>traj-dist-rs</code> is on average <strong>4.00x</strong> faster than <code>traj-dist (Cython)</code> and <strong>97.28x</strong> faster than <code>traj-dist (Python)</code>.</li>
+<li>In batch mode, parallel Rust reaches up to <strong>61.10x</strong> speedup on <code>pdist</code> and <strong>48.46x</strong> on <code>cdist</code>.</li>
 </ul>
 <h2 id="batch-computation">Batch Computation</h2>
 <h3 id="configuration">Configuration</h3>
@@ -841,132 +863,132 @@ Batch benchmarks compare Rust and Cython implementations.</p>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">25</td>
-<td style="text-align: left;">0.2315 ms</td>
-<td style="text-align: left;">0.0152 ms</td>
-<td style="text-align: left;">0.4327 ms</td>
-<td style="text-align: left;">15.23x</td>
-<td style="text-align: left;">0.54x</td>
+<td style="text-align: left;">0.1842 ms</td>
+<td style="text-align: left;">0.0414 ms</td>
+<td style="text-align: left;">0.3811 ms</td>
+<td style="text-align: left;">4.45x</td>
+<td style="text-align: left;">0.48x</td>
 </tr>
 <tr>
 <td style="text-align: left;">cdist</td>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: right;">100</td>
 <td style="text-align: right;">25</td>
-<td style="text-align: left;">16.5879 ms</td>
-<td style="text-align: left;">0.9157 ms</td>
-<td style="text-align: left;">0.8914 ms</td>
-<td style="text-align: left;">18.11x</td>
-<td style="text-align: left;">18.61x</td>
+<td style="text-align: left;">16.4476 ms</td>
+<td style="text-align: left;">0.9475 ms</td>
+<td style="text-align: left;">0.8907 ms</td>
+<td style="text-align: left;">17.36x</td>
+<td style="text-align: left;">18.47x</td>
 </tr>
 <tr>
 <td style="text-align: left;">cdist</td>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: right;">1000</td>
 <td style="text-align: right;">25</td>
-<td style="text-align: left;">1348.2364 ms</td>
-<td style="text-align: left;">98.2446 ms</td>
-<td style="text-align: left;">26.1649 ms</td>
-<td style="text-align: left;">13.72x</td>
-<td style="text-align: left;">51.53x</td>
+<td style="text-align: left;">1467.9222 ms</td>
+<td style="text-align: left;">126.4213 ms</td>
+<td style="text-align: left;">30.2903 ms</td>
+<td style="text-align: left;">11.61x</td>
+<td style="text-align: left;">48.46x</td>
 </tr>
 <tr>
 <td style="text-align: left;">cdist</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">25</td>
-<td style="text-align: left;">0.3073 ms</td>
-<td style="text-align: left;">0.1091 ms</td>
-<td style="text-align: left;">0.4480 ms</td>
-<td style="text-align: left;">2.82x</td>
-<td style="text-align: left;">0.69x</td>
+<td style="text-align: left;">0.2605 ms</td>
+<td style="text-align: left;">0.1122 ms</td>
+<td style="text-align: left;">0.5688 ms</td>
+<td style="text-align: left;">2.32x</td>
+<td style="text-align: left;">0.46x</td>
 </tr>
 <tr>
 <td style="text-align: left;">cdist</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: right;">100</td>
 <td style="text-align: right;">25</td>
-<td style="text-align: left;">25.0034 ms</td>
-<td style="text-align: left;">8.5706 ms</td>
-<td style="text-align: left;">3.4372 ms</td>
-<td style="text-align: left;">2.92x</td>
-<td style="text-align: left;">7.27x</td>
+<td style="text-align: left;">23.7994 ms</td>
+<td style="text-align: left;">10.0824 ms</td>
+<td style="text-align: left;">2.7441 ms</td>
+<td style="text-align: left;">2.36x</td>
+<td style="text-align: left;">8.67x</td>
 </tr>
 <tr>
 <td style="text-align: left;">cdist</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: right;">1000</td>
 <td style="text-align: right;">25</td>
-<td style="text-align: left;">2492.1669 ms</td>
-<td style="text-align: left;">835.7577 ms</td>
-<td style="text-align: left;">245.3529 ms</td>
-<td style="text-align: left;">2.98x</td>
-<td style="text-align: left;">10.16x</td>
+<td style="text-align: left;">2691.1131 ms</td>
+<td style="text-align: left;">857.7901 ms</td>
+<td style="text-align: left;">239.6442 ms</td>
+<td style="text-align: left;">3.14x</td>
+<td style="text-align: left;">11.23x</td>
 </tr>
 <tr>
 <td style="text-align: left;">pdist</td>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: left;">0.0828 ms</td>
-<td style="text-align: left;">0.0169 ms</td>
-<td style="text-align: left;">0.5908 ms</td>
-<td style="text-align: left;">4.90x</td>
-<td style="text-align: left;">0.14x</td>
+<td style="text-align: left;">0.1301 ms</td>
+<td style="text-align: left;">0.0090 ms</td>
+<td style="text-align: left;">0.3618 ms</td>
+<td style="text-align: left;">14.46x</td>
+<td style="text-align: left;">0.36x</td>
 </tr>
 <tr>
 <td style="text-align: left;">pdist</td>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: right;">100</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: left;">5.1769 ms</td>
-<td style="text-align: left;">0.5084 ms</td>
-<td style="text-align: left;">0.6494 ms</td>
-<td style="text-align: left;">10.18x</td>
-<td style="text-align: left;">7.97x</td>
+<td style="text-align: left;">6.6328 ms</td>
+<td style="text-align: left;">0.6956 ms</td>
+<td style="text-align: left;">1.1937 ms</td>
+<td style="text-align: left;">9.54x</td>
+<td style="text-align: left;">5.56x</td>
 </tr>
 <tr>
 <td style="text-align: left;">pdist</td>
 <td style="text-align: left;">euclidean</td>
 <td style="text-align: right;">1000</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: left;">537.6616 ms</td>
-<td style="text-align: left;">40.2273 ms</td>
-<td style="text-align: left;">8.6270 ms</td>
-<td style="text-align: left;">13.37x</td>
-<td style="text-align: left;">62.32x</td>
+<td style="text-align: left;">574.1788 ms</td>
+<td style="text-align: left;">40.9131 ms</td>
+<td style="text-align: left;">9.3981 ms</td>
+<td style="text-align: left;">14.03x</td>
+<td style="text-align: left;">61.10x</td>
 </tr>
 <tr>
 <td style="text-align: left;">pdist</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: left;">0.1215 ms</td>
-<td style="text-align: left;">0.0397 ms</td>
-<td style="text-align: left;">1.0569 ms</td>
-<td style="text-align: left;">3.06x</td>
-<td style="text-align: left;">0.11x</td>
+<td style="text-align: left;">0.1453 ms</td>
+<td style="text-align: left;">0.0478 ms</td>
+<td style="text-align: left;">0.3555 ms</td>
+<td style="text-align: left;">3.04x</td>
+<td style="text-align: left;">0.41x</td>
 </tr>
 <tr>
 <td style="text-align: left;">pdist</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: right;">100</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: left;">9.9536 ms</td>
-<td style="text-align: left;">3.4735 ms</td>
-<td style="text-align: left;">1.3983 ms</td>
-<td style="text-align: left;">2.87x</td>
-<td style="text-align: left;">7.12x</td>
+<td style="text-align: left;">10.3956 ms</td>
+<td style="text-align: left;">4.3205 ms</td>
+<td style="text-align: left;">2.5783 ms</td>
+<td style="text-align: left;">2.41x</td>
+<td style="text-align: left;">4.03x</td>
 </tr>
 <tr>
 <td style="text-align: left;">pdist</td>
 <td style="text-align: left;">spherical</td>
 <td style="text-align: right;">1000</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: left;">999.8620 ms</td>
-<td style="text-align: left;">322.2799 ms</td>
-<td style="text-align: left;">60.0632 ms</td>
-<td style="text-align: left;">3.10x</td>
-<td style="text-align: left;">16.65x</td>
+<td style="text-align: left;">1082.8202 ms</td>
+<td style="text-align: left;">371.9546 ms</td>
+<td style="text-align: left;">62.9440 ms</td>
+<td style="text-align: left;">2.91x</td>
+<td style="text-align: left;">17.20x</td>
 </tr>
 </tbody>
 </table>

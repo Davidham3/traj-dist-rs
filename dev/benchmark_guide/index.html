@@ -975,7 +975,7 @@
 <li>
 <p><strong>Test traj-dist-rs (Rust implementation)</strong></p>
 </li>
-<li>Single trajectory pair distance calculation performance</li>
+<li>Single trajectory pair distance calculation performance (including EDwP)</li>
 <li>
 <p>Batch computation performance (pdist/cdist, including sequential and parallel)</p>
 </li>
@@ -986,7 +986,7 @@
 <li>Generate Markdown format report to mk_docs/docs/performance.md</li>
 </ol>
 <p><strong>Expected time</strong>:
-- K=1000, WARMUP_RUNS=10, NUM_RUNS=50: Approximately 10-15 minutes
+- K=1000, WARMUP_RUNS=10, NUM_RUNS=50: Approximately 30-60 minutes
 - K=50, WARMUP_RUNS=3, NUM_RUNS=10: Approximately 1-2 minutes</p>
 <h2 id="4-viewing-results">4. Viewing Results</h2>
 <h3 id="41-performance-report">4.1. Performance Report</h3>
@@ -1025,11 +1025,15 @@
 <li><strong>LCSS</strong> (Longest Common Subsequence)</li>
 <li><strong>EDR</strong> (Edit Distance on Real sequence)</li>
 <li><strong>ERP</strong> (Edit distance with Real Penalty)</li>
+<li><strong>Frechet Distance</strong> (Continuous) — Euclidean distance only, Cython implementation only; no Python implementation in upstream traj-dist</li>
 <li><strong>Discret Frechet Distance</strong></li>
+<li><strong>EDwP</strong> (Edit Distance with Projections) — Euclidean distance only, no Cython implementation</li>
 </ol>
-<p>All algorithms support two distance types:
+<p>Algorithms 1–6 and 8 support two distance types:
 - <strong>Euclidean</strong>: Euclidean distance based on 2D coordinates
 - <strong>Spherical</strong>: Haversine distance based on 2D coordinates (spherical distance)</p>
+<p>Algorithm 7 (Frechet) only supports Euclidean distance. Frechet is benchmarked as Rust vs Cython only (no Python implementation available in upstream traj-dist).</p>
+<p>Algorithm 9 (EDwP) only supports Euclidean distance. EDwP is benchmarked as Rust vs Python (using the reference Python implementation from <a href="https://github.com/changyanchuan/TrajCL">TrajCL</a>). There is no Cython implementation available for EDwP.</p>
 <h2 id="6-references">6. References</h2>
 <ul>
 <li><strong>traj-dist</strong>: Original Python/Cython implementation, with improved spherical distance precision</li>

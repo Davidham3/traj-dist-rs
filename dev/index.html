@@ -642,11 +642,11 @@
 <a href="https://www.python.org/downloads/"><img alt="Python Version" src="https://img.shields.io/badge/python-3.10%2B-blue" /></a>
 <a href="https://www.rust-lang.org/"><img alt="Rust Version" src="https://img.shields.io/badge/rust-1.85%2B-orange" /></a></p>
 <h2 id="about">About</h2>
-<p><strong>traj-dist-rs</strong> is a high-performance trajectory distance calculation library written in Rust, providing both native Rust APIs and Python bindings via PyO3. It is a complete rewrite of the original <a href="https://github.com/bguillouet/traj-dist">traj-dist</a> library, focusing on performance optimization and modern language features.</p>
+<p><strong>traj-dist-rs</strong> is a high-performance trajectory distance calculation library written in Rust, providing both native Rust APIs and Python bindings via PyO3. It is based on the original <a href="https://github.com/bguillouet/traj-dist">traj-dist</a> library with additional algorithms (e.g., EDwP), focusing on performance optimization and modern language features.</p>
 <h3 id="why-traj-dist-rs">Why traj-dist-rs?</h3>
 <ul>
-<li><strong>Performance</strong>: <strong>~82x faster</strong> than Python implementation and <strong>~3x faster</strong> than Cython implementation on average</li>
-<li><strong>Batch Computation</strong>: Native <code>pdist</code> and <code>cdist</code> functions with parallel support up to <strong>130x</strong> faster than <code>traj-dist</code></li>
+<li><strong>Performance</strong>: <strong>~231x faster</strong> than Python implementation and <strong>~15.3x faster</strong> than Cython implementation on average</li>
+<li><strong>Batch Computation</strong>: Native <code>pdist</code> and <code>cdist</code> functions with parallel support up to <strong>61.1x</strong> faster than <code>traj-dist</code></li>
 <li><strong>Zero Dependencies</strong>: Only requires <strong>numpy &gt;= 1.21</strong> - no heavy dependencies like polars, pyarrow, pandas, or shapely</li>
 <li><strong>Safety</strong>: Rust's memory safety guarantees eliminate common runtime errors</li>
 <li><strong>Cross-platform</strong>: Supports Linux, macOS, and Windows with native binaries</li>
@@ -675,6 +675,11 @@
 <td>Similarity with time warping, flexible alignment</td>
 </tr>
 <tr>
+<td><strong>Frechet</strong></td>
+<td>Fréchet Distance (Continuous)</td>
+<td>Exact geometric similarity, considers all curve points</td>
+</tr>
+<tr>
 <td><strong>Discret Frechet</strong></td>
 <td>Discrete Fréchet Distance</td>
 <td>Geometric similarity, path-based matching</td>
@@ -699,23 +704,29 @@
 <td>Edit distance with Real Penalty</td>
 <td>Robust similarity with gap handling</td>
 </tr>
+<tr>
+<td><strong>EDwP</strong></td>
+<td>Edit Distance with Projections</td>
+<td>Inconsistent sampling rates, projection-based matching</td>
+</tr>
 </tbody>
 </table>
 <h3 id="distance-types">Distance Types</h3>
 <ul>
-<li><strong>Euclidean</strong> - 2D Euclidean distance</li>
-<li><strong>Spherical</strong> - Haversine distance for geographic coordinates</li>
+<li><strong>Euclidean</strong> - 2D Euclidean distance (all algorithms)</li>
+<li><strong>Spherical</strong> - Haversine distance for geographic coordinates (all algorithms except Frechet, Discret Frechet, and EDwP)</li>
 </ul>
 <h3 id="batch-computation">Batch Computation</h3>
 <ul>
 <li><strong><code>pdist</code></strong> - Pairwise distance matrix for trajectory collections (compressed format)</li>
 <li><strong><code>cdist</code></strong> - Cross-distance matrix between two trajectory collections</li>
 <li><strong>Parallel processing</strong> - Automatic parallelization using Rayon for large datasets</li>
+<li><strong>Progress display</strong> - Built-in progress bar via <code>show_progress=True</code> (powered by <code>indicatif</code>, rendered to stderr)</li>
 <li><strong>Metric API</strong> - Type-safe configuration with factory methods</li>
 </ul>
 <h3 id="additional-features">Additional Features</h3>
 <ul>
-<li>Matrix return for DP-based algorithms (DTW, LCSS, EDR, ERP, Discret Frechet)</li>
+<li>Matrix return for DP-based algorithms (DTW, LCSS, EDR, ERP, Discret Frechet, EDwP)</li>
 <li>Precomputed distance matrix support for efficient batch computations</li>
 <li>Zero-copy NumPy array support for optimal performance</li>
 <li>Pickle serialization for <code>DpResult</code> objects (compatible with joblib)</li>
@@ -733,7 +744,7 @@
 <h3 id="migration-from-traj-dist">Migration from traj-dist</h3>
 <p>If you used the original <code>traj-dist</code> library for trajectory similarity measurement, this library is compatible and offers significant performance improvements:</p>
 <ul>
-<li><strong>Algorithm compatibility</strong>: Core algorithms (SSPD, DTW, Hausdorff, LCSS, EDR, ERP) supported</li>
+<li><strong>Algorithm compatibility</strong>: Core algorithms (SSPD, DTW, Hausdorff, LCSS, EDR, ERP, Frechet, Discret Frechet) supported, plus EDwP (not in original traj-dist)</li>
 <li><strong>Performance</strong>: 3-10x faster than Cython implementation</li>
 </ul>
 

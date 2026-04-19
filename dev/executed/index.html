@@ -8,13 +8,9 @@
       
       
       
-        <link rel="canonical" href="https://davidham3.github.io/traj-dist-rs/dev/usage_for_rust/">
+        <link rel="canonical" href="https://davidham3.github.io/traj-dist-rs/dev/executed/">
       
       
-        <link rel="prev" href="../usage_for_python/">
-      
-      
-        <link rel="next" href="../performance/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -294,30 +290,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Rust User Guide
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../usage_for_rust/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -326,272 +302,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#table-of-contents" class="md-nav__link">
-    <span class="md-ellipsis">
-      Table of Contents
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#import-and-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Import and Setup
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#basic-concepts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Basic Concepts
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#basic-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Basic Usage
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-spherical-distance" class="md-nav__link">
-    <span class="md-ellipsis">
-      Using Spherical Distance
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#algorithms-with-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Algorithms with Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#comparing-all-available-algorithms" class="md-nav__link">
-    <span class="md-ellipsis">
-      Comparing All Available Algorithms
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-dpresult-distance-with-optional-matrix" class="md-nav__link">
-    <span class="md-ellipsis">
-      Using DpResult (Distance with Optional Matrix)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#batch-computation-with-pdist" class="md-nav__link">
-    <span class="md-ellipsis">
-      Batch Computation with pdist
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#batch-computation-with-cdist" class="md-nav__link">
-    <span class="md-ellipsis">
-      Batch Computation with cdist
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parallel-processing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Parallel Processing
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-metric-api-with-different-algorithms" class="md-nav__link">
-    <span class="md-ellipsis">
-      Using Metric API with Different Algorithms
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-comparison" class="md-nav__link">
-    <span class="md-ellipsis">
-      Performance Comparison
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#real-world-data-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Real-World Data Usage
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-usage-core-traits-and-types" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced Usage: Core Traits and Types
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Advanced Usage: Core Traits and Types">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ascoord-trait" class="md-nav__link">
-    <span class="md-ellipsis">
-      AsCoord Trait
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#coordsequence-trait" class="md-nav__link">
-    <span class="md-ellipsis">
-      CoordSequence Trait
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#distancecalculator-trait" class="md-nav__link">
-    <span class="md-ellipsis">
-      DistanceCalculator Trait
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#trajectorycalculator" class="md-nav__link">
-    <span class="md-ellipsis">
-      TrajectoryCalculator
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#precomputeddistancecalculator" class="md-nav__link">
-    <span class="md-ellipsis">
-      PrecomputedDistanceCalculator
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#summary-of-core-traits-and-types" class="md-nav__link">
-    <span class="md-ellipsis">
-      Summary of Core Traits and Types
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-optimization-sphericaltrajectorycache" class="md-nav__link">
-    <span class="md-ellipsis">
-      Performance Optimization: SphericalTrajectoryCache
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Performance Optimization: SphericalTrajectoryCache">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automatic-optimization-via-trajectorycalculator" class="md-nav__link">
-    <span class="md-ellipsis">
-      Automatic Optimization via TrajectoryCalculator
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#manual-cache-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Manual Cache Usage
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#when-to-use-sphericaltrajectorycache" class="md-nav__link">
-    <span class="md-ellipsis">
-      When to Use SphericalTrajectoryCache
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      Summary
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -3432,21 +3142,21 @@ println!("Results match: {}", distances_seq.len() == distances_par.len());</f64>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Sequential time: 1.857s
+<pre>Sequential time: 1.858s
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Parallel time: 0.628s
+<pre>Parallel time: 0.625s
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Speedup: 2.96x
+<pre>Speedup: 2.97x
 </pre>
 </div>
 </div>
@@ -3704,14 +3414,14 @@ println!("Hausdorff: {:.6}s, distance: {:.6}", hausdorff_time.as_secs_f64(), res
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>SSPD: 0.000005s, distance: 0.000000
+<pre>SSPD: 0.000004s, distance: 0.000000
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>DTW: 0.000002s, distance: 0
+<pre>DTW: 0.000001s, distance: 0
 </pre>
 </div>
 </div>
@@ -3725,7 +3435,7 @@ println!("Hausdorff: {:.6}s, distance: {:.6}", hausdorff_time.as_secs_f64(), res
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Discret Frechet: 0.000002s, distance: 0
+<pre>Discret Frechet: 0.000001s, distance: 0
 </pre>
 </div>
 </div>
@@ -3814,14 +3524,14 @@ println!("GPS Trajectory 2 (first 3 points): {:?}", &amp;gps_traj2[..3]);</f64><
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>GPS Trajectory 1 (first 3 points): [[40.71523333371714, -74.01037532035106], [40.71569176733604, -74.01093122448417], [40.70521343112414, -73.99731891153826]]
+<pre>GPS Trajectory 1 (first 3 points): [[40.720941652529206, -74.00128841701236], [40.723449788403535, -74.00427294029066], [40.71730225349742, -73.99715639484359]]
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>GPS Trajectory 2 (first 3 points): [[40.721868037096826, -74.008262307348], [40.7169152318689, -73.99950624179779], [40.722812444357906, -74.00564945650852]]
+<pre>GPS Trajectory 2 (first 3 points): [[40.7148576389179, -74.00990428209695], [40.70756870486747, -74.00900108770828], [40.71021518183355, -74.00692632905466]]
 </pre>
 </div>
 </div>
@@ -3883,21 +3593,21 @@ println!("Hausdorff spherical distance: {:.2} meters", hausdorff_dist);</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>SSPD spherical distance: 242.86 meters
+<pre>SSPD spherical distance: 215.16 meters
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>DTW spherical distance: 10250.6713075273 meters
+<pre>DTW spherical distance: 11225.448341196558 meters
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Hausdorff spherical distance: 462.99 meters
+<pre>Hausdorff spherical distance: 531.96 meters
 </pre>
 </div>
 </div>
