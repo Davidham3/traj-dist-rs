@@ -50,7 +50,7 @@ target/
 docs/_build/
 
 # pytest
-py_tests/data/
+py_tests/data/cython_samples/
 
 # Traj-dist submodule
 traj-dist/.venv/
