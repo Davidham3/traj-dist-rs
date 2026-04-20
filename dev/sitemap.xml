@@ -2,37 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://davidham3.github.io/traj-dist-rs/dev/</loc>
-         <lastmod>2026-04-19</lastmod>
+         <lastmod>2026-04-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://davidham3.github.io/traj-dist-rs/dev/api_reference/</loc>
-         <lastmod>2026-04-19</lastmod>
+         <lastmod>2026-04-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://davidham3.github.io/traj-dist-rs/dev/benchmark_guide/</loc>
-         <lastmod>2026-04-19</lastmod>
+         <lastmod>2026-04-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://davidham3.github.io/traj-dist-rs/dev/installation/</loc>
-         <lastmod>2026-04-19</lastmod>
+         <lastmod>2026-04-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://davidham3.github.io/traj-dist-rs/dev/performance/</loc>
-         <lastmod>2026-04-19</lastmod>
+         <lastmod>2026-04-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://davidham3.github.io/traj-dist-rs/dev/usage_for_python/</loc>
-         <lastmod>2026-04-19</lastmod>
+         <lastmod>2026-04-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://davidham3.github.io/traj-dist-rs/dev/usage_for_rust/</loc>
-         <lastmod>2026-04-19</lastmod>
+         <lastmod>2026-04-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
