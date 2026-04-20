@@ -78,7 +78,7 @@ fn free_line<C: AsCoord, D: AsCoord, E: AsCoord>(
 
         // Sort [0, 1, u1, u2] and take middle two
         let mut sorted = [0.0_f64, 1.0, u1, u2];
-        sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        sorted.sort_by(|a, b| a.total_cmp(b));
         Some((sorted[1], sorted[2]))
     } else {
         // Single intersection point (tangent)
@@ -206,7 +206,7 @@ where
         }
     }
 
-    values.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    values.sort_by(|a, b| a.total_cmp(b));
     values.dedup();
     values
 }
