@@ -33,6 +33,164 @@ use rayon::prelude::*;
 #[cfg(feature = "progress")]
 use indicatif::{ProgressBar, ProgressStyle};
 
+#[cfg(feature = "progress")]
+use std::io::IsTerminal;
+
+#[cfg(feature = "progress")]
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+
+#[cfg(feature = "progress")]
+use std::sync::Arc;
+
+/// Progress tracker that adapts to the output environment.
+///
+/// - **TTY (terminal)**: Uses `indicatif::ProgressBar` for interactive progress display.
+/// - **Non-TTY (piped/redirected)**: Uses an atomic counter with a monitor thread
+///   that prints progress to stderr every 10 seconds.
+#[cfg(feature = "progress")]
+enum ProgressTracker {
+    /// Interactive terminal progress bar (indicatif)
+    Terminal(ProgressBar),
+    /// Non-TTY logging: atomic counter + monitor thread
+    Logging {
+        counter: Arc<AtomicU64>,
+        total: u64,
+        stop_flag: Arc<AtomicBool>,
+        monitor_handle: Option<std::thread::JoinHandle<()>>,
+    },
+}
+
+#[cfg(feature = "progress")]
+impl ProgressTracker {
+    /// Create a new progress tracker.
+    ///
+    /// Automatically detects whether stdout is a terminal and chooses the
+    /// appropriate progress display mode.
+    fn new(total: u64, label: &str) -> Self {
+        if std::io::stderr().is_terminal() {
+            let progress_bar = ProgressBar::new(total);
+            progress_bar.set_style(
+                ProgressStyle::with_template(
+                    "{msg}  {bar:40.cyan/blue}  {pos}/{len}  [{elapsed_precise}<{eta_precise}, {per_sec}]"
+                )
+                .expect("hardcoded progress bar template should be valid")
+                .progress_chars("█▉▊▋▌▍▎▏  ")
+            );
+            progress_bar.set_message(label.to_string());
+            Self::Terminal(progress_bar)
+        } else {
+            let counter = Arc::new(AtomicU64::new(0));
+            let stop_flag = Arc::new(AtomicBool::new(false));
+
+            let monitor_counter = Arc::clone(&counter);
+            let monitor_stop = Arc::clone(&stop_flag);
+            let monitor_label = label.to_string();
+
+            let monitor_handle = std::thread::spawn(move || {
+                while !monitor_stop.load(Ordering::Relaxed) {
+                    std::thread::sleep(std::time::Duration::from_secs(10));
+                    if monitor_stop.load(Ordering::Relaxed) {
+                        break;
+                    }
+                    let current = monitor_counter.load(Ordering::Relaxed);
+                    let percentage = if total > 0 {
+                        (current as f64 / total as f64) * 100.0
+                    } else {
+                        0.0
+                    };
+                    eprintln!(
+                        "[progress] {}: {}/{} ({:.1}%)",
+                        monitor_label, current, total, percentage
+                    );
+                }
+            });
+
+            Self::Logging {
+                counter,
+                total,
+                stop_flag,
+                monitor_handle: Some(monitor_handle),
+            }
+        }
+    }
+
+    /// Increment the progress by `delta` units.
+    fn inc(&self, delta: u64) {
+        match self {
+            Self::Terminal(pb) => pb.inc(delta),
+            Self::Logging { counter, .. } => {
+                counter.fetch_add(delta, Ordering::Relaxed);
+            }
+        }
+    }
+
+    /// Finish the progress tracker.
+    ///
+    /// For terminal mode, finishes the progress bar.
+    /// For logging mode, signals the monitor thread to stop and joins it,
+    /// then prints a final completion message.
+    fn finish(&mut self) {
+        match self {
+            Self::Terminal(pb) => pb.finish(),
+            Self::Logging {
+                counter,
+                total,
+                stop_flag,
+                monitor_handle,
+            } => {
+                stop_flag.store(true, Ordering::Relaxed);
+                if let Some(handle) = monitor_handle.take() {
+                    // Unpark the thread in case it's sleeping
+                    handle.thread().unpark();
+                    let _ = handle.join();
+                }
+                let final_count = counter.load(Ordering::Relaxed);
+                eprintln!("[progress] done: {}/{}", final_count, total);
+            }
+        }
+    }
+}
+
+/// A wrapper for optional progress tracking in parallel contexts.
+///
+/// This is needed because `ProgressTracker` contains a `JoinHandle` which is
+/// not `Sync`. In parallel code, we only need the atomic counter or the
+/// indicatif `ProgressBar` (which is `Sync`), so this wrapper extracts the
+/// sync-safe parts.
+#[cfg(all(feature = "progress", feature = "parallel"))]
+enum SyncProgressRef<'a> {
+    Terminal(&'a ProgressBar),
+    Logging(&'a Arc<AtomicU64>),
+    None,
+}
+
+#[cfg(all(feature = "progress", feature = "parallel"))]
+impl SyncProgressRef<'_> {
+    fn inc(&self, delta: u64) {
+        match self {
+            Self::Terminal(pb) => pb.inc(delta),
+            Self::Logging(counter) => {
+                counter.fetch_add(delta, Ordering::Relaxed);
+            }
+            Self::None => {}
+        }
+    }
+}
+
+#[cfg(all(feature = "progress", feature = "parallel"))]
+unsafe impl Sync for SyncProgressRef<'_> {}
+
+#[cfg(all(feature = "progress", feature = "parallel"))]
+impl ProgressTracker {
+    /// Get a sync-safe reference for use in parallel computation.
+    fn as_sync_ref(&self) -> SyncProgressRef<'_> {
+        match self {
+            Self::Terminal(pb) => SyncProgressRef::Terminal(pb),
+            Self::Logging { counter, .. } => SyncProgressRef::Logging(counter),
+        }
+    }
+}
+
 /// Distance algorithm with parameters
 ///
 /// This enum combines the algorithm selection with its required parameters,
@@ -248,20 +406,10 @@ where
         ));
     }
 
-    // Create progress bar (only when progress feature is enabled and show_progress=true)
     #[cfg(feature = "progress")]
-    let progress_bar = if show_progress {
+    let mut tracker = if show_progress {
         let total = (n * (n - 1) / 2) as u64;
-        let pb = ProgressBar::new(total);
-        pb.set_style(
-            ProgressStyle::with_template(
-                "pdist [{msg}]  {bar:40.cyan/blue}  {pos}/{len}  [{elapsed_precise}<{eta_precise}, {per_sec}]"
-            )
-            .unwrap()
-            .progress_chars("█▉▊▋▌▍▎▏  ")
-        );
-        pb.set_message(format!("{}", metric));
-        Some(pb)
+        Some(ProgressTracker::new(total, &format!("pdist [{}]", metric)))
     } else {
         None
     };
@@ -272,23 +420,19 @@ where
     // Use Rayon's global thread pool for parallel processing
     #[cfg(feature = "parallel")]
     let distances = if parallel {
-        #[cfg(feature = "progress")]
-        {
-            compute_pdist_parallel(trajectories, metric, &progress_bar)
-        }
-        #[cfg(not(feature = "progress"))]
-        {
-            compute_pdist_parallel(trajectories, metric)
-        }
+        compute_pdist_parallel(
+            trajectories,
+            metric,
+            #[cfg(feature = "progress")]
+            &tracker,
+        )
     } else {
-        #[cfg(feature = "progress")]
-        {
-            compute_pdist_sequential(trajectories, metric, &progress_bar)
-        }
-        #[cfg(not(feature = "progress"))]
-        {
-            compute_pdist_sequential(trajectories, metric)
-        }
+        compute_pdist_sequential(
+            trajectories,
+            metric,
+            #[cfg(feature = "progress")]
+            &tracker,
+        )
     };
 
     #[cfg(not(feature = "parallel"))]
@@ -297,31 +441,26 @@ where
     }
 
     #[cfg(not(feature = "parallel"))]
-    let distances = {
+    let distances = compute_pdist_sequential(
+        trajectories,
+        metric,
         #[cfg(feature = "progress")]
-        {
-            compute_pdist_sequential(trajectories, metric, &progress_bar)
-        }
-        #[cfg(not(feature = "progress"))]
-        {
-            compute_pdist_sequential(trajectories, metric)
-        }
-    };
+        &tracker,
+    );
 
     #[cfg(feature = "progress")]
-    if let Some(pb) = progress_bar {
-        pb.finish();
+    if let Some(ref mut t) = tracker {
+        t.finish();
     }
 
     Ok(distances)
 }
 
 /// Compute pairwise distances sequentially
-#[cfg(feature = "progress")]
 fn compute_pdist_sequential<T: CoordSequence>(
     trajectories: &[T],
     metric: &Metric,
-    progress_bar: &Option<ProgressBar>,
+    #[cfg(feature = "progress")] tracker: &Option<ProgressTracker>,
 ) -> Vec<f64> {
     let n = trajectories.len();
     let mut distances = Vec::with_capacity(n * (n - 1) / 2);
@@ -330,25 +469,10 @@ fn compute_pdist_sequential<T: CoordSequence>(
         for j in (i + 1)..n {
             let dist = metric.distance(&trajectories[i], &trajectories[j]);
             distances.push(dist);
-            if let Some(pb) = progress_bar {
-                pb.inc(1);
+            #[cfg(feature = "progress")]
+            if let Some(t) = tracker {
+                t.inc(1);
             }
-        }
-    }
-
-    distances
-}
-
-/// Compute pairwise distances sequentially (no progress)
-#[cfg(not(feature = "progress"))]
-fn compute_pdist_sequential<T: CoordSequence>(trajectories: &[T], metric: &Metric) -> Vec<f64> {
-    let n = trajectories.len();
-    let mut distances = Vec::with_capacity(n * (n - 1) / 2);
-
-    for i in 0..n {
-        for j in (i + 1)..n {
-            let dist = metric.distance(&trajectories[i], &trajectories[j]);
-            distances.push(dist);
         }
     }
 
@@ -360,11 +484,11 @@ fn compute_pdist_sequential<T: CoordSequence>(trajectories: &[T], metric: &Metri
 /// Uses Rayon's global thread pool for efficient parallel execution.
 /// Creates an index vector of all unique pairs, then computes distances
 /// in parallel.
-#[cfg(all(feature = "parallel", feature = "progress"))]
+#[cfg(feature = "parallel")]
 fn compute_pdist_parallel<T: CoordSequence + Sync>(
     trajectories: &[T],
     metric: &Metric,
-    progress_bar: &Option<ProgressBar>,
+    #[cfg(feature = "progress")] tracker: &Option<ProgressTracker>,
 ) -> Vec<f64> {
     let n = trajectories.len();
 
@@ -372,38 +496,32 @@ fn compute_pdist_parallel<T: CoordSequence + Sync>(
         .flat_map(|i| ((i + 1)..n).map(move |j| (i, j)))
         .collect();
 
-    match progress_bar {
-        Some(pb) => {
-            use indicatif::ParallelProgressIterator;
-            pairs
-                .into_par_iter()
-                .progress_with(pb.clone())
-                .map(|(i, j)| metric.distance(&trajectories[i], &trajectories[j]))
-                .collect()
-        }
-        None => pairs
+    #[cfg(feature = "progress")]
+    let sync_ref = match tracker {
+        Some(t) => t.as_sync_ref(),
+        None => SyncProgressRef::None,
+    };
+
+    #[cfg(feature = "progress")]
+    {
+        let progress = &sync_ref;
+        pairs
+            .into_par_iter()
+            .map(|(i, j)| {
+                let dist = metric.distance(&trajectories[i], &trajectories[j]);
+                progress.inc(1);
+                dist
+            })
+            .collect()
+    }
+
+    #[cfg(not(feature = "progress"))]
+    {
+        pairs
             .into_par_iter()
             .map(|(i, j)| metric.distance(&trajectories[i], &trajectories[j]))
-            .collect(),
+            .collect()
     }
-}
-
-/// Compute pairwise distances in parallel (no progress)
-#[cfg(all(feature = "parallel", not(feature = "progress")))]
-fn compute_pdist_parallel<T: CoordSequence + Sync>(
-    trajectories: &[T],
-    metric: &Metric,
-) -> Vec<f64> {
-    let n = trajectories.len();
-
-    let pairs: Vec<(usize, usize)> = (0..n)
-        .flat_map(|i| ((i + 1)..n).map(move |j| (i, j)))
-        .collect();
-
-    pairs
-        .into_par_iter()
-        .map(|(i, j)| metric.distance(&trajectories[i], &trajectories[j]))
-        .collect()
 }
 
 /// Compute distances between two trajectory collections
@@ -481,20 +599,10 @@ where
         ));
     }
 
-    // Create progress bar (only when progress feature is enabled and show_progress=true)
     #[cfg(feature = "progress")]
-    let progress_bar = if show_progress {
+    let mut tracker = if show_progress {
         let total = (n_a * n_b) as u64;
-        let pb = ProgressBar::new(total);
-        pb.set_style(
-            ProgressStyle::with_template(
-                "cdist [{msg}]  {bar:40.cyan/blue}  {pos}/{len}  [{elapsed_precise}<{eta_precise}, {per_sec}]"
-            )
-            .unwrap()
-            .progress_chars("█▉▊▋▌▍▎▏  ")
-        );
-        pb.set_message(format!("{}", metric));
-        Some(pb)
+        Some(ProgressTracker::new(total, &format!("cdist [{}]", metric)))
     } else {
         None
     };
@@ -508,61 +616,54 @@ where
     #[cfg(feature = "parallel")]
     {
         if parallel {
-            #[cfg(feature = "progress")]
             compute_cdist_parallel(
                 trajectories_a,
                 trajectories_b,
                 &mut distances,
                 metric,
-                &progress_bar,
+                #[cfg(feature = "progress")]
+                &tracker,
             );
-            #[cfg(not(feature = "progress"))]
-            compute_cdist_parallel(trajectories_a, trajectories_b, &mut distances, metric);
         } else {
-            #[cfg(feature = "progress")]
             compute_cdist_sequential(
                 trajectories_a,
                 trajectories_b,
                 &mut distances,
                 metric,
-                &progress_bar,
+                #[cfg(feature = "progress")]
+                &tracker,
             );
-            #[cfg(not(feature = "progress"))]
-            compute_cdist_sequential(trajectories_a, trajectories_b, &mut distances, metric);
         }
     }
 
     #[cfg(not(feature = "parallel"))]
     {
         let _ = parallel;
-        #[cfg(feature = "progress")]
         compute_cdist_sequential(
             trajectories_a,
             trajectories_b,
             &mut distances,
             metric,
-            &progress_bar,
+            #[cfg(feature = "progress")]
+            &tracker,
         );
-        #[cfg(not(feature = "progress"))]
-        compute_cdist_sequential(trajectories_a, trajectories_b, &mut distances, metric);
     }
 
     #[cfg(feature = "progress")]
-    if let Some(pb) = progress_bar {
-        pb.finish();
+    if let Some(ref mut t) = tracker {
+        t.finish();
     }
 
     Ok(distances)
 }
 
 /// Compute cdist distances sequentially
-#[cfg(feature = "progress")]
 fn compute_cdist_sequential<T: CoordSequence>(
     trajectories_a: &[T],
     trajectories_b: &[T],
     distances: &mut [f64],
     metric: &Metric,
-    progress_bar: &Option<ProgressBar>,
+    #[cfg(feature = "progress")] tracker: &Option<ProgressTracker>,
 ) {
     let n_b = trajectories_b.len();
 
@@ -571,27 +672,9 @@ fn compute_cdist_sequential<T: CoordSequence>(
             let idx = i * n_b + j;
             distances[idx] = metric.distance(traj_a, traj_b);
         }
-        // Update progress per row (n_b distances computed)
-        if let Some(pb) = progress_bar {
-            pb.inc(n_b as u64);
-        }
-    }
-}
-
-/// Compute cdist distances sequentially (no progress)
-#[cfg(not(feature = "progress"))]
-fn compute_cdist_sequential<T: CoordSequence>(
-    trajectories_a: &[T],
-    trajectories_b: &[T],
-    distances: &mut [f64],
-    metric: &Metric,
-) {
-    let n_b = trajectories_b.len();
-
-    for (i, traj_a) in trajectories_a.iter().enumerate() {
-        for (j, traj_b) in trajectories_b.iter().enumerate() {
-            let idx = i * n_b + j;
-            distances[idx] = metric.distance(traj_a, traj_b);
+        #[cfg(feature = "progress")]
+        if let Some(t) = tracker {
+            t.inc(n_b as u64);
         }
     }
 }
@@ -600,46 +683,45 @@ fn compute_cdist_sequential<T: CoordSequence>(
 ///
 /// Uses Rayon's global thread pool and `par_chunks_mut` for efficient
 /// in-place matrix filling. Progress is updated per row (n_b distances).
-#[cfg(all(feature = "parallel", feature = "progress"))]
+#[cfg(feature = "parallel")]
 fn compute_cdist_parallel<T: CoordSequence + Sync>(
     trajectories_a: &[T],
     trajectories_b: &[T],
     distances: &mut [f64],
     metric: &Metric,
-    progress_bar: &Option<ProgressBar>,
+    #[cfg(feature = "progress")] tracker: &Option<ProgressTracker>,
 ) {
     let n_b = trajectories_b.len();
 
-    distances
-        .par_chunks_mut(n_b)
-        .enumerate()
-        .for_each(|(i, row)| {
-            for (j, dist) in row.iter_mut().enumerate() {
-                *dist = metric.distance(&trajectories_a[i], &trajectories_b[j]);
-            }
-            // Update progress per row
-            if let Some(pb) = progress_bar {
-                pb.inc(n_b as u64);
-            }
-        });
-}
+    #[cfg(feature = "progress")]
+    let sync_ref = match tracker {
+        Some(t) => t.as_sync_ref(),
+        None => SyncProgressRef::None,
+    };
 
-/// Compute cdist distances in parallel (no progress)
-#[cfg(all(feature = "parallel", not(feature = "progress")))]
-fn compute_cdist_parallel<T: CoordSequence + Sync>(
-    trajectories_a: &[T],
-    trajectories_b: &[T],
-    distances: &mut [f64],
-    metric: &Metric,
-) {
-    let n_b = trajectories_b.len();
+    #[cfg(feature = "progress")]
+    {
+        let progress = &sync_ref;
+        distances
+            .par_chunks_mut(n_b)
+            .enumerate()
+            .for_each(|(i, row)| {
+                for (j, dist) in row.iter_mut().enumerate() {
+                    *dist = metric.distance(&trajectories_a[i], &trajectories_b[j]);
+                }
+                progress.inc(n_b as u64);
+            });
+    }
 
-    distances
-        .par_chunks_mut(n_b)
-        .enumerate()
-        .for_each(|(i, row)| {
-            for (j, dist) in row.iter_mut().enumerate() {
-                *dist = metric.distance(&trajectories_a[i], &trajectories_b[j]);
-            }
-        });
+    #[cfg(not(feature = "progress"))]
+    {
+        distances
+            .par_chunks_mut(n_b)
+            .enumerate()
+            .for_each(|(i, row)| {
+                for (j, dist) in row.iter_mut().enumerate() {
+                    *dist = metric.distance(&trajectories_a[i], &trajectories_b[j]);
+                }
+            });
+    }
 }
