@@ -177,6 +177,8 @@ fn build_calculator(algorithm: DistanceAlgorithm, type_d: &str) -> PyResult<Metr
 ///                    or list of [x, y] pairs
 /// * `metric` - Metric configuration object (e.g., `Metric.sspd()`, `Metric.lcss(eps=5.0)`)
 /// * `parallel` - Whether to use parallel processing (default: True)
+/// * `show_progress` - Whether to display a progress bar during computation (default: False).
+///                     The progress bar is rendered to stderr so it does not interfere with stdout.
 ///
 /// # Returns
 /// * `distances` - 1D numpy array containing distances for all unique pairs
@@ -213,6 +215,9 @@ fn build_calculator(algorithm: DistanceAlgorithm, type_d: &str) -> PyResult<Metr
 /// # Using LCSS with epsilon parameter
 /// metric_lcss = traj_dist_rs.Metric.lcss(eps=5.0, type_d="euclidean")
 /// distances = traj_dist_rs.pdist(trajectories, metric=metric_lcss)
+///
+/// # With progress bar
+/// distances = traj_dist_rs.pdist(trajectories, metric=metric, show_progress=True)
 /// ```
 #[cfg(feature = "python-binding")]
 #[gen_stub_pyfunction]
@@ -276,6 +281,8 @@ pub fn pdist<'py>(
 /// * `trajectories_b` - Second collection of trajectories
 /// * `metric` - Metric configuration object (e.g., `Metric.sspd()`, `Metric.lcss(eps=5.0)`)
 /// * `parallel` - Whether to use parallel processing (default: True)
+/// * `show_progress` - Whether to display a progress bar during computation (default: False).
+///                     The progress bar is rendered to stderr so it does not interfere with stdout.
 ///
 /// # Returns
 /// * `distances` - 2D numpy array with shape (len(trajectories_a), len(trajectories_b))
@@ -320,6 +327,9 @@ pub fn pdist<'py>(
 /// # Using ERP with gap point parameter
 /// metric_erp = traj_dist_rs.Metric.erp(g=[0.0, 1.0], type_d="euclidean")
 /// distances = traj_dist_rs.cdist(trajectories_a, trajectories_b, metric=metric_erp)
+///
+/// # With progress bar
+/// distances = traj_dist_rs.cdist(trajectories_a, trajectories_b, metric=metric, show_progress=True)
 /// ```
 #[cfg(feature = "python-binding")]
 #[gen_stub_pyfunction]
