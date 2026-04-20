@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-rc.5] - 2026-04-20
+
+### Added
+
+#### Batch Computation
+- Added non-TTY environment support for progress display in `pdist()` and `cdist()`
+  - Automatically falls back to periodic logging (every 10 seconds) when `stderr` is not attached to a terminal
+  - Uses a lightweight background monitor thread and atomic counters for thread-safe progress tracking
+  - Prevents log spam in CI/CD pipelines or redirected outputs while still providing computation status
+
+### Fixed
+
+#### Documentation Updates
+- Fixed `pdist` and `cdist` doc comments in Rust source (`src/binding/batch.rs`) to include missing `show_progress` parameter documentation
+- Regenerated Python stub file (`_lib.pyi`) to reflect the updated API documentation
+- Updated `__init__.py` module docstring:
+  - Added Frechet and EDwP to the supported algorithms list
+  - Documented distance type support per algorithm (Euclidean & Spherical vs Euclidean only)
+  - Added Batch Computation section describing `pdist`/`cdist` with parallel and progress bar support
+  - Added usage examples for `frechet()`, `edwp()`, and batch computation with `Metric` API
+
+---
+
 ## [1.0.0-rc.4] - 2026-04-19
 
 ### Added
