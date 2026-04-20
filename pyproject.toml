@@ -1,6 +1,6 @@
 [project]
 name = "traj-dist-rs"
-version = "1.0.0rc4"
+version = "1.0.0rc5"
 description = "High-performance trajectory distance & similarity measures in Rust with Python bindings"
 readme = "README.md"
 requires-python = ">=3.10"
